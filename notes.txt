@@ -8,3 +8,14 @@ TODO:
 - still units
 - interfaces
 - concepts
+
+
+ROADMAP:
+[X] Lexer
+[ ] AST
+    [ ] Use better representation with virtual classes and std::shared_ptr
+[ ] Translator
+[ ] Lowerer
+    [ ] Redeveloping Representation
+[ ] LLVM Shit
+    [ ] Linking LLVM
