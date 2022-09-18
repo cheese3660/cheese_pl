@@ -10,6 +10,8 @@
 namespace cheese {
     extern std::vector<std::string> filenames;
 
+    std::size_t getFileIndex(std::string filename);
+
     struct Coordinate {
         std::uint32_t line_number;
         std::uint32_t column_number;

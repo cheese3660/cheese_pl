@@ -4,8 +4,9 @@
 
 #ifndef CHEESE_LEXER_H
 #define CHEESE_LEXER_H
-
 #include "../Coordinate.h"
+#include <map>
+
 namespace cheese::lexer {
     enum class TokenType {
 
@@ -74,8 +75,9 @@ namespace cheese::lexer {
         BitwiseXorAssign, // ^=
         Unwrap, // # (This is a postfix unwrap operator for types that are wrapped like a pointer or a unit in the future)
         Dereference, // $
-        Call, // !(
-        Object, // !{
+        Tuple, // .(
+        Object, // .{
+        Array, // .[
         Exponentiate, // ^^
         ExponentiateAssign, //^^=
 
@@ -164,13 +166,16 @@ namespace cheese::lexer {
         //Special Tokens
         Error, //An error token in the lexer
         EoF, //End of File
+        Then, //Then
+        NewLine,
     };
-
     struct Token {
         Coordinate location;
         TokenType ty;
-        std::string value;
+        std::string_view value;
     };
-    std::vector<Token> lex(std::string buffer, std::string filename="unknown");
+
+    std::vector<Token> lex(std::string_view buffer, std::string filename="unknown", bool errorInvalid = true, bool outputComments = false, bool warnComments = true);
+    void output(std::vector<Token>);
 } //cheese::lexer
 #endif //CHEESE_LEXER_H

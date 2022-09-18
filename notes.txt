@@ -1,0 +1,10 @@
+TODO:
+- Make newlines end statements in the parser, such that we can return to a normal function call and object syntax
+- Have tuple literals that are different from struct literals, .{} vs .(), and also array literals .[]
+- Do the same .{:TYPE} or .[:TYPE] if the type cant be inferred for the literal
+- Have '...' function params that can get globbed into a tuple with the name ... basically (internally these parameters are passed as a tuple)
+- figure out how to link LLVM
+- internally tuples and structures are basically the same still
+- still units
+- interfaces
+- concepts
