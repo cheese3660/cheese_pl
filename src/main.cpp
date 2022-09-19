@@ -2,7 +2,7 @@
 #include "lexer/lexer.h"
 #include "NotImplementedException.h"
 #include "vterm.h"
-#include <argparse/argparse.hpp>
+#include "argparse/argparse.hpp"
 #include "configuration.h"
 #include <fstream>
 const char* name = "cheese";

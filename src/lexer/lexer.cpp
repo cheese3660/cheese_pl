@@ -2,8 +2,8 @@
 // Created by Lexi Allen on 9/18/2022.
 //
 
-#include "lexer.h"
-#include "../NotImplementedException.h"
+#include "lexer/lexer.h"
+#include "NotImplementedException.h"
 #include <optional>
 #include <functional>
 #include <algorithm>
