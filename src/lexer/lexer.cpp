@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <utility>
 #include <iostream>
+#include <sstream>
 namespace cheese::lexer {
 #define RESERVED(keyword, token) std::pair<std::string_view, TokenType>{# keyword, token},
     const auto reserved_keywords = std::vector<std::pair<std::string_view, TokenType>>{
@@ -946,10 +947,19 @@ namespace cheese::lexer {
     };
 
 #undef MAP
-    void output(std::vector<Token> tokens) {
+    std::string_view name_of(TokenType t) {
+        return token_names.at(t);
+    }
+    std::string to_stream(std::vector<Token> tokens) {
+        std::stringstream ss;
         for (Token t : tokens) {
-            std::cout << token_names.at(t.ty) << ' ';
+            ss << name_of(t.ty) << ' ';
         }
-        std::cout << '\n';
+        std::string s = ss.str();
+        if (s.ends_with(" ")) {
+            return s.substr(0,s.size()-1);
+        } else {
+            return s;
+        }
     }
 }

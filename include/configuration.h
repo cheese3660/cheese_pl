@@ -19,9 +19,12 @@ namespace cheese::configuration {
     extern std::map<std::string, std::filesystem::path> lib_directories; //A mapping of library names to their directories
                                                                          //Usually installed locally
                                                                          //Dependency resolution is going to be a bitch ... NPM anyone?
+    extern bool log_errors; //Whether errors should be logged, this is set to false when running the compiler tests for things that don't expect errors for example
+    extern bool warnings_are_errors; //Whether warnings should be treated as errors
+    extern bool die_on_first_error; //Whether the compiler should die on the first error, used by the testing system to test for errors
     //Add the target information into here once it's feasible to do so
 
-
+    void setup_escape_sequences();
 } // cheese::configuration
 
 #endif //CHEESE_CONFIGURATION_H

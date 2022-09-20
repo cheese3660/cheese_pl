@@ -163,11 +163,11 @@ namespace cheese::lexer {
         SingleLineComment,
         BlockComment,
         Underscore,
-        //Special Tokens
-        Error, //An error token in the lexer
-        EoF, //End of File
         Then, //Then
         NewLine,
+        //Special Tokens
+        Error, //An error token in the lexer
+        EoF, //End of File, ALWAYS KEEP THIS AT THE END OF THE PROGRAM
     };
     struct Token {
         Coordinate location;
@@ -176,6 +176,7 @@ namespace cheese::lexer {
     };
 
     std::vector<Token> lex(std::string_view buffer, std::string filename="unknown", bool errorInvalid = true, bool outputComments = false, bool warnComments = true);
-    void output(std::vector<Token>);
+    std::string to_stream(std::vector<Token>);
+    std::string_view name_of(TokenType);
 } //cheese::lexer
 #endif //CHEESE_LEXER_H

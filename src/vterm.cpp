@@ -4,10 +4,11 @@
 #include "vterm.h"
 #include <iostream>
 #include <map>
+#include <format>
 namespace cheese::io {
     bool useHyperLinks = false;
     inline void renditionBackend(std::uint8_t rendition) {
-        std::cout << ESCAPE << '[' << rendition << 'm';
+        std::cout << ESCAPE << '[' << static_cast<uint16_t>(rendition) << 'm';
     }
     void setForegroundColor(Color color) {
         renditionBackend(static_cast<uint8_t>(color));

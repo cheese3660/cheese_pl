@@ -1,0 +1,63 @@
+[
+  {
+    "test_name": "simple main",
+    "test_type": "standalone",
+    "test_location": "entry.chs",
+    "test_stages": {
+      "lexer": {
+        "expect": {
+          "expectation": "match",
+          "pattern": "Fn Identifier ThickArrow UnsignedIntType Entry DoubleThickArrow DecimalLiteral EoF"
+        },
+        "output": false
+      },
+      "parser": {
+        "expect": {
+          "expectation": "match",
+          "pattern": {
+            "type": "structure",
+            "tuple": false,
+            "children": [
+              {
+                "type": "function_definition",
+                "modifiers": ["entry"],
+                "name": "main",
+                "return_type": {
+                  "type": "unsigned_int_type",
+                  "size": 8
+                },
+                "body": {
+                  "type": "return",
+                  "value": {
+                    "type": "integer",
+                    "value": 1
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "output": false
+      },
+      "bacteria": {
+        "expect": {
+          "expectation": "success"
+        },
+        "output": true
+      },
+      "llvm": {
+        "expect": {
+          "expectation": "success"
+        },
+        "output": true
+      },
+      "run": {
+        "expect": {
+          "expectation": "return",
+          "return_code": 1
+        },
+        "output": true
+      }
+    }
+  }
+]
