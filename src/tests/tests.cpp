@@ -1,6 +1,7 @@
 //
 // Created by Lexi Allen on 9/19/2022.
 //
+#ifndef CHEESE_NO_SELF_TESTS
 #include "tests/tests.h"
 #include "configuration.h"
 #include "vterm.h"
@@ -11,56 +12,24 @@
 #include "lexer/lexer.h"
 #include "error.h"
 #include <sstream>
+#include <unordered_map>
 namespace cheese::tests {
-    std::vector<Test*> all_tests;
-
+    std::unordered_map<std::uint32_t,TestSection*> all_test_sections;
+    std::vector<std::uint32_t> all_priorities;
     void run_all_builtin() {
-        std::cout << "RUNNING BUILTIN TESTS\n";
-        std::uint32_t pass = 0;
-        std::uint32_t fail = 0;
-        for (auto test : all_tests) {
-            if (test->expects_error) {
-                configuration::die_on_first_error = true;
-            } else {
-                configuration::die_on_first_error = false;
-            }
-            if (test->expects_warning) {
-                configuration::warnings_are_errors = true;
-            } else {
-                configuration::warnings_are_errors = false;
-            }
-            std::cout << "Running test: " << test->name << '\n';
-            bool result = true;
-            try {
-                result = test->test();
-            } catch (std::exception& e) {
-                std::cerr << e.what();
-                result = false;
-            }
-            if (result) {
-                pass += 1;
-                if (configuration::use_escape_sequences) {
-                    io::setForegroundColor(io::Color::Green);
-                }
-                std::cout << "\t[PASS]\n";
-                if (configuration::use_escape_sequences) {
-                    io::setForegroundColor(io::Color::Gray);
-                }
-            } else {
-                fail += 1;
-                if (configuration::use_escape_sequences) {
-                    io::setForegroundColor(io::Color::Red);
-                }
-                std::cout << "\t[FAIL]\n";
-                if (configuration::use_escape_sequences) {
-                    io::setForegroundColor(io::Color::Gray);
-                }
-            }
+        configuration::log_errors = false;
+        std::sort(all_priorities.begin(),all_priorities.end());
+        TestResults results;
+        for (auto prio : all_priorities) {
+            auto section = all_test_sections[prio];
+            std::cout << "section: " << section->section_name << '\n';
+            results = results + section->run(1);
         }
-        std::uint32_t total_ran = pass+fail;
-        std::cout << "Results:\n\tTests ran: " << total_ran << "\n\tSuccess: " << pass << "\n\tFailure: " << fail << "\n";
+        results.display_results(0);
+        configuration::log_errors = true;
     }
     void run_json_tests(std::string filename) {
+        configuration::log_errors = false;
         std::cout << "Running tests from: " << filename << '\n';
         std::string json_buffer;
         try {
@@ -109,6 +78,7 @@ namespace cheese::tests {
         } else {
             std::cout << "Expected file to contain an array of JSON tests\n";
         }
+        configuration::log_errors = true;
     }
     bool run_single_json_test(nlohmann::json json_test) {
         if (!json_test.is_object()) {
@@ -167,35 +137,39 @@ namespace cheese::tests {
                 auto expect = lexer_info["expect"];
                 auto expectation = expect["expectation"].get<std::string>();
                 if (expectation == "success") {
-                    std::cout << "\tchecking if lexer succeeds...\n";
+                    std::cout << "\tchecking if lexer succeeds...";
                     try {
                         tokens = cheese::lexer::lex(file_buffer,filename);
-                        std::cout << "\tlexer succeeded...\n";
+                        gen_pass();
+                        std::cout << '\n';
                     } catch (std::exception& e){
+                        gen_fail();
                         std::cout << '\t' << e.what() << '\n';
                         return false;
                     }
                 } else if (expectation == "error") {
                     configuration::die_on_first_error = true;
                     auto expected_code = expect["code"].get<std::uint32_t>();
-                    std::cout << "\tchecking if lexer gives error " << error::getError(expected_code) << "...\n";
+                    std::cout << "\tchecking if lexer gives error " << error::getError(expected_code) << "...";
                     try {
                         tokens = cheese::lexer::lex(file_buffer,filename);
                         configuration::die_on_first_error = false;
-                        std::cout << "\tlexer did not error\n";
+                        gen_fail();
                         return false;
                     } catch (cheese::error::CompilerError& compilerError) {
                         if (static_cast<std::uint32_t>(compilerError.code) != expected_code) {
+                            gen_fail();
                             std::cout << "\tgot error code " << error::getError(compilerError.code) << ", expected: " << error::getError(expected_code) << '\n';
                             std::cout << '\t' << compilerError.what() << '\n';
                             configuration::die_on_first_error = false;
                             return false;
                         } else {
-                            std::cout << "\tlexer gave error " << error::getError(expected_code) << "\n";
+                            gen_pass();
                             configuration::die_on_first_error = false;
                             return true;
                         }
                     } catch (std::exception& e) {
+                        gen_fail();
                         std::cout << '\t' << e.what() << '\n';
                         configuration::die_on_first_error = false;
                         return false;
@@ -204,27 +178,29 @@ namespace cheese::tests {
                     configuration::die_on_first_error = true;
                     configuration::warnings_are_errors = true;
                     auto expected_code = expect["code"].get<std::uint32_t>();
-                    std::cout << "\tchecking if lexer gives warning " << error::getError(expected_code) << "...\n";
+                    std::cout << "\tchecking if lexer gives warning " << error::getError(expected_code) << "...";
                     try {
                         tokens = cheese::lexer::lex(file_buffer,filename);
                         configuration::die_on_first_error = false;
                         configuration::warnings_are_errors = false;
-                        std::cout << "\tlexer did not warn\n";
+                        gen_fail();
                         return false;
                     } catch (cheese::error::CompilerError& compilerError) {
                         if (static_cast<std::uint32_t>(compilerError.code) != expected_code) {
+                            gen_fail();
                             std::cout << "\tgot code " << error::getError(compilerError.code) << ", expected: " << error::getError(expected_code) << '\n';
                             std::cout << '\t' << compilerError.what() << '\n';
                             configuration::die_on_first_error = false;
                             configuration::warnings_are_errors = false;
                             return false;
                         } else {
-                            std::cout << "\tlexer gave warning " << error::getError(expected_code) << "\n";
+                            gen_pass();
                             configuration::die_on_first_error = false;
                             configuration::warnings_are_errors = false;
                             return true;
                         }
                     } catch (std::exception& e) {
+                        gen_fail();
                         std::cout << '\t' << e.what() << '\n';
                         configuration::die_on_first_error = false;
                         configuration::warnings_are_errors = false;
@@ -232,20 +208,22 @@ namespace cheese::tests {
                     }
                 } else if (expectation == "match") {
                     auto expected_pattern = expect["pattern"].get<std::string>();
-                    std::cout << "\tchecking if lexer matches pattern...\n";
+                    std::cout << "\tchecking if lexer matches pattern...";
                     try {
                         tokens = cheese::lexer::lex(file_buffer,filename);
                         auto lexer_pattern = cheese::lexer::to_stream(tokens);
                         if (lexer_pattern != expected_pattern) {
+                            gen_fail();
                             std::cout << "\tgot incorrect pattern:\n";
                             std::cout << "\t\t" << lexer_pattern << '\n';
                             std::cout << "\texpected:\n";
                             std::cout << "\t\t" << expected_pattern << '\n';
                             return false;
                         } else {
-                            std::cout << "\tlexer gave correct pattern...\n";
+                            gen_pass();
                         }
                     } catch (std::exception& e){
+                        gen_fail();
                         std::cout << '\t' << e.what() << '\n';
                         return false;
                     }
@@ -258,8 +236,9 @@ namespace cheese::tests {
                 std::cout << "\timplicitly checking if lexer succeeds...\n";
                 try {
                     tokens = cheese::lexer::lex(file_buffer,filename);
-                    std::cout << "\tlexer succeeded...\n";
+                    gen_pass();
                 } catch (std::exception& e) {
+                    gen_fail();
                     std::cout << e.what();
                     return false;
                 }
@@ -279,7 +258,7 @@ namespace cheese::tests {
         if (configuration::use_escape_sequences) {
             io::setForegroundColor(io::Color::Green);
         }
-        std::cout << "[PASS]";
+        std::cout << "[PASS]\n";
         if (configuration::use_escape_sequences) {
             io::setForegroundColor(io::Color::Gray);
         }
@@ -293,6 +272,144 @@ namespace cheese::tests {
         if (configuration::use_escape_sequences) {
             io::setForegroundColor(io::Color::Gray);
         }
+    }
 
+    void gen_skip() {
+        if (configuration::use_escape_sequences) {
+            io::setForegroundColor(io::Color::Yellow);
+        }
+        std::cout << "[FAIL]\n";
+        if (configuration::use_escape_sequences) {
+            io::setForegroundColor(io::Color::Gray);
+        }
+    }
+
+    std::vector<std::string> internal_split(std::string message) {
+        std::uint32_t beg = 0;
+        std::uint32_t count = 0;
+        std::vector<std::string> res;
+        while (beg+count < message.size()) {
+            if (message[beg+count] == '\n') {
+                res.push_back(message.substr(beg,count+1));
+                beg = beg+count+1;
+                count = 0;
+            } else {
+                ++count;
+            }
+        }
+        if (count > 0) res.push_back(message.substr(beg,count));
+        return res;
+    }
+
+    void test_output_message(std::uint32_t nesting, std::string message) {
+        auto split = internal_split(message);
+        for (auto& line : split) {
+            for (std::uint32_t tabs = 0; tabs < nesting; tabs++) {
+                std::cout << '\t';
+            }
+            std::cout << line;
+        }
+    }
+
+    void TestResults::display_results(std::uint32_t nesting) {
+        test_output_message(nesting, "results:\n");
+        test_output_message(nesting+1, "total amount of tests: ");
+        std::cout << (pass + fail + skip) << '\n';
+        test_output_message(nesting+1,"passed: ");
+        std::cout << pass << '\n';
+        test_output_message(nesting+1,"failed: ");
+        std::cout << fail << '\n';
+        test_output_message(nesting+1,"skipped: ");
+        std::cout << skip << '\n';
+        test_output_message(nesting+1, "percentage: ");
+        std::cout << static_cast<std::uint32_t>( (static_cast<double>(pass)/static_cast<double>(pass+fail+skip)) * 100) << "%\n";
+    }
+
+    TestResults SectionMember::run(int nesting) {
+        if (is_subsection) {
+            test_output_message(nesting, "section: " + subsection->section_name + "\n");
+            return subsection->run(nesting+1);
+        } else {
+            if (test_case->expects_error) {
+                configuration::die_on_first_error = true;
+            } else {
+                configuration::die_on_first_error = false;
+            }
+            if (test_case->expects_warning) {
+                configuration::warnings_are_errors = true;
+            } else {
+                configuration::warnings_are_errors = false;
+            }
+            test_output_message(nesting, test_case->description + "...");
+            return test_case->run(nesting+1);
+        }
+    }
+
+    TestResults TestSection::run(int nesting) {
+        if (setup.has_value()) {
+            setup.value()();
+        }
+        TestResults results;
+        for (auto& member : members) {
+            results = results + member.run(nesting);
+        }
+        results.display_results(nesting);
+        if (destroy.has_value()) {
+            destroy.value()();
+        }
+        return results;
+    }
+
+    TestSection::TestSection(std::string name, std::uint32_t priority) {
+        section_name = name;
+        all_test_sections[priority] = this;
+        all_priorities.push_back(priority);
+    }
+
+    TestSection::TestSection(std::string name, TestSection *parent) {
+        section_name = name;
+        parent->add(this);
+    }
+
+    void TestSection::add(TestSection *subsection) {
+        SectionMember mem{.is_subsection = true,.subsection = subsection};
+        members.push_back(mem);
+    }
+
+    void TestSection::add(TestCase *subcase) {
+        SectionMember mem{.is_subsection = false,.test_case = subcase};
+        members.push_back(mem);
+    }
+
+    TestResults TestCase::run(int nesting) {
+        try {
+            auto res = test_case(nesting);
+            switch (res) {
+                case SingleResult::Pass:
+                    return TestResults{1,0,0};
+                case SingleResult::Fail:
+                    return TestResults{0,1,0};
+                case SingleResult::Skip:
+                    return TestResults{0,0,1};
+            }
+
+        } catch (error::CompilerError& c) {
+            gen_fail();
+            test_output_message(nesting,c.what());
+            std::cout << '\n';
+            return TestResults{0,1,0};
+        } catch (std::exception& e) {
+            gen_fail();
+            test_output_message(nesting,e.what());
+            std::cout << '\n';
+            return TestResults{0,1,0};
+        }
+        return TestResults{0,0,0};
+    }
+
+    TestCase::TestCase(TestSection *parent, std::string description, TestCaseWithNesting test_case, bool expects_error,
+                       bool expects_warning) : description(description), test_case(test_case), expects_error(expects_error), expects_warning(expects_warning) {
+        parent->add(this);
     }
 }
+#endif

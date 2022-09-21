@@ -8,6 +8,7 @@
 #include <stdexcept>
 #include <string>
 #include "Coordinate.h"
+#include "configuration.h"
 namespace cheese::error {
     //Have an enum here in case
     constexpr uint32_t warning_modifier = 500;
@@ -20,6 +21,7 @@ namespace cheese::error {
         UnterminatedStringLiteral = lexer_error_start,
         UnterminatedCharacterLiteral,
         UnterminatedMultilineComment,
+        UnexpectedCharacter,
 
         //Then lexer warnings
         TodoFoundInComment = lexer_error_start+warning_modifier,
@@ -46,13 +48,20 @@ namespace cheese::error {
         ErrorCode code;
 
         // Construct with given error message:
-        CompilerError(Coordinate location, ErrorCode code, const char *message)
+        CompilerError(Coordinate location, ErrorCode code, std::string& message)
                 : std::runtime_error(message), location(location), code(code) {
         }
-        const char* what();
+        std::string what();
     };
 
 
+    [[noreturn]] void raise_exiting_error(const char* module, std::string message, Coordinate location, ErrorCode code);
+
+    void raise_error(const char* module, std::string message, Coordinate location, ErrorCode code);
+    void raise_warning(const char* module, std::string message, Coordinate location, ErrorCode code);
+
+
+    //TODO: Errors with call stack
 }
 
 #endif //CHEESE_ERROR_H

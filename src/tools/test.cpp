@@ -13,6 +13,7 @@
 #include <fstream>
 namespace cheese::tools {
     int test(std::vector<std::string> args) {
+#ifndef CHEESE_NO_SELF_TESTS
         auto program = get_parser("test");
         program.add_argument("--builtin", "-b")
                 .help("run builtin tests ")
@@ -39,5 +40,9 @@ namespace cheese::tools {
             tests::run_json_tests(testfile);
         }
         return 0;
+#else
+        std::cerr << "error: this version of the cheese tool has been compiled such that self-tests are not built in\n";
+        return 1;
+#endif
     }
 }

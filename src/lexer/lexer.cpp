@@ -4,6 +4,7 @@
 
 #include "lexer/lexer.h"
 #include "NotImplementedException.h"
+#include "error.h"
 #include <optional>
 #include <functional>
 #include <algorithm>
@@ -170,19 +171,19 @@ namespace cheese::lexer {
             std::string_view comment = VIEW;
             if (warnComments) {
                 if (comment.contains("TODO")) {
-                    throw NotImplementedException("TODO: Warnings");
+                    error::raise_warning("LEXER", "'TODO' found inside a comment, maybe you should look into this?", start_location, error::ErrorCode::TodoFoundInComment);
                 }
                 if (comment.contains("FIXME")) {
-                    throw NotImplementedException("TODO: Warnings");
+                    error::raise_warning("LEXER", "'FIXME' found inside a comment, maybe you should look into this?", start_location, error::ErrorCode::FixmeFoundInComment);
                 }
                 if (comment.contains("BUG")) {
-                    throw NotImplementedException("TODO: Warnings");
+                    error::raise_warning("LEXER", "'BUG' found inside a comment, maybe you should look into this?", start_location, error::ErrorCode::BugFoundInComment);
                 }
                 if (comment.contains("XXX")) {
-                    throw NotImplementedException("TODO: Warnings");
+                    error::raise_warning("LEXER", "'XXX' found inside a comment, maybe you should look into this?", start_location, error::ErrorCode::XXXFoundInComment);
                 }
                 if (comment.contains("HACK")) {
-                    throw NotImplementedException("TODO: Warnings");
+                    error::raise_warning("LEXER", "'HACK' found inside a comment, maybe you should look into this?", start_location, error::ErrorCode::HackFoundInComment);
                 }
             }
             return Token{
@@ -196,7 +197,7 @@ namespace cheese::lexer {
             while (true) {
                 if (END) {
                     if (errorInvalid) {
-                        throw NotImplementedException("TODO: Compiler Errors");
+                        error::raise_exiting_error("LEXER","unterminated block comment", start_location, error::ErrorCode::UnterminatedMultilineComment);
                     } else {
                         return Token{
                             start_location,
@@ -239,19 +240,19 @@ namespace cheese::lexer {
             std::string_view comment = VIEW;
             if (warnComments) {
                 if (comment.contains("TODO")) {
-                    throw NotImplementedException("TODO: Warnings");
+                    error::raise_warning("LEXER", "'TODO' found inside a comment, maybe you should look into this?", start_location, error::ErrorCode::TodoFoundInComment);
                 }
                 if (comment.contains("FIXME")) {
-                    throw NotImplementedException("TODO: Warnings");
+                    error::raise_warning("LEXER", "'FIXME' found inside a comment, maybe you should look into this?", start_location, error::ErrorCode::FixmeFoundInComment);
                 }
                 if (comment.contains("BUG")) {
-                    throw NotImplementedException("TODO: Warnings");
+                    error::raise_warning("LEXER", "'BUG' found inside a comment, maybe you should look into this?", start_location, error::ErrorCode::BugFoundInComment);
                 }
                 if (comment.contains("XXX")) {
-                    throw NotImplementedException("TODO: Warnings");
+                    error::raise_warning("LEXER", "'XXX' found inside a comment, maybe you should look into this?", start_location, error::ErrorCode::XXXFoundInComment);
                 }
                 if (comment.contains("HACK")) {
-                    throw NotImplementedException("TODO: Warnings");
+                    error::raise_warning("LEXER", "'HACK' found inside a comment, maybe you should look into this?", start_location, error::ErrorCode::HackFoundInComment);
                 }
             }
             return Token{
@@ -271,7 +272,7 @@ namespace cheese::lexer {
                 auto current = PEEK;
                 if (END || current == '\n') {
                     if (errorInvalid) {
-                        throw NotImplementedException("TODO: Compiler Errors");
+                        error::raise_exiting_error("LEXER", "unterminated string literal", location,error::ErrorCode::UnterminatedStringLiteral);
                     } else {
                         return Token{LOCATION, TokenType::Error, VIEW};
                     }
@@ -306,7 +307,7 @@ namespace cheese::lexer {
                 auto current = PEEK;
                 if (END || current == '\n') {
                     if (errorInvalid) {
-                        throw NotImplementedException("TODO: Compiler Errors");
+                        error::raise_exiting_error("LEXER", "unterminated character literal", location,error::ErrorCode::UnterminatedCharacterLiteral);
                     } else {
                         return Token{LOCATION, TokenType::Error, VIEW};
                     }
@@ -336,6 +337,7 @@ namespace cheese::lexer {
             std::size_t size = 0;
             while (true) {
                 if (!validB(PEEK)) return size;
+                ADVANCE;
                 ++size;
             }
         };
@@ -343,6 +345,7 @@ namespace cheese::lexer {
             std::size_t size = 0;
             while (true) {
                 if (!validO(PEEK)) return size;
+                ADVANCE;
                 ++size;
             }
         };
@@ -350,6 +353,7 @@ namespace cheese::lexer {
             std::size_t size = 0;
             while (true) {
                 if (!validX(PEEK)) return size;
+                ADVANCE;
                 ++size;
             }
         };
@@ -792,7 +796,7 @@ namespace cheese::lexer {
                     } else if (validDBeg(current)) {
                         tokens.push_back(number());
                     } else if (errorInvalid) {
-                        throw NotImplementedException("TODO: Compiler Errors");
+                        error::raise_exiting_error("LEXER", "unexpected character", start_location, error::ErrorCode::UnexpectedCharacter);
                     } else {
                         SINGLE(TokenType::Error);
                     }
