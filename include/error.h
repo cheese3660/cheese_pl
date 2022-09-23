@@ -31,7 +31,9 @@ namespace cheese::error {
         XXXFoundInComment,
 
         //Parsing errors next
-        ExpectedOperator = 1000,
+        ExpectedOperator = parser_error_start,
+        ExpectedStructureStatement,
+        ExpectedFieldDeclaration,
 
 
         //General error (thrown for example when multiple previous errors were printed)

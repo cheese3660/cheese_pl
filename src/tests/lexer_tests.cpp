@@ -7,7 +7,7 @@
 #include "error.h"
 #include "tests/tests.h"
 #include <iostream>
-namespace cheese::tests::lexer {
+namespace cheese::tests::lexer_tests {
     TEST_SECTION("lexer tests",0)
         TEST_SUBSECTION("token representations")
             TEST_GENERATOR {
@@ -137,6 +137,28 @@ namespace cheese::tests::lexer {
                         TEST_GEN_END
                     }
                 }
+            TEST_END
+            TEST_SUBSECTION("logical modification operators")
+                TEST_GENERATOR {
+                    using enum cheese::lexer::TokenType;
+                    std::vector<std::tuple<std::string,std::string,cheese::lexer::TokenType>> operators_to_test{
+                            {"and assign", "and=", AndAssign},
+                            {"or assign", "or=", OrAssign},
+                            {"xor assign", "xor=", XorAssign},
+                    };
+                    for (auto& to_test : operators_to_test) {
+                        TEST_GEN_BEGIN(std::get<0>(to_test))
+                            std::vector<cheese::lexer::Token> tokens;
+                            TEST_TRY(tokens = cheese::lexer::lex(std::get<1>(to_test)));
+                            std::string message = "expected: 1 token, got: " + std::to_string(tokens.size()-1) + "\n";
+                            TEST_ASSERT_EQ_CONTINUE_MESSAGE(tokens.size(),2,message);
+                            message = "expected: " + std::string(cheese::lexer::name_of(std::get<2>(to_test))) + ", got: " + std::string(cheese::lexer::name_of(tokens[0].ty));
+                            TEST_ASSERT_EQ_CONTINUE_MESSAGE(std::get<2>(to_test),tokens[0].ty,message);
+                            message = "expected: " + std::get<1>(to_test) + ", got: " + std::string(tokens[0].value);
+                            TEST_ASSERT_EQ_MESSAGE(std::get<1>(to_test),tokens[0].value,message);
+                        TEST_GEN_END
+                    }
+                };
             TEST_END
         TEST_END
     TEST_END

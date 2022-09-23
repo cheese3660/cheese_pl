@@ -10,7 +10,6 @@
 #include <algorithm>
 #include <utility>
 #include <iostream>
-#include <sstream>
 namespace cheese::lexer {
 #define RESERVED(keyword, token) std::pair<std::string_view, TokenType>{# keyword, token},
     const auto reserved_keywords = std::vector<std::pair<std::string_view, TokenType>>{
@@ -58,6 +57,17 @@ namespace cheese::lexer {
         RESERVED(break, TokenType::Break)
         RESERVED(_,TokenType::Underscore)
         RESERVED(then,TokenType::Then)
+        RESERVED(do,TokenType::Do)
+        RESERVED(and,TokenType::And)
+        RESERVED(and=,TokenType::AndAssign)
+        RESERVED(or,TokenType::Or)
+        RESERVED(or=,TokenType::OrAssign)
+        RESERVED(xor,TokenType::Xor)
+        RESERVED(xor=,TokenType::XorAssign)
+        RESERVED(not,TokenType::Not)
+        RESERVED(bool,TokenType::Bool)
+        RESERVED(true,TokenType::True)
+        RESERVED(false,TokenType::False)
     };
 #undef  RESERVED
     const auto builtin_macros = std::vector<std::string_view>{
@@ -435,6 +445,16 @@ namespace cheese::lexer {
                 view_size++;
                 ADVANCE;
             }
+            if (PEEK == '=') {
+                auto x = getKW(buffer.substr(view_start,view_size+1));
+                if (x.has_value()) {
+                    view_size++;
+                    ADVANCE;
+                    auto view = VIEW;
+                    return Token{start_location, x.value(), view};
+                }
+            }
+
             auto view = VIEW;
             auto opt = getKW(view);
             return Token{start_location, validIntegerType(view) ? (view[0] == 'u'? TokenType::UnsignedIntType : TokenType::SignedIntType) : opt.value_or(isMacro(view)?TokenType::BuiltinReference:TokenType::Identifier), view};
@@ -607,28 +627,7 @@ namespace cheese::lexer {
                     break;
                 }
                 case '&': {
-                    ADVANCE;
-                    view_size++;
-                    switch (PEEK) {
-                        case '=':
-                            SINGLE(TokenType::BitwiseAndAssign);
-                            break;
-                        case '&':
-                            ADVANCE;
-                            view_size++;
-                            switch (PEEK) {
-                                case '=':
-                                    SINGLE(TokenType::BooleanAndAssign);
-                                    break;
-                                default:
-                                    ADD(TokenType::BooleanAnd);
-                                    break;
-                            }
-                            break;
-                        default:
-                            ADD(TokenType::Ampersand);
-                            break;
-                    }
+                    SINGLE(TokenType::Ampersand);
                     break;
                 }
                 case '@':
@@ -682,7 +681,14 @@ namespace cheese::lexer {
                             ADVANCE;
                             view_size++;
                             if (PEEK == '=') {
-                                SINGLE(TokenType::ReversedDoubleThickArrow);
+                                ADVANCE;
+                                view_size++;
+                                if (PEEK == '(') {
+                                    SINGLE(TokenType::BlockYield);
+                                }
+                                else {
+                                    ADD(TokenType::ReversedDoubleThickArrow);
+                                }
                             } else {
                                 ADD(TokenType::LessThanEqual);
                             }
@@ -739,25 +745,7 @@ namespace cheese::lexer {
                     if (PEEK == '=') {
                         SINGLE(TokenType::NotEqualTo);
                     } else {
-                        ADD(TokenType::BooleanNot);
-                    }
-                    break;
-                }
-                case '|': {
-                    ADVANCE;
-                    view_size++;
-                    if (PEEK == '|') {
-                        ADVANCE;
-                        view_size++;
-                        if (PEEK == '=') {
-                            SINGLE(TokenType::BooleanOrAssign);
-                        } else {
-                            ADD(TokenType::BooleanOr);
-                        }
-                    } else if (PEEK == '=') {
-                        SINGLE(TokenType::BitwiseOrAssign);
-                    } else {
-                        ADD(TokenType::BitwiseOr);
+                        ADD(TokenType::Exclamation); //At some point figure out what to do with this
                     }
                     break;
                 }
@@ -771,19 +759,6 @@ namespace cheese::lexer {
                     }
                     break;
                 }
-                case '^': {
-                    ADVANCE;
-                    view_size++;
-                    if (PEEK == '=') {
-                        SINGLE(TokenType::BitwiseXorAssign);
-                    } else {
-                        ADD(TokenType::BitwiseXor);
-                    }
-                    break;
-                }
-                case '~':
-                    SINGLE(TokenType::BitwiseNot);
-                    break;
                 case '$':
                     tokens.push_back(builtin());
                     break;
@@ -857,25 +832,20 @@ namespace cheese::lexer {
             MAP(NotEqualTo),
             MAP(GreaterThanEqual),
             MAP(LessThanEqual),
-            MAP(BooleanAnd),
-            MAP(BooleanOr),
-            MAP(BooleanNot),
-            MAP(BitwiseOr),
-            MAP(BitwiseXor),
-            MAP(BitwiseNot),
+            MAP(And),
+            MAP(Or),
+            MAP(Xor),
+            MAP(AndAssign),
+            MAP(OrAssign),
+            MAP(XorAssign),
             MAP(Assign),
             MAP(MulAssign),
             MAP(ModAssign),
             MAP(DivAssign),
             MAP(AddAssign),
             MAP(SubAssign),
-            MAP(BooleanAndAssign),
-            MAP(BooleanOrAssign),
             MAP(LeftShiftAssign),
             MAP(RightShiftAssign),
-            MAP(BitwiseAndAssign),
-            MAP(BitwiseOrAssign),
-            MAP(BitwiseXorAssign),
             MAP(Unwrap),
             MAP(Dereference),
             MAP(Tuple),
@@ -947,14 +917,22 @@ namespace cheese::lexer {
             MAP(Error),
             MAP(EoF),
             MAP(Then),
+            MAP(Do),
+            MAP(Exclamation),
             MAP(NewLine),
+            MAP(Bool),
+            MAP(True),
+            MAP(False),
+            MAP(Not),
+            MAP(Block),
+            MAP(BlockYield),
     };
 
 #undef MAP
     std::string_view name_of(TokenType t) {
         return token_names.at(t);
     }
-    std::string to_stream(std::vector<Token> tokens) {
+    std::string to_stream(const std::vector<Token>& tokens) {
         std::stringstream ss;
         for (Token t : tokens) {
             ss << name_of(t.ty) << ' ';

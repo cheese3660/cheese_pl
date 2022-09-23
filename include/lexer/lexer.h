@@ -12,6 +12,7 @@ namespace cheese::lexer {
 
         //Structural tokens
         SingleArrow, // ->
+        Exclamation, // !
         DoubleArrow, // -->
         ThickArrow, // =>
         DoubleThickArrow, // ==>
@@ -54,32 +55,34 @@ namespace cheese::lexer {
         NotEqualTo, // !=
         GreaterThanEqual, // >=
         LessThanEqual, // <=
-        BooleanAnd, // &&
-        BooleanOr, // ||
-        BooleanNot, // !
-        BitwiseOr, // |
-        BitwiseXor, // ^
-        BitwiseNot, // ~
+        And, //and
+        Or, //or
+        Xor, //xor
+        AndAssign, //and=
+        OrAssign, //or=
+        XorAssign, //xor=
+        Not, //not
         Assign, // =
         MulAssign, // *=
         ModAssign, // +=
         DivAssign, // /=
         AddAssign, // +=
         SubAssign, // -=
-        BooleanAndAssign, // &&=
-        BooleanOrAssign, // ||=
         LeftShiftAssign, // <<=
         RightShiftAssign, // >>=
-        BitwiseAndAssign, // &=
-        BitwiseOrAssign, // |=
-        BitwiseXorAssign, // ^=
         Unwrap, // # (This is a postfix unwrap operator for types that are wrapped like a pointer or a unit in the future)
         Dereference, // $
         Tuple, // .(
         Object, // .{
         Array, // .[
+        Block, // :(
+        BlockYield, // <==(
         Exponentiate, // ^^
         ExponentiateAssign, //^^=
+        Bool,
+        True,
+        False,
+
 
         //Textual tokens
         Public, // public
@@ -164,6 +167,7 @@ namespace cheese::lexer {
         BlockComment,
         Underscore,
         Then, //Then
+        Do,
         NewLine,
         //Special Tokens
         Error, //An error token in the lexer
@@ -176,7 +180,7 @@ namespace cheese::lexer {
     };
 
     std::vector<Token> lex(std::string_view buffer, std::string filename="unknown", bool errorInvalid = true, bool outputComments = false, bool warnComments = true);
-    std::string to_stream(std::vector<Token>);
+    std::string to_stream(const std::vector<Token>&);
     std::string_view name_of(TokenType);
 } //cheese::lexer
 #endif //CHEESE_LEXER_H

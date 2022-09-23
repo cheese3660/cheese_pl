@@ -175,8 +175,8 @@ using __current_section = __next_section;
 #define TEST_EXPECT(expr, expected_error) do { try {expr; TEST_FAIL; } catch (cheese::error::CompilerError& c) {if (c.code == (expected_error)) {TEST_PASS;} else {TEST_FAIL_MESSAGE(NEWLINE(c.what()));}} catch (std::exception& e) {TEST_FAIL_MESSAGE(NEWLINE(e.what()));}} while(0)
 #define TEST_EXPECT_MESSAGE(expr, expected_error, message)  do { try {expr; TEST_FAIL_MESSAGE(message); } catch (cheese::error::CompilerError& c) {if (c.code == (expected_error)) {TEST_PASS;} else {TEST_FAIL_MESSAGE(std::string(message) + NEWLINE(c.what()));}} catch (std::exception& e) {TEST_FAIL_MESSAGE(std::string(message) + NEWLINE(e.what()));}} while(0)
 
-#define TEST_SKIP_IF(X)
-#define TEST_SKIP_IF_MESSAGE(X,message)
+#define TEST_SKIP_IF(X) do {if (X) TEST_SKIP;} while (0)
+#define TEST_SKIP_IF_MESSAGE(X,message) do {if (X) TEST_SKIP_MESSAGE(message);} while 0
 
 
 #define TEST_END }
