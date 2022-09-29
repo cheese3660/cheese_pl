@@ -1,0 +1,1 @@
+pandoc --pdf-engine=xelatex -H head.tex -N --highlight-style zenburn -V geometry:"top=2cm, bottom=1.5cm, left=1.5cm, right=1.5cm"  reference.md -o reference.pdf
