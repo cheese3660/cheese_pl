@@ -9,24 +9,40 @@ namespace cheese::parser::nodes{
     }
 
     nlohmann::json Structure::as_json() {
-        NOT_IMPL
+//        if (!is_tuple && interfaces.size() == 0 && children.size() == 0) {
+//            return "struct";
+//        }
+//        nlohmann::json ints = nlohmann::json::array();
+//        nlohmann::json kids = nlohmann::json::array();
+//        for (auto &interface: interfaces) {
+//            ints.push_back(interface->as_json());
+//        }
+//        for (auto &child: children) {
+//            kids.push_back(child->as_json());
+//        }
+//        nlohmann::json result = nlohmann::json::object();
+//        result["type"] = "struct";
+//        if (is_tuple) result["tuple"] = true;
+//        if (ints.size() > 0) result["interfaces"] = ints;
+//        if (kids.size() > 0) result["children"] = kids;
+//        return result;
+        return build_json("struct",{"tuple","interfaces","children"},is_tuple,interfaces,children);
     }
 
     bool Structure::compare_json(nlohmann::json json) {
-        if (!json.is_object()) return false;
-        if (!json.contains("type")) return false;
-        if (!json["type"].is_string()) return false;
-        if (json["type"].get<std::string>() != "structure") return false;
-        if (!json.contains("tuple")) return false;
-        if (!json["tuple"].is_boolean()) return false;
-        if (json["tuple"].get<bool>() != is_tuple) return false;
-        if (!json.contains("children")) return false;
-        if (!json["children"].is_array()) return false;
-        if (json["children"].size() != children.size()) return false;
-        auto& j_children = json["children"];
-        for (size_t i = 0; i < children.size(); i++) {
-            if (!children[i]->compare_json(j_children[i])) return false;
-        }
-        return true;
+        //Basically if it is as simple as possible and can just be reduced to struct then do so
+//        if (json.is_string() && json.get<std::string>() == "struct" && !is_tuple && interfaces.size() == 0 && children.size() == 0) return true;
+//        if (!json.is_object()) return false;
+//        if (!compare_helper(json,"type","struct")) return false;
+//        if (!compare_helper(json,"tuple",is_tuple)) return false;
+//        if (!compare_helper(json, "interfaces",interfaces)) return false;
+//        if (!compare_helper(json, "children", children)) return false;
+        return compare_helper(json,"struct",{
+            "tuple",
+            "interfaces",
+            "children"
+        },is_tuple,interfaces,children);
+
+
     }
 }

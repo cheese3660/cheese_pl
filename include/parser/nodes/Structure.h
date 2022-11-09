@@ -9,11 +9,11 @@
 #include <memory>
 
 namespace cheese::parser::nodes {
-    class Structure : public Node {
+    struct Structure : public Node {
         bool is_tuple;
+        NodeList interfaces;
         NodeList children;
-    public:
-        Structure(Coordinate location, NodeList children, bool is_tuple) : Node(location), children(std::move(children)), is_tuple(is_tuple) {}
+        Structure(Coordinate location, NodeList interfaces, NodeList children, bool is_tuple) : Node(location), interfaces(std::move(interfaces)), children(std::move(children)), is_tuple(is_tuple) {}
         void nested_display(std::uint32_t nesting) override;
         nlohmann::json as_json() override;
         bool compare_json(nlohmann::json) override;

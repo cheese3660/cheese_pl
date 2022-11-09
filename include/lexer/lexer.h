@@ -70,15 +70,14 @@ namespace cheese::lexer {
         SubAssign, // -=
         LeftShiftAssign, // <<=
         RightShiftAssign, // >>=
-        Unwrap, // # (This is a postfix unwrap operator for types that are wrapped like a pointer or a unit in the future)
         Dereference, // $
         Tuple, // .(
         Object, // .{
         Array, // .[
         Block, // :(
         BlockYield, // <==(
-        Exponentiate, // ^^
-        ExponentiateAssign, //^^=
+        Exponentiate, // ^
+        ExponentiateAssign, //^=
         Bool,
         True,
         False,
@@ -169,6 +168,9 @@ namespace cheese::lexer {
         Then, //Then
         Do,
         NewLine,
+        Pipe, // |
+        Redefine, // :=
+        Generator, // generator
         //Special Tokens
         Error, //An error token in the lexer
         EoF, //End of File, ALWAYS KEEP THIS AT THE END OF THE PROGRAM

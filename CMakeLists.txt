@@ -22,7 +22,41 @@ add_definitions(${LLVM_DEFINITIONS_LIST})
 # add_compile_definitions(CHEESE_NO_SELF_TESTS)
 
 
-add_executable(cheese src/main.cpp include/lexer/lexer.h src/Coordinate.cpp include/Coordinate.h src/lexer/lexer.cpp include/NotImplementedException.h src/error.cpp include/error.h include/vterm.h src/vterm.cpp src/configuration.cpp include/configuration.h include/tools/tools.h src/tools/tools.cpp src/tools/test.cpp include/tools/test.h include/tests/tests.h src/tests/tests.cpp src/tests/lexer_tests.cpp src/parser/Node.cpp include/parser/Node.h include/parser/parser.h include/parser/nodes/Structure.h src/parser/nodes/Structure.cpp src/parser/parser.cpp src/tests/parser_tests.cpp)
+add_executable(
+        cheese
+        src/main.cpp
+        include/lexer/lexer.h
+        src/Coordinate.cpp
+        include/Coordinate.h
+        src/lexer/lexer.cpp
+        include/NotImplementedException.h
+        src/error.cpp include/error.h
+        include/vterm.h
+        src/vterm.cpp
+        src/configuration.cpp
+        include/configuration.h
+        include/tools/tools.h
+        src/tools/tools.cpp
+        src/tools/test.cpp
+        include/tools/test.h
+        include/tests/tests.h
+        src/tests/tests.cpp
+        src/tests/lexer_tests.cpp
+        src/parser/Node.cpp
+        include/parser/Node.h
+        include/parser/parser.h
+        include/parser/nodes/Structure.h
+        src/parser/nodes/Structure.cpp
+        src/parser/parser.cpp
+        src/tests/parser_tests.cpp
+        include/compression/base64.h
+        src/compression/base64.cpp
+        external/inflatecpp/adler32.cc
+        external/inflatecpp/bit_reader.cc
+        external/inflatecpp/crc32.cc
+        external/inflatecpp/decompressor.cc
+        external/inflatecpp/huffman_decoder.cc
+        src/parser/nodes/Import.cpp include/parser/nodes/Import.h include/parser/nodes/TerminalNodes.h include/parser/nodes/SingleMemberNodes.h include/math/BigInteger.h)
 if (UNIX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++ -lc++abi")

@@ -34,7 +34,9 @@ namespace cheese::error {
         ExpectedOperator = parser_error_start,
         ExpectedStructureStatement,
         ExpectedFieldDeclaration,
-
+        ExpectedImportName,
+        ExpectedImportPath,
+        ExpectedFunctionGeneratorName,
 
         //General error (thrown for example when multiple previous errors were printed)
         GeneralCompilerError = 9999,

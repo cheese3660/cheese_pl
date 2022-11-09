@@ -110,8 +110,8 @@ fn main => void public {
     let b4 = b2 and b3
     let b5 = (not b2) xor b3
     // Optional
-    let o: Maybe(u32) = 5
-    let o2: Maybe(u32) = none
+    let o: Optional(u32) = 5
+    let o2: Optional(u32) = none
     // Errors
     let ok: Result(u32) = 5
     let err: Result(u32) = .error
@@ -173,10 +173,10 @@ fn main => void public {
 
 ### Primitive values
 
-| Name            | Description                     |
-|-----------------|---------------------------------|
-| `true`, `false` | `bool` values                   |
-| `none`          | used to set Maybe(T) to `null`  |
+| Name            | Description            |
+|-----------------|------------------------|
+| `true`, `false` | `bool` values          |
+| `none`          | Literal of type `void` |
 
 ### String literals
 ```cheese
@@ -239,8 +239,14 @@ let coordinate = struct {
     y: i32
     
     fn create x: i32, y: i32 => Self .{x: x, y: y}
+    let z = 0
 }
 ```
+Note a few things, fields are defined by an identifier followed by a `:`, and then a type. Structures can also have
+"static" variables with the `let` or def keywords, and that functions can be declared within structures.
+
+Another thing of note is that all files implicitly declare a structure containing the files contents. So a file can have
+field declarations and such.
 
 #### Structure Literals
 
@@ -485,8 +491,15 @@ how they work, they go after the return type declaration. Possible modifiers are
 
 An example of a function using one of said modifiers is
 ```cheese
-fn doSomething arg: i32 => i32 export ==> arg+1
+fn doSomething arg: i32 => i32 export arg+1
 ```
+
+#### Returning Values From Functions
+
+Values are implicitly returned from one line functions with no return statements. But otherwise to return a value from a
+function you use the `==> value` or `==>` keywords, where the latter is the same as returning nothing from the function.
+(note to do so in a one line environment you must use the keyword none after it like such `==> none`)
+
 
 #### Importing Functions From Other Objects
 To import a function symbol for your program to use, you define a function as you normally would, but you put `import`
@@ -501,9 +514,8 @@ their usage though is for returning functions. They can refer to compile time va
 Anonymous functions can be templates.
 ```cheese
 fn accessor index: comptime_int comptime => fn (any) => any
-    ==>
-        fn x: any => any
-            ==> x[index] 
+    fn x: any => any
+        x[index]
 ```
 
 #### Closures
@@ -579,29 +591,14 @@ generator numbersUpTo n: i32 => i32
     }
     // Implicit return .None, so it exits here
 }
-// Note, values of type generator must be declared mutable as the internal state of a generator changes.
+// Note, values of type generator must be declared mutable
+// as the internal state of a generator changes.
 let x mut = numbersUpTo(32)
 x() //0
 x() //1
 x() //2
 x() //3
 ```
-
-### Structure Types
-Structure types are defined via the `struct` keyword followed by brackets
-```cheese
-let Struct = struct {
-    a: i32 public
-    b: i32
-    fn create => Struct public .{5,5}
-    let z = 5
-}
-```
-Note a few things, fields are defined by an identifier followed by a `:`, and then a type. Structures can also have
-"static" variables with the `let` or def keywords, and that functions can be declared within structures.
-
-Another thing of note is that all files implicitly declare a structure containing the files contents. So a file can have
-field declarations and such.
 
 ### Interfaces
 Interfaces are defined via the `interface` keyword followed by brackets.
@@ -961,7 +958,7 @@ either replace a single expression or define a new block and therefore a new sco
 than reference or value as w/ functions.
 
 ```cheese
-macro x a
+let x = macro a
     a.x
 ```
 
@@ -2114,3 +2111,152 @@ Denotes an allocator.
 
 # Standard Library
 TODO: Standard library documentation (and standard library)
+------------------------------------------------------------------------------------------------------------------------
+# Full Grammar
+
+## Lexer
+
+```EBNF
+SINGLE_ARROW = '->';
+EXCLAMATION = '!';
+DOUBLE_ARROW = '-->';
+THICK_ARROW = '=>';
+DOUBLE_THICK_ARROW = '==>';
+REVERSED_DOUBLE_THICK_ARROW = '<==';
+REVERSED_ARROW = '<-';
+LEFT_BRACE = '{';
+RIGHT_BRACE = '}';
+LEFT_PAREN = '(';
+RIGHT_PAREN = ')';
+COLON = ':';
+COMMA = ',';
+SEMICOLON = ';';
+DOT = '.';
+DOT2 = '..';
+DOT3 = '...';
+HASH = '#';
+QUESTION = '?';
+CONST_POINTER = '*~';
+CONST_ARRAY =  ']~';
+CONST_SLICE = '>~';
+CAST = '@';
+STAR = '*';
+PERCENT = '%';
+SLASH = '/';
+PLUS = '+';
+DASH = '-';
+AMPERSAND = '&';
+LEFT_SHIFT = '<<';
+RIGHT_SHIFT = '>>';
+GREATER_THAN = '>';
+LESS_THAN = '<';
+EQUAL_TO = '==';
+NOT_EQUAL_TO = '!=';
+GREATER_THAN_EQUAL = '>=';
+LESS_THAN_EQUAL = '<=';
+AND = 'and';
+OR = 'or';
+XOR = 'xor';
+AND_ASSIGN = 'and=';
+OR_ASSIGN = 'or=';
+XOR_ASSIGN = 'xor=';
+NOT = 'not';
+ASSIGN = '=';
+MUL_ASSIGN = '*=';
+MOD_ASSIGN = '%=';
+DIV_ASSIGN = '/=';
+ADD_ASSIGN = '+=';
+SUB_ASSIGN = '-=';
+LEFT_SHIFT_ASSIGN = '<<=';
+RIGHT_SHIFT_ASSIGN = '>>=';
+DEREFERENCE = '$';
+TUPLE = '.(';
+OBJECT = '.{';
+ARRAY = '.[';
+BLOCK = ':(';
+BLOCK_YIELD = '<==(';
+EXPONENTIATE = '^';
+EXPONENTIATE_ASSIGN = '^=';
+BOOL = 'bool';
+TRUE = 'true';
+FALSE = 'false';
+PUBLIC = 'public';
+PRIVATE = 'private';
+CONST = 'const';
+NO_RETURN = 'noreturn';
+MEMBER = 'member';
+ENUM = 'enum';
+UNION = 'union';
+STRUCT = 'struct';
+EXTERN = 'extern';
+LET = 'let';
+DEF = 'def';
+FN = 'fn';
+F32 = 'f32';
+F64 = 'f64';
+C32 = 'c32';
+C64 = 'c64';
+SWITCH = 'switch';
+IF = 'if';
+ELIF = 'elif';
+ELSE = 'else';
+WHILE = 'while';
+FOR = 'for';
+IMPORT = 'type';
+NONE = 'none';
+VOID = 'void';
+PROTOTYPE = 'prototype';
+INLINE = 'inline';
+ENTRY = 'entry';
+COMPTIME = 'comptime';
+BREAK = 'break';
+CONTINUE = 'continue';
+ANY = 'any';
+ASM = 'asm';
+COMPTIME_STRING = 'cstr';
+COMPTIME_FLOAT = 'comptime_float';
+COMPTIME_INT = 'comptime_int';
+COMPTIME_COMPLEX = 'comptime_complex';
+UNSIGNED_SIZE = 'usize';
+SIGNED_SIZE = 'isize';
+digit = '0'|'1'|'2'|'3'|'4'|'5'|'6'|'7'|'8'|'9';
+SIGNED_INT_TYPE = 'i',digit,{digit};
+UNSIGNED_INT_TYPE = 'u',digit,{digit};
+magnitude = 'e','E';
+float = digit,{digit},['.',digit,{digit}],[magnitude,['-'],digit,{digit}];
+FLOATING_LITERAL = float;
+IMAGINARY_LITERAL = float,'I';
+DECIMAL_LITERAL = digit,{digit};
+hex_digit = digit|'a'|'A'|'b'|'B'|'c'|'C'|'d'|'D'|'e'|'E'|'f'|'F';
+HEX_LITERAL = '0x',hex_digit,{hex_digit};
+oct_digit = '0'|'1'|'2'|'3'|'4'|'5'|'6'|'7';
+OCT_LITERAL = '0o',oct_digit,{oct_digit};
+bin_digit = '0'|'1';
+BIN_LITERAL = '0b',bin_digit,{bin_digit};
+STRING_LITERAL = '"',{.},'"';
+CHARACTER_LITERAL = "'",.,"'";
+COMMENT = '//',{.};
+BLOCK_COMMENT = '/*',{.},'*/';
+THEN = 'then';
+DO = 'do';
+NEWLINE = '\n';
+PIPE = '|';
+REDEFINE = ':=';
+GENERATOR = 'generator';
+```
+
+## Parser
+```EBNF
+grammar = {structure_statement}, EOF;
+
+structure_statement =
+      definition
+    | declaration
+    | builtin_call
+    | comptime
+    | function
+    | import
+    | field
+    ;
+
+```

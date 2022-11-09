@@ -1,0 +1,1905 @@
+[
+  [
+    "primitive types: bool",
+    "def x: bool",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_def",
+          "name": "x",
+          "var_type": {
+            "type": "bool_type"
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "primitive types: i1",
+    "def x: i1",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_def",
+          "name": "x",
+          "var_type": {
+            "type": "int_type",
+            "size": 1
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "primitive types: i64",
+    "def x: i64",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_def",
+          "name": "x",
+          "var_type": {
+            "type": "int_type",
+            "size": 64
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "primitive types: i65535",
+    "def x: i65535",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_def",
+          "name": "x",
+          "var_type": {
+            "type": "int_type",
+            "size": 65535
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "primitive types: u1",
+    "def x: u1",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_def",
+          "name": "x",
+          "var_type": {
+            "type": "uint_type",
+            "size": 1
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "primitive types: u64",
+    "def x: u64",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_def",
+          "name": "x",
+          "var_type": {
+            "type": "uint_type",
+            "size": 64
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "primitive types: u65535",
+    "def x: u65535",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_def",
+          "name": "x",
+          "var_type": {
+            "type": "uint_type",
+            "size": 65535
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "primitive types: f32",
+    "def x: f32",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_def",
+          "name": "x",
+          "var_type": {
+            "type": "f32_type"
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "primitive types: f64",
+    "def x: f64",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_def",
+          "name": "x",
+          "var_type": {
+            "type": "f64_type"
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "primitive types: c32",
+    "def x: c32",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_def",
+          "name": "x",
+          "var_type": {
+            "type": "c32_type"
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "primitive types: c64",
+    "def x: c64",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_def",
+          "name": "x",
+          "var_type": {
+            "type": "c64_type"
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "primitive types: opaque",
+    "def x: opaque",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_def",
+          "name": "x",
+          "var_type": {
+            "type": "opaque_type"
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "primitive types: void",
+    "def x: void",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_def",
+          "name": "x",
+          "var_type": {
+            "type": "void_type"
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "primitive types: comptime_float",
+    "def x: comptime_float",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_def",
+          "name": "x",
+          "var_type": {
+            "type": "comptime_float_type"
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "primitive types: comptime_complex",
+    "def x: comptime_complex",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_def",
+          "name": "x",
+          "var_type": {
+            "type": "comptime_complex_type"
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "primitive types: comptime_int",
+    "def x: comptime_int",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_def",
+          "name": "x",
+          "var_type": {
+            "type": "comptime_int_type"
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "primitive types: comptime_string",
+    "def x: comptime_string",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_def",
+          "name": "x",
+          "var_type": {
+            "type": "comptime_string_type"
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "primitive types: noreturn",
+    "def x: noreturn",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_def",
+          "name": "x",
+          "var_type": {
+            "type": "noreturn_type"
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "primitive types: type",
+    "def x: type",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_def",
+          "name": "x",
+          "var_type": {
+            "type": "type_type"
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "primitive values: true",
+    "let x = true",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "x"
+          },
+          "value": {
+            "type": "true"
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "primitive values: false",
+    "let x = false",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "x"
+          },
+          "value": {
+            "type": "false"
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "primitive values: none",
+    "let x = none",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "x"
+          },
+          "value": {
+            "type": "none"
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "string literals",
+    "let x = \"this is a string literal\"",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "x"
+          },
+          "value": {
+            "type": "string",
+            "str": "this is a string literal"
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "mutable assignment",
+    "let x mut = 5",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "x",
+            "mods": [
+              "mut"
+            ]
+          },
+          "value": {
+            "type": "int",
+            "value": 5
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "destructuring",
+    "let{a:(x mut, y, z),b:w,c:_}=a",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "destructure",
+          "structure": {
+            "type": "destructure_struct",
+            "children": {
+              "a": {
+                "type": "destructure_tuple",
+                "children": [
+                  {
+                    "type": "var_def",
+                    "mods": [
+                      "mut"
+                    ],
+                    "name": "x"
+                  },
+                  {
+                    "type": "var_def",
+                    "name": "y"
+                  },
+                  {
+                    "type": "var_def",
+                    "name": "z"
+                  }
+                ]
+              },
+              "b": {
+                "type": "var_def",
+                "name": "w"
+              },
+              "c": {
+                "type": "ignore"
+              }
+            }
+          },
+          "value": {
+            "type": "ref",
+            "name": "a"
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "structure types",
+    "let p=struct{a:bool,b:bool}",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "p"
+          },
+          "value": {
+            "type": "struct",
+            "children": [
+              {
+                "type": "field",
+                "name": "a",
+                "field_type": {
+                  "type": "bool_type"
+                }
+              },
+              {
+                "type": "field",
+                "name": "b",
+                "field_type": {
+                  "type": "bool_type"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "structure literals: explicit/object calls",
+    "let x=p{a:false,b:false}",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "x"
+          },
+          "value": {
+            "type": "object_call",
+            "object": {
+              "type": "ref",
+              "name": "p"
+            },
+            "args": {
+              "a": {
+                "type": "false"
+              },
+              "b": {
+                "type": "false"
+              }
+            }
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "structure literals: implicit",
+    "let x=.{false,false}",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "x"
+          },
+          "value": {
+            "type": "struct_literal",
+            "args": {
+              "a": {
+                "type": "false"
+              },
+              "b": {
+                "type": "false"
+              }
+            }
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "tuple types",
+    "let p=struct(bool,bool)",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "p"
+          },
+          "value": {
+            "type": "struct",
+            "tuple": true,
+            "children": [
+              {
+                "type": "bool_type"
+              },
+              {
+                "type": "bool_type"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "tuple literals: explicit/function calls",
+    "let x=p(false,false)",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "x"
+          },
+          "value": {
+            "type": "tuple_call",
+            "object": {
+              "type": "ref",
+              "name": "p"
+            },
+            "args": [
+              {
+                "type": "false"
+              },
+              {
+                "type": "false"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "tuple literals: implicit",
+    "let x=.(false,false)",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "x"
+          },
+          "value": {
+            "type": "tuple_literal",
+            "args": [
+              {
+                "type": "false"
+              },
+              {
+                "type": "false"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "empty structure type",
+    "let p=struct",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "p"
+          },
+          "value": {
+            "type": "struct"
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "enumerations",
+    "let e=enum{E=0,I(i32),B{x:i32,y:i32}}",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "e"
+          },
+          "value": {
+            "type": "enum",
+            "children": [
+              {
+                "type": "enum_constant",
+                "name": "E",
+                "value": {
+                  "type": "int",
+                  "value": 0
+                }
+              },
+              {
+                "type": "enum_constant",
+                "name": "I",
+                "tuple": true,
+                "children": [
+                  {
+                    "type": "int_type",
+                    "size": 32
+                  }
+                ]
+              },
+              {
+                "type": "enum_constant",
+                "name": "B",
+                "children": [
+                  {
+                    "type": "field",
+                    "name": "x",
+                    "field_type": {
+                      "type": "int_type",
+                      "size": 32
+                    }
+                  },
+                  {
+                    "type": "field",
+                    "name": "y",
+                    "field_type": {
+                      "type": "int_type",
+                      "size": 32
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "enumeration constants",
+    "let x=.E",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "x"
+          },
+          "value": {
+            "type": "enum_constant",
+            "name": "E"
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "reference types: mutable",
+    "def x:*bool",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_def",
+          "name": "x",
+          "var_type": {
+            "type": "ref_type",
+            "child": {
+              "type": "bool_type"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "reference types: immutable",
+    "def x:*~bool",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_def",
+          "name": "x",
+          "var_type": {
+            "type": "const_ref_type",
+            "child": {
+              "type": "bool_type"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "array types: known single dimension mutable",
+    "def x:[1]bool",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_def",
+          "name": "x",
+          "var_type": {
+            "type": "known_array",
+            "dimensions": [
+              {
+                "type": "int",
+                "value": 1
+              }
+            ],
+            "child": {
+              "type": "bool_type"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "array types: known single dimension immutable",
+    "def x:[1]~bool",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_def",
+          "name": "x",
+          "var_type": {
+            "type": "const_known_array",
+            "dimensions": [
+              {
+                "type": "int",
+                "value": 1
+              }
+            ],
+            "child": {
+              "type": "bool_type"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "array types: known multi dimension mutable",
+    "def x:[1,1]bool",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_def",
+          "name": "x",
+          "var_type": {
+            "type": "known_array",
+            "dimensions": [
+              {
+                "type": "int",
+                "value": 1
+              },
+              {
+                "type": "int",
+                "value": 1
+              }
+            ],
+            "child": {
+              "type": "bool_type"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "array types: known multi dimension immutable",
+    "def x:[1,1]~bool",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_def",
+          "name": "x",
+          "var_type": {
+            "type": "const_known_array",
+            "dimensions": [
+              {
+                "type": "int",
+                "value": 1
+              },
+              {
+                "type": "int",
+                "value": 1
+              }
+            ],
+            "child": {
+              "type": "bool_type"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "array types: unknown single dimension mutable",
+    "def x:[?]bool",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_def",
+          "name": "x",
+          "var_type": {
+            "type": "unknown_array",
+            "known_dimensions": [
+            ],
+            "child": {
+              "type": "bool_type"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "array types: unknown single dimension immutable",
+    "def x:[?]~bool",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_def",
+          "name": "x",
+          "var_type": {
+            "type": "const_unknown_array",
+            "known_dimensions": [
+            ],
+            "child": {
+              "type": "bool_type"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "array types: unknown multi dimension mutable",
+    "def x:[1,?]bool",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_def",
+          "name": "x",
+          "var_type": {
+            "type": "unknown_array",
+            "known_dimensions": [
+              {
+                "type": "int",
+                "value": 1
+              }
+            ],
+            "child": {
+              "type": "bool_type"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "array types: unknown multi dimension immutable",
+    "def x:[1,?]~bool",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_def",
+          "name": "x",
+          "var_type": {
+            "type": "const_unknown_array",
+            "known_dimensions": [
+              {
+                "type": "int",
+                "value": 1
+              }
+            ],
+            "child": {
+              "type": "bool_type"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "slice types: mutable",
+    "def x:<>bool",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_def",
+          "name": "x",
+          "var_type": {
+            "type": "slice_type",
+            "child": {
+              "type": "bool_type"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "slice types: immutable",
+    "def x:<>~bool",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_def",
+          "name": "x",
+          "var_type": {
+            "type": "const_slice_type",
+            "child": {
+              "type": "bool_type"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "array literals: explicit/array subscripting/array calls",
+    "let x=bool[false,true]",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "x"
+          },
+          "value": {
+            "type": "array_call",
+            "object": {
+              "type": "bool_type"
+            },
+            "args": [
+              {
+                "type": "false"
+              },
+              {
+                "type": "true"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "array literals: implicit",
+    "let x=.[false,true]",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "x"
+          },
+          "value": {
+            "type": "array_literal",
+            "args": [
+              {
+                "type": "false"
+              },
+              {
+                "type": "true"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "functions: no arguments, no modifiers",
+    "fn a => void none",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "fn_decl",
+          "name": "a",
+          "return_type": {
+            "type": "void_type"
+          },
+          "body": {
+            "type": "none"
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "functions: single argument, no modifiers",
+    "fn a x:any=>any x",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "fn_decl",
+          "name": "a",
+          "args": [
+            {
+              "type": "fn_arg",
+              "name": "x",
+              "arg_type": {
+                "type": "any"
+              }
+            }
+          ],
+          "return_type": {
+            "type": "any"
+          },
+          "body": {
+            "type": "ref",
+            "name": "x"
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "functions: multiple arguments, no modifiers",
+    "fn a b:any,c:any=>any a+b",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "fn_decl",
+          "name": "a",
+          "args": [
+            {
+              "type": "fn_arg",
+              "name": "b",
+              "arg_type": {
+                "type": "any"
+              }
+            },
+            {
+              "type": "fn_arg",
+              "name": "c",
+              "arg_type": {
+                "type": "any"
+              }
+            }
+          ],
+          "return_type": {
+            "type": "any"
+          },
+          "body": {
+            "type": "add",
+            "lhs": {
+              "type": "ref",
+              "name": "b"
+            },
+            "rhs": {
+              "type": "ref",
+              "name": "c"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "functions: multiple arguments, no modifiers (block)",
+    "fn a b:any,c:any=>any{==>a+b}",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "fn_decl",
+          "name": "a",
+          "args": [
+            {
+              "type": "fn_arg",
+              "name": "b",
+              "arg_type": {
+                "type": "any"
+              }
+            },
+            {
+              "type": "fn_arg",
+              "name": "c",
+              "arg_type": {
+                "type": "any"
+              }
+            }
+          ],
+          "return_type": {
+            "type": "any"
+          },
+          "body": {
+            "type": "block",
+            "children": [
+              {
+                "type": "return",
+                "child": {
+                  "type": "add",
+                  "lhs": {
+                    "type": "ref",
+                    "name": "b"
+                  },
+                  "rhs": {
+                    "type": "ref",
+                    "name": "c"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "functions: no arguments, inline modifier",
+    "fn a=>void inline none",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "fn_decl",
+          "name": "a",
+          "return_type": {
+            "type": "void_type"
+          },
+          "mods": [
+            "inline"
+          ],
+          "body": {
+            "type": "none"
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "functions: no arguments, extern modifier",
+    "fn a=>void extern none",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "fn_decl",
+          "name": "a",
+          "return_type": {
+            "type": "void_type"
+          },
+          "mods": [
+            "extern"
+          ],
+          "body": {
+            "type": "none"
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "functions: no arguments, export modifier",
+    "fn a=>void export none",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "fn_decl",
+          "name": "a",
+          "return_type": {
+            "type": "void_type"
+          },
+          "mods": [
+            "export"
+          ],
+          "body": {
+            "type": "none"
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "functions: no arguments, comptime modifier",
+    "fn a=>void comptime none",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "fn_decl",
+          "name": "a",
+          "return_type": {
+            "type": "void_type"
+          },
+          "mods": [
+            "comptime"
+          ],
+          "body": {
+            "type": "none"
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "functions: no arguments, public modifier",
+    "fn a=>void public none",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "fn_decl",
+          "name": "a",
+          "return_type": {
+            "type": "void_type"
+          },
+          "mods": [
+            "public"
+          ],
+          "body": {
+            "type": "none"
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "functions: no arguments, private modifier",
+    "fn a=>void private none",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "fn_decl",
+          "name": "a",
+          "return_type": {
+            "type": "void_type"
+          },
+          "mods": [
+            "private"
+          ],
+          "body": {
+            "type": "none"
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "functions: no arguments, entry modifier",
+    "fn a=>void entry none",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "fn_decl",
+          "name": "a",
+          "return_type": {
+            "type": "void_type"
+          },
+          "mods": [
+            "entry"
+          ],
+          "body": {
+            "type": "none"
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "functions: no arguments, multiple modifiers (export entry)",
+    "fn a=>void export entry none",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "fn_decl",
+          "name": "a",
+          "return_type": {
+            "type": "void_type"
+          },
+          "mods": [
+            "export",
+            "entry"
+          ],
+          "body": {
+            "type": "none"
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "functions: importing",
+    "fn a=>void import",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "fn_import",
+          "name": "a",
+          "return_type": {
+            "type": "void_type"
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "functions: anonymous",
+    "let x=fn => void none",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "x"
+          },
+          "value": {
+            "type": "fn_anon",
+            "return_type": {
+              "type": "void_type"
+            },
+            "mods": [
+              "entry"
+            ],
+            "body": {
+              "type": "none"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "closures: no arguments, implicit captures, no return type",
+    "let x=||none",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "x"
+          },
+          "value": {
+            "type": "closure",
+            "body": {
+              "type": "none"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "closures: one argument, implicit captures, no return type",
+    "let x=|y:bool|none",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "x"
+          },
+          "value": {
+            "type": "closure",
+            "args": [
+              {
+                "type": "fn_arg",
+                "name": "y",
+                "arg_type": {
+                  "type": "bool_type"
+                }
+              }
+            ],
+            "body": {
+              "type": "none"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "closures: multiple arguments, implicit captures, no return type",
+    "let x=|y:bool,z:bool|none",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "x"
+          },
+          "value": {
+            "type": "closure",
+            "args": [
+              {
+                "type": "fn_arg",
+                "name": "y",
+                "arg_type": {
+                  "type": "bool_type"
+                }
+              }
+            ],
+            "body": {
+              "type": "none"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "closures: no arguments, no captures, no return type",
+    "let x=||[]none",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "x"
+          },
+          "value": {
+            "type": "closure",
+            "captures": [],
+            "body": {
+              "type": "none"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "closures: no arguments, implicit immutable reference capture, no return type",
+    "let x=||[*~]none",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "x"
+          },
+          "value": {
+            "type": "closure",
+            "captures": [
+              {
+                "type": "const_ref_capture_implicit"
+              }
+            ],
+            "body": {
+              "type": "none"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "closures: no arguments, implicit mutable reference capture, no return type",
+    "let x=||[*]none",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "x"
+          },
+          "value": {
+            "type": "closure",
+            "captures": [
+              {
+                "type": "ref_capture_implicit"
+              }
+            ],
+            "body": {
+              "type": "none"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "closures: no arguments, implicit copy capture, no return type",
+    "let x=||[=]none",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "x"
+          },
+          "value": {
+            "type": "closure",
+            "captures": [
+              {
+                "type": "copy_capture_implicit"
+              }
+            ],
+            "body": {
+              "type": "none"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "closures: no arguments, explicit immutable reference capture, no return type",
+    "let x=||[*~y]none",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "x"
+          },
+          "value": {
+            "type": "closure",
+            "captures": [
+              {
+                "type": "const_ref_capture",
+                "name": "y"
+              }
+            ],
+            "body": {
+              "type": "none"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "closures: no arguments, explicit mutable reference capture, no return type",
+    "let x=||[*y]none",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "x"
+          },
+          "value": {
+            "type": "closure",
+            "captures": [
+              {
+                "type": "ref_capture",
+                "name": "y"
+              }
+            ],
+            "body": {
+              "type": "none"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "closures: no arguments, explicit copy capture, no return type",
+    "let x=||[=y]none",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "x"
+          },
+          "value": {
+            "type": "closure",
+            "captures": [
+              {
+                "type": "copy_capture",
+                "name": "y"
+              }
+            ],
+            "body": {
+              "type": "none"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "closures: no arguments, multiple captures, no return type",
+    "let x=||[*a,=b,*~]none",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "x"
+          },
+          "value": {
+            "type": "closure",
+            "captures": [
+              {
+                "type": "ref_capture",
+                "name": "a"
+              },
+              {
+                "type": "copy_capture",
+                "name": "b"
+              },
+              {
+                "type": "const_ref_capture_implicit"
+              }
+            ],
+            "body": {
+              "type": "none"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "closures: no arguments, implicit captures, return type",
+    "let x=||=>void none",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "x"
+          },
+          "value": {
+            "type": "closure",
+            "return_type": {
+              "type": "void_type"
+            },
+            "body": {
+              "type": "none"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "function types: no arguments",
+    "def x:fn()=>void",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_def",
+          "name": "x",
+          "var_type": {
+            "type": "fn_type",
+            "return_type": {
+              "type": "void_type"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "function types: one argument",
+    "def x:fn(bool)=>void",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_def",
+          "name": "x",
+          "var_type": {
+            "type": "fn_type",
+            "args": [
+              {
+                "type": "bool_type"
+              }
+            ],
+            "return_type": {
+              "type": "void_type"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "function types: multiple arguments",
+    "def x:fn(bool,bool)=>void",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_def",
+          "name": "x",
+          "var_type": {
+            "type": "fn_type",
+            "args": [
+              {
+                "type": "bool_type"
+              },
+              {
+                "type": "bool_type"
+              }
+            ],
+            "return_type": {
+              "type": "void_type"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "generators",
+    "generator x=>bool none",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "gen_decl",
+          "name": "x",
+          "name": "x",
+          "return_type": {
+            "type": "bool_type"
+          },
+          "body": {
+            "type": "none"
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "anonymous generators",
+    "let x=generator=>bool none",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "x"
+          },
+          "value": {
+            "type": "gen_anon",
+            "return_type": {
+              "type": "bool_type"
+            },
+            "body": {
+              "type": "none"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "generator types",
+    "let x=generator()=>bool",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "x"
+          },
+          "value": {
+            "type": "gen_type",
+            "return_type": {
+              "type": "bool_type"
+            }
+          }
+        }
+      ]
+    }
+  ]
+]

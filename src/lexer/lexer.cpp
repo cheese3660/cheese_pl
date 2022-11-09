@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <utility>
 #include <iostream>
+#include <sstream>
 namespace cheese::lexer {
 #define RESERVED(keyword, token) std::pair<std::string_view, TokenType>{# keyword, token},
     const auto reserved_keywords = std::vector<std::pair<std::string_view, TokenType>>{
@@ -68,6 +69,7 @@ namespace cheese::lexer {
         RESERVED(bool,TokenType::Bool)
         RESERVED(true,TokenType::True)
         RESERVED(false,TokenType::False)
+        RESERVED(generator,TokenType::Generator)
     };
 #undef  RESERVED
     const auto builtin_macros = std::vector<std::string_view>{
@@ -602,7 +604,12 @@ namespace cheese::lexer {
                     break;
                 }
                 case ':':
-                    SINGLE(TokenType::Colon);
+                    ADVANCE;
+                    if (PEEK == '=') {
+                        SINGLE(TokenType::Redefine);
+                    } else {
+                        ADD(TokenType::Colon);
+                    }
                     break;
                 case ',':
                     SINGLE(TokenType::Comma);
@@ -765,6 +772,9 @@ namespace cheese::lexer {
                 case '?':
                     SINGLE(TokenType::Question);
                     break;
+                case '|':
+                    SINGLE(TokenType::Pipe);
+                    break;
                 default:
                     if (validIBeg(current)) {
                         tokens.push_back(identifier());
@@ -846,7 +856,6 @@ namespace cheese::lexer {
             MAP(SubAssign),
             MAP(LeftShiftAssign),
             MAP(RightShiftAssign),
-            MAP(Unwrap),
             MAP(Dereference),
             MAP(Tuple),
             MAP(Object),
@@ -926,6 +935,9 @@ namespace cheese::lexer {
             MAP(Not),
             MAP(Block),
             MAP(BlockYield),
+            MAP(Pipe),
+            MAP(Redefine),
+            MAP(Generator)
     };
 
 #undef MAP
