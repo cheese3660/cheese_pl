@@ -13,13 +13,13 @@ namespace cheese::parser {
     }
 
     template<>
-    void parser::build_json<NodePtr>(nlohmann::json &object, std::string name, NodePtr &value) {
+    void parser::build_json<NodePtr>(nlohmann::json &object, std::string name, const NodePtr &value) {
         if (value.get() == nullptr) return;
         object[name] = value->as_json();
     }
 
     template<>
-    void parser::build_json<NodeList>(nlohmann::json &object, std::string name, NodeList &value) {
+    void parser::build_json<NodeList>(nlohmann::json &object, std::string name, const NodeList &value) {
         if (value.empty()) return;
         object[name] = nlohmann::json::array();
         for (auto& n : value) {
@@ -27,32 +27,32 @@ namespace cheese::parser {
         }
     }
 
-    bool implicit_compare_value(NodePtr &value) {
+    bool implicit_compare_value(const NodePtr &value) {
         return value.get() == nullptr;
     }
 
-    bool parser::compare_helper(nlohmann::json &object, std::string name, std::string &value) {
-        if (!object.contains(name)) return value.empty();
+    bool parser::compare_helper(const nlohmann::json &object, std::string name, const std::string &value) {
+        if (!object.contains(name)) return implicit_compare_value(value);
         if (!object[name].is_string()) return false;
         return object[name] == value;
     }
 
-    bool implicit_compare_value(std::string &value) {
+    bool implicit_compare_value(const std::string &value) {
         return value.empty();
     }
 
-    bool parser::compare_helper(nlohmann::json &object, std::string name, bool &value) {
-        if (!object.contains(name)) return !value;
+    bool parser::compare_helper(const nlohmann::json &object, std::string name, bool value) {
+        if (!object.contains(name)) return implicit_compare_value(value);
         if (!object[name].is_boolean()) return false;
         return object[name].get<bool>() && value;
     }
 
-    bool implicit_compare_value(bool &value) {
+    bool implicit_compare_value(bool value) {
         return !value;
     }
 
-    bool parser::compare_helper(nlohmann::json &object, std::string name, NodeList &value) {
-        if (!object.contains(name)) return value.empty();
+    bool parser::compare_helper(const nlohmann::json &object, std::string name, const NodeList &value) {
+        if (!object.contains(name)) return implicit_compare_value(value);
         if (!object[name].is_array()) return false;
         auto& j_arr = object[name];
         if (j_arr.size() != value.size()) return false;
@@ -62,51 +62,51 @@ namespace cheese::parser {
         return true;
     }
 
-    bool implicit_compare_value(NodeList &value) {
+    bool implicit_compare_value(const NodeList &value) {
         return value.empty();
     }
 
-    bool parser::compare_helper(nlohmann::json &object, std::string name, uint64_t &value) {
-        if (!object.contains(name)) return value == 0;
+    bool parser::compare_helper(const nlohmann::json &object, std::string name, uint64_t value) {
+        if (!object.contains(name)) return implicit_compare_value(value);
         if (!object[name].is_number() || object[name].is_number_float()) return false;
         return object[name] == value;
     }
 
-    bool implicit_compare_value(uint64_t &value) {
+    bool implicit_compare_value(uint64_t value) {
         return value == 0;
     }
 
-    bool parser::compare_helper(nlohmann::json &object, std::string name, int64_t &value) {
-        if (!object.contains(name)) return value == 0;
+    bool parser::compare_helper(const nlohmann::json &object, std::string name, int64_t value) {
+        if (!object.contains(name)) return implicit_compare_value(value);
         if (!object[name].is_number() || object[name].is_number_float()) return false;
         return object[name] == value;
     }
 
-    bool implicit_compare_value(int64_t &value) {
+    bool implicit_compare_value(int64_t value) {
         return value == 0;
     }
 
-    bool implicit_compare_value(double &value) {
+    bool implicit_compare_value(double value) {
         return value == 0;
     }
 
-    bool parser::compare_helper(nlohmann::json &object, std::string name, const char *value) {
+    bool parser::compare_helper(const nlohmann::json &object, std::string name, char *value) {
         std::string v = value;
         return compare_helper(object,name,v);
     }
 
-    bool compare_helper(nlohmann::json &object, std::string name, NodePtr &value) {
-        if (!object.contains(name)) return false;
+    bool compare_helper(const nlohmann::json &object, std::string name, const NodePtr &value) {
+        if (!object.contains(name)) return implicit_compare_value(value);
         return value->compare_json(object[name]);
     }
 
-    bool compare_helper(nlohmann::json &object, std::string name, double &value) {
+    bool compare_helper(const nlohmann::json &object, std::string name, double value) {
         if (!object.contains(name)) return value == 0;
         if (!object[name].is_number()) return false;
         return object[name] == value;
     }
 
-    bool parser::compare_helper(nlohmann::json &object, std::string name, FlagSet &value) {
+    bool parser::compare_helper(const nlohmann::json &object, std::string name, const FlagSet &value) {
         if (!object.contains(name)) return implicit_compare_value(value);
         auto list = object[name];
         bool inlin = value.inlin;
@@ -115,7 +115,7 @@ namespace cheese::parser {
         bool comptime = value.comptime;
         bool pub = value.pub;
         bool priv = value.priv;
-        bool cons = value.cons;
+        bool mut = value.mut;
         for (size_t i = 0; i < list.size(); i++) {
             auto& str = list[i];
             if (str == "inline") {
@@ -130,19 +130,19 @@ namespace cheese::parser {
                 pub = !pub;
             } else if (str == "private") {
                 priv = !priv;
-            } else if (str == "const") {
-                cons = !cons;
+            } else if (str == "mutable") {
+                mut = !mut;
             }
         }
-        return !(inlin || exter || exp || comptime || pub || priv || cons);
+        return !(inlin || exter || exp || comptime || pub || priv || mut);
     }
 
-    bool parser::implicit_compare_value(FlagSet &value) {
-        return !(value.inlin || value.exter || value.exp || value.comptime || value.pub || value.priv || value.cons);
+    bool parser::implicit_compare_value(const FlagSet &value) {
+        return !(value.inlin || value.exter || value.exp || value.comptime || value.pub || value.priv || value.mut);
     }
 
     template<>
-    void parser::build_json<FlagSet>(nlohmann::json &object, std::string name, FlagSet &value) {
+    void parser::build_json<FlagSet>(nlohmann::json &object, std::string name, const FlagSet &value) {
         if (implicit_compare_value(value)) return;
         object[name] = nlohmann::json::array();
         if (value.inlin) {
@@ -163,8 +163,42 @@ namespace cheese::parser {
         if (value.priv) {
             object[name].push_back("private");
         }
-        if (value.cons) {
-            object[name].push_back("const");
+        if (value.mut) {
+            object[name].push_back("mutable");
+        }
+    }
+
+    template<>
+    void parser::build_json<math::BigInteger>(nlohmann::json &object, std::string name, const math::BigInteger &value) {
+        if (implicit_compare_value(value)) return;
+        if (value.words.size() > 1) {
+            object[name] = static_cast<std::string>(value);
+        } else {
+            object[name] = static_cast<std::int64_t>(value);
+        }
+    }
+
+    bool parser::implicit_compare_value(const math::BigInteger &value) {
+        return value.zero();
+    }
+
+    bool parser::compare_helper(const nlohmann::json &object, std::string name, const math::BigInteger &value) {
+        if (!object.contains(name)) return implicit_compare_value(value);
+        auto x = object[name];
+        if (x.is_number_integer()) {
+            return value == x.get<std::int64_t>();
+        } else if (x.is_string()) {
+            return value == x.get<std::string>();
+        }
+    }
+
+    bool parser::compare_helper(const nlohmann::json &object, std::string type) {
+        if (!object.is_object()) {
+            return object == type;
+        } else if (!object.contains("type")) {
+            return false;
+        } else {
+            return object["type"] == type;
         }
     }
 

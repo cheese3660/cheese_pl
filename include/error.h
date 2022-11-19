@@ -37,6 +37,12 @@ namespace cheese::error {
         ExpectedImportName,
         ExpectedImportPath,
         ExpectedFunctionGeneratorName,
+        IncorrectSeparator,
+        ExpectedName,
+        UninitializedDeclaration,
+        ExpectedColon,
+        UnexpectedEoF,
+        ExpectedCaptureSpecifier,
 
         //General error (thrown for example when multiple previous errors were printed)
         GeneralCompilerError = 9999,

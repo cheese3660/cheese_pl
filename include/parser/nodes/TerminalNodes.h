@@ -30,6 +30,13 @@ namespace cheese::parser::nodes {
     TERMINAL_NODE(Continue, "continue")
     TERMINAL_NODE(EmptyBreak, "empty_break")
     TERMINAL_NODE(EmptyReturn, "empty_return")
+    TERMINAL_NODE(Self,"self")
+    TERMINAL_NODE(ConstSelf,"const_self")
+    TERMINAL_NODE(SelfType,"self_type")
+    TERMINAL_NODE(ConstRefImplicitCapture,"const_ref_capture_implicit")
+    TERMINAL_NODE(RefImplicitCapture,"ref_capture_implicit")
+    TERMINAL_NODE(CopyImplicitCapture,"copy_capture_implicit")
+
 }
 
 #endif //CHEESE_TERMINALNODES_H

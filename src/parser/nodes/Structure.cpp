@@ -1,14 +1,14 @@
 //
 // Created by Lexi Allen on 9/21/2022.
 //
-#include "parser/nodes/Structure.h"
+#include "parser/nodes/OtherNodes.h"
 #include "NotImplementedException.h"
 namespace cheese::parser::nodes{
-    void Structure::nested_display(std::uint32_t nesting) {
+    void Structure::nested_display(std::uint32_t nesting) const {
         NOT_IMPL
     }
 
-    nlohmann::json Structure::as_json() {
+    nlohmann::json Structure::as_json() const {
 //        if (!is_tuple && interfaces.size() == 0 && children.size() == 0) {
 //            return "struct";
 //        }
@@ -29,7 +29,7 @@ namespace cheese::parser::nodes{
         return build_json("struct",{"tuple","interfaces","children"},is_tuple,interfaces,children);
     }
 
-    bool Structure::compare_json(nlohmann::json json) {
+    bool Structure::compare_json(const nlohmann::json& json) const {
         //Basically if it is as simple as possible and can just be reduced to struct then do so
 //        if (json.is_string() && json.get<std::string>() == "struct" && !is_tuple && interfaces.size() == 0 && children.size() == 0) return true;
 //        if (!json.is_object()) return false;

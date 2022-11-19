@@ -8,9 +8,7 @@
         {
           "type": "var_def",
           "name": "x",
-          "var_type": {
-            "type": "bool_type"
-          }
+          "var_type": "bool"
         }
       ]
     }
@@ -223,7 +221,7 @@
           "type": "var_def",
           "name": "x",
           "var_type": {
-            "type": "comptime_float_type"
+            "type": "comptime_float"
           }
         }
       ]
@@ -239,7 +237,7 @@
           "type": "var_def",
           "name": "x",
           "var_type": {
-            "type": "comptime_complex_type"
+            "type": "comptime_complex"
           }
         }
       ]
@@ -255,7 +253,7 @@
           "type": "var_def",
           "name": "x",
           "var_type": {
-            "type": "comptime_int_type"
+            "type": "comptime_int"
           }
         }
       ]
@@ -271,7 +269,7 @@
           "type": "var_def",
           "name": "x",
           "var_type": {
-            "type": "comptime_string_type"
+            "type": "comptime_string"
           }
         }
       ]
@@ -476,14 +474,14 @@
                 "type": "field",
                 "name": "a",
                 "field_type": {
-                  "type": "bool_type"
+                  "type": "bool"
                 }
               },
               {
                 "type": "field",
                 "name": "b",
                 "field_type": {
-                  "type": "bool_type"
+                  "type": "bool"
                 }
               }
             ]
@@ -567,10 +565,10 @@
             "tuple": true,
             "children": [
               {
-                "type": "bool_type"
+                "type": "bool"
               },
               {
-                "type": "bool_type"
+                "type": "bool"
               }
             ]
           }
@@ -747,9 +745,9 @@
           "type": "var_def",
           "name": "x",
           "var_type": {
-            "type": "ref_type",
+            "type": "reference",
             "child": {
-              "type": "bool_type"
+              "type": "bool"
             }
           }
         }
@@ -766,9 +764,10 @@
           "type": "var_def",
           "name": "x",
           "var_type": {
-            "type": "const_ref_type",
+            "type": "reference",
+            "constant": true,
             "child": {
-              "type": "bool_type"
+              "type": "bool"
             }
           }
         }
@@ -793,7 +792,7 @@
               }
             ],
             "child": {
-              "type": "bool_type"
+              "type": "bool"
             }
           }
         }
@@ -818,7 +817,7 @@
               }
             ],
             "child": {
-              "type": "bool_type"
+              "type": "bool"
             }
           }
         }
@@ -847,7 +846,7 @@
               }
             ],
             "child": {
-              "type": "bool_type"
+              "type": "bool"
             }
           }
         }
@@ -876,7 +875,7 @@
               }
             ],
             "child": {
-              "type": "bool_type"
+              "type": "bool"
             }
           }
         }
@@ -897,7 +896,7 @@
             "known_dimensions": [
             ],
             "child": {
-              "type": "bool_type"
+              "type": "bool"
             }
           }
         }
@@ -918,7 +917,7 @@
             "known_dimensions": [
             ],
             "child": {
-              "type": "bool_type"
+              "type": "bool"
             }
           }
         }
@@ -943,7 +942,7 @@
               }
             ],
             "child": {
-              "type": "bool_type"
+              "type": "bool"
             }
           }
         }
@@ -968,7 +967,7 @@
               }
             ],
             "child": {
-              "type": "bool_type"
+              "type": "bool"
             }
           }
         }
@@ -987,7 +986,7 @@
           "var_type": {
             "type": "slice_type",
             "child": {
-              "type": "bool_type"
+              "type": "bool"
             }
           }
         }
@@ -1006,7 +1005,7 @@
           "var_type": {
             "type": "const_slice_type",
             "child": {
-              "type": "bool_type"
+              "type": "bool"
             }
           }
         }
@@ -1028,7 +1027,7 @@
           "value": {
             "type": "array_call",
             "object": {
-              "type": "bool_type"
+              "type": "bool"
             },
             "args": [
               {
@@ -1100,7 +1099,7 @@
           "name": "a",
           "args": [
             {
-              "type": "fn_arg",
+              "type": "arg",
               "name": "x",
               "arg_type": {
                 "type": "any"
@@ -1129,14 +1128,14 @@
           "name": "a",
           "args": [
             {
-              "type": "fn_arg",
+              "type": "arg",
               "name": "b",
               "arg_type": {
                 "type": "any"
               }
             },
             {
-              "type": "fn_arg",
+              "type": "arg",
               "name": "c",
               "arg_type": {
                 "type": "any"
@@ -1172,14 +1171,14 @@
           "name": "a",
           "args": [
             {
-              "type": "fn_arg",
+              "type": "arg",
               "name": "b",
               "arg_type": {
                 "type": "any"
               }
             },
             {
-              "type": "fn_arg",
+              "type": "arg",
               "name": "c",
               "arg_type": {
                 "type": "any"
@@ -1471,10 +1470,10 @@
             "type": "closure",
             "args": [
               {
-                "type": "fn_arg",
+                "type": "arg",
                 "name": "y",
                 "arg_type": {
-                  "type": "bool_type"
+                  "type": "bool"
                 }
               }
             ],
@@ -1488,7 +1487,7 @@
   ],
   [
     "closures: multiple arguments, implicit captures, no return type",
-    "let x=|y:bool,z:bool|none",
+    "let x=|y:bool,z:bool| none",
     {
       "type": "struct",
       "children": [
@@ -1502,10 +1501,17 @@
             "type": "closure",
             "args": [
               {
-                "type": "fn_arg",
+                "type": "arg",
                 "name": "y",
                 "arg_type": {
-                  "type": "bool_type"
+                  "type": "bool"
+                }
+              },
+              {
+                "type": "arg",
+                "name": "z",
+                "arg_type": {
+                  "type": "bool"
                 }
               }
             ],
@@ -1797,7 +1803,7 @@
             "type": "fn_type",
             "args": [
               {
-                "type": "bool_type"
+                "type": "bool"
               }
             ],
             "return_type": {
@@ -1821,10 +1827,10 @@
             "type": "fn_type",
             "args": [
               {
-                "type": "bool_type"
+                "type": "bool"
               },
               {
-                "type": "bool_type"
+                "type": "bool"
               }
             ],
             "return_type": {
@@ -1844,9 +1850,8 @@
         {
           "type": "gen_decl",
           "name": "x",
-          "name": "x",
           "return_type": {
-            "type": "bool_type"
+            "type": "bool"
           },
           "body": {
             "type": "none"
@@ -1870,7 +1875,7 @@
           "value": {
             "type": "gen_anon",
             "return_type": {
-              "type": "bool_type"
+              "type": "bool"
             },
             "body": {
               "type": "none"
@@ -1895,7 +1900,7 @@
           "value": {
             "type": "gen_type",
             "return_type": {
-              "type": "bool_type"
+              "type": "bool"
             }
           }
         }

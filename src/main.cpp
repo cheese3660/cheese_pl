@@ -15,7 +15,6 @@ std::string usage =
         "   --version   -   print the version and exit\n"
         "   --help      -   print a help string dependant on the tool and exit\n";
 std::string version = "cheese v0.0.1\n";
-#include "parser/nodes/Structure.h"
 int main(int argc, const char** argv) {
     try {
         if (argc < 2) {

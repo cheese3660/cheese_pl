@@ -86,7 +86,7 @@ namespace cheese::lexer {
         //Textual tokens
         Public, // public
         Private, // private
-        Const, // const
+        Mutable, // mut
         NoReturn, // noreturn
         Member, // member
         Enum, // enum
@@ -171,6 +171,8 @@ namespace cheese::lexer {
         Pipe, // |
         Redefine, // :=
         Generator, // generator
+        DynamicCast, // @*
+        Is, // is
         //Special Tokens
         Error, //An error token in the lexer
         EoF, //End of File, ALWAYS KEEP THIS AT THE END OF THE PROGRAM

@@ -45,7 +45,6 @@ add_executable(
         src/parser/Node.cpp
         include/parser/Node.h
         include/parser/parser.h
-        include/parser/nodes/Structure.h
         src/parser/nodes/Structure.cpp
         src/parser/parser.cpp
         src/tests/parser_tests.cpp
@@ -56,9 +55,13 @@ add_executable(
         external/inflatecpp/crc32.cc
         external/inflatecpp/decompressor.cc
         external/inflatecpp/huffman_decoder.cc
-        src/parser/nodes/Import.cpp include/parser/nodes/Import.h include/parser/nodes/TerminalNodes.h include/parser/nodes/SingleMemberNodes.h include/math/BigInteger.h)
+        src/parser/nodes/Import.cpp
+        include/parser/nodes/TerminalNodes.h
+        include/parser/nodes/SingleMemberNodes.h
+        include/math/BigInteger.h
+        src/math/BigInteger.cpp include/parser/nodes/OtherNodes.h)
 if (UNIX)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++ -Wall")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++ -lc++abi")
 endif()
 llvm_map_components_to_libnames(llvm_libs support core irreader)

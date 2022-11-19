@@ -16,7 +16,7 @@ namespace cheese::lexer {
     const auto reserved_keywords = std::vector<std::pair<std::string_view, TokenType>>{
         RESERVED(public,TokenType::Public)
         RESERVED(private,TokenType::Private)
-        RESERVED(const,TokenType::Const)
+        RESERVED(mut,TokenType::Mutable)
         RESERVED(noreturn, TokenType::NoReturn)
         RESERVED(member, TokenType::Member)
         RESERVED(enum, TokenType::Enum)
@@ -70,6 +70,7 @@ namespace cheese::lexer {
         RESERVED(true,TokenType::True)
         RESERVED(false,TokenType::False)
         RESERVED(generator,TokenType::Generator)
+        RESERVED(is,TokenType::Is)
     };
 #undef  RESERVED
     const auto builtin_macros = std::vector<std::string_view>{
@@ -638,7 +639,13 @@ namespace cheese::lexer {
                     break;
                 }
                 case '@':
-                    SINGLE(TokenType::Cast);
+                    ADVANCE;
+                    view_size++;
+                    if (PEEK == '*') {
+                        SINGLE(TokenType::DynamicCast);
+                    } else {
+                        ADD(TokenType::Cast);
+                    }
                     break;
                 case '{':
                     SINGLE(TokenType::LeftBrace);
@@ -864,7 +871,7 @@ namespace cheese::lexer {
             MAP(ExponentiateAssign),
             MAP(Public),
             MAP(Private),
-            MAP(Const),
+            MAP(Mutable),
             MAP(NoReturn),
             MAP(Member),
             MAP(Enum),
@@ -937,7 +944,9 @@ namespace cheese::lexer {
             MAP(BlockYield),
             MAP(Pipe),
             MAP(Redefine),
-            MAP(Generator)
+            MAP(Generator),
+            MAP(DynamicCast),
+            MAP(Is)
     };
 
 #undef MAP
