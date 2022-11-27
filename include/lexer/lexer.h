@@ -175,6 +175,8 @@ namespace cheese::lexer {
         Is, // is
         //Special Tokens
         Error, //An error token in the lexer
+        Opaque,
+        Export,
         EoF, //End of File, ALWAYS KEEP THIS AT THE END OF THE PROGRAM
     };
     struct Token {

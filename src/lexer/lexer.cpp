@@ -47,11 +47,11 @@ namespace cheese::lexer {
         RESERVED(entry, TokenType::Entry)
         RESERVED(any, TokenType::Any)
         RESERVED(comptime, TokenType::Comptime)
-        RESERVED(cstr, TokenType::ComptimeString)
+        RESERVED(comptime_string, TokenType::ComptimeString)
         RESERVED(asm, TokenType::Asm)
-        RESERVED(cfloat, TokenType::ComptimeFloat)
-        RESERVED(ccomplex, TokenType::ComptimeComplex)
-        RESERVED(cint, TokenType::ComptimeInt)
+        RESERVED(comptime_float, TokenType::ComptimeFloat)
+        RESERVED(comptime_complex, TokenType::ComptimeComplex)
+        RESERVED(comptime_int, TokenType::ComptimeInt)
         RESERVED(usize, TokenType::UnsignedSize)
         RESERVED(isize, TokenType::SignedSize)
         RESERVED(continue,TokenType::Continue)
@@ -71,6 +71,8 @@ namespace cheese::lexer {
         RESERVED(false,TokenType::False)
         RESERVED(generator,TokenType::Generator)
         RESERVED(is,TokenType::Is)
+        RESERVED(opaque,TokenType::Opaque)
+        RESERVED(export,TokenType::Export)
     };
 #undef  RESERVED
     const auto builtin_macros = std::vector<std::string_view>{
@@ -946,7 +948,9 @@ namespace cheese::lexer {
             MAP(Redefine),
             MAP(Generator),
             MAP(DynamicCast),
-            MAP(Is)
+            MAP(Is),
+            MAP(Opaque),
+            MAP(Export),
     };
 
 #undef MAP

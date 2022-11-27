@@ -43,6 +43,9 @@ namespace cheese::error {
         ExpectedColon,
         UnexpectedEoF,
         ExpectedCaptureSpecifier,
+        ExpectedReturnSpecifier,
+        ExpectedDestructuringStatement,
+        ExpectedClosingParentheses,
 
         //General error (thrown for example when multiple previous errors were printed)
         GeneralCompilerError = 9999,

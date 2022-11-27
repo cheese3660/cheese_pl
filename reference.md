@@ -607,8 +607,8 @@ etc..., and all the types must be concretely defined and not inferred. You can s
 interfaces.
 ```cheese
 let Nameable = interface {
-    fn self, setName name: std.String => void
-    fn ~self, getName => std.String //~self means that this function will not modify internal state
+    fn setName self, name: std.String => void
+    fn getName ~self => std.String //~self means that this function will not modify internal state
 }
 ```
 
@@ -808,7 +808,7 @@ constrain isEven => ...
 
 #### Catchall Constraint
 
-The catchall constraint is either a variable name or `_`. This matches anything that hasn't already been matched by
+The catchall constraint is `_`. This matches anything that hasn't already been matched by
 other arms.
 
 #### Destructuring Constraint
@@ -819,7 +819,7 @@ by default, if no variable name is provided with the `->` syntax then the field 
 constraint 
 
 ```cheese
-.{x: 0..3, y: constrain isEven, z: _} => ...
+.{x: 0..3; y: constrain isEven; z: _} => ...
 ```
 
 Or instead for tuple destructuring, it is instead `.(` that is used, and it instead is a list of constraints.
@@ -834,9 +834,9 @@ Same as the destructuring constraint, but an enum identifier is placed in front 
 match node {
   .empty => ...
   .integer(0..255 -> small_int) => ...
-  .integer(big_int) => ...
-  .add{lhs: constrain isConstant, rhs: constrain isConstant} => ...
-  .add{lhs,rhs} => ...
+  .integer(_ -> big_int) => ...
+  .add{lhs: constrain isConstant; rhs: constrain isConstant} => ...
+  .add{lhs: _,rhs: _} => ...
   _ => ...
 }
 ```
@@ -1078,7 +1078,8 @@ let x = struc{a: 5, b: 3, c: 2}
 #### Overloading
 
 `{}` can be overloaded via the `operator {}` overload, as for the arguments, it takes a single object of a structural
-type or any type which is what the structure literal is converted into
+type, an any type argument which is what the structure literal is converted into, or a list of named arguments that the
+structure literal is destructured into.
 
 ```cheese
 operator {} self, struc: any => return_type...
@@ -1248,7 +1249,7 @@ let inverse = (not x) + 1
 ```
 
 #### Overloading
-`$` can be overloaded with the `operator not` operator, it takes no arguments other than self.
+`not` can be overloaded with the `operator not` operator, it takes no arguments other than self.
 
 ```cheese
 operator not self => Self ...
@@ -1984,7 +1985,7 @@ Within the aforementioned constructs, commas are recognized to split up the indi
 
 ### Match Statements
 Within match statement arms, commas are recognized to split up the different constraints
-Within the bodies semicolons are recognized to split up the different statements
+Within destructured match arms, semicolons are recognized to split up the fields, new lines do the same
 
 ------------------------------------------------------------------------------------------------------------------------
 
@@ -2112,151 +2113,3 @@ Denotes an allocator.
 # Standard Library
 TODO: Standard library documentation (and standard library)
 ------------------------------------------------------------------------------------------------------------------------
-# Full Grammar
-
-## Lexer
-
-```EBNF
-SINGLE_ARROW = '->';
-EXCLAMATION = '!';
-DOUBLE_ARROW = '-->';
-THICK_ARROW = '=>';
-DOUBLE_THICK_ARROW = '==>';
-REVERSED_DOUBLE_THICK_ARROW = '<==';
-REVERSED_ARROW = '<-';
-LEFT_BRACE = '{';
-RIGHT_BRACE = '}';
-LEFT_PAREN = '(';
-RIGHT_PAREN = ')';
-COLON = ':';
-COMMA = ',';
-SEMICOLON = ';';
-DOT = '.';
-DOT2 = '..';
-DOT3 = '...';
-HASH = '#';
-QUESTION = '?';
-CONST_POINTER = '*~';
-CONST_ARRAY =  ']~';
-CONST_SLICE = '>~';
-CAST = '@';
-STAR = '*';
-PERCENT = '%';
-SLASH = '/';
-PLUS = '+';
-DASH = '-';
-AMPERSAND = '&';
-LEFT_SHIFT = '<<';
-RIGHT_SHIFT = '>>';
-GREATER_THAN = '>';
-LESS_THAN = '<';
-EQUAL_TO = '==';
-NOT_EQUAL_TO = '!=';
-GREATER_THAN_EQUAL = '>=';
-LESS_THAN_EQUAL = '<=';
-AND = 'and';
-OR = 'or';
-XOR = 'xor';
-AND_ASSIGN = 'and=';
-OR_ASSIGN = 'or=';
-XOR_ASSIGN = 'xor=';
-NOT = 'not';
-ASSIGN = '=';
-MUL_ASSIGN = '*=';
-MOD_ASSIGN = '%=';
-DIV_ASSIGN = '/=';
-ADD_ASSIGN = '+=';
-SUB_ASSIGN = '-=';
-LEFT_SHIFT_ASSIGN = '<<=';
-RIGHT_SHIFT_ASSIGN = '>>=';
-DEREFERENCE = '$';
-TUPLE = '.(';
-OBJECT = '.{';
-ARRAY = '.[';
-BLOCK = ':(';
-BLOCK_YIELD = '<==(';
-EXPONENTIATE = '^';
-EXPONENTIATE_ASSIGN = '^=';
-BOOL = 'bool';
-TRUE = 'true';
-FALSE = 'false';
-PUBLIC = 'public';
-PRIVATE = 'private';
-CONST = 'const';
-NO_RETURN = 'noreturn';
-MEMBER = 'member';
-ENUM = 'enum';
-UNION = 'union';
-STRUCT = 'struct';
-EXTERN = 'extern';
-LET = 'let';
-DEF = 'def';
-FN = 'fn';
-F32 = 'f32';
-F64 = 'f64';
-C32 = 'c32';
-C64 = 'c64';
-SWITCH = 'switch';
-IF = 'if';
-ELIF = 'elif';
-ELSE = 'else';
-WHILE = 'while';
-FOR = 'for';
-IMPORT = 'type';
-NONE = 'none';
-VOID = 'void';
-PROTOTYPE = 'prototype';
-INLINE = 'inline';
-ENTRY = 'entry';
-COMPTIME = 'comptime';
-BREAK = 'break';
-CONTINUE = 'continue';
-ANY = 'any';
-ASM = 'asm';
-COMPTIME_STRING = 'cstr';
-COMPTIME_FLOAT = 'comptime_float';
-COMPTIME_INT = 'comptime_int';
-COMPTIME_COMPLEX = 'comptime_complex';
-UNSIGNED_SIZE = 'usize';
-SIGNED_SIZE = 'isize';
-digit = '0'|'1'|'2'|'3'|'4'|'5'|'6'|'7'|'8'|'9';
-SIGNED_INT_TYPE = 'i',digit,{digit};
-UNSIGNED_INT_TYPE = 'u',digit,{digit};
-magnitude = 'e','E';
-float = digit,{digit},['.',digit,{digit}],[magnitude,['-'],digit,{digit}];
-FLOATING_LITERAL = float;
-IMAGINARY_LITERAL = float,'I';
-DECIMAL_LITERAL = digit,{digit};
-hex_digit = digit|'a'|'A'|'b'|'B'|'c'|'C'|'d'|'D'|'e'|'E'|'f'|'F';
-HEX_LITERAL = '0x',hex_digit,{hex_digit};
-oct_digit = '0'|'1'|'2'|'3'|'4'|'5'|'6'|'7';
-OCT_LITERAL = '0o',oct_digit,{oct_digit};
-bin_digit = '0'|'1';
-BIN_LITERAL = '0b',bin_digit,{bin_digit};
-STRING_LITERAL = '"',{.},'"';
-CHARACTER_LITERAL = "'",.,"'";
-COMMENT = '//',{.};
-BLOCK_COMMENT = '/*',{.},'*/';
-THEN = 'then';
-DO = 'do';
-NEWLINE = '\n';
-PIPE = '|';
-REDEFINE = ':=';
-GENERATOR = 'generator';
-```
-
-## Parser
-```EBNF
-grammar = {structure_statement}, EOF;
-
-structure_statement =
-      definition
-    | declaration
-    | builtin_call
-    | comptime
-    | function
-    | import
-    | field
-    ;
-
-```

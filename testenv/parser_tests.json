@@ -395,8 +395,8 @@
           "def": {
             "type": "var_def",
             "name": "x",
-            "mods": [
-              "mut"
+            "flags": [
+              "mutable"
             ]
           },
           "value": {
@@ -416,15 +416,15 @@
         {
           "type": "destructure",
           "structure": {
-            "type": "destructure_struct",
+            "type": "structure_destructure",
             "children": {
               "a": {
-                "type": "destructure_tuple",
+                "type": "tuple_destructure",
                 "children": [
                   {
                     "type": "var_def",
-                    "mods": [
-                      "mut"
+                    "flags": [
+                      "mutable"
                     ],
                     "name": "x"
                   },
@@ -443,48 +443,13 @@
                 "name": "w"
               },
               "c": {
-                "type": "ignore"
+                "type": "underscore"
               }
             }
           },
           "value": {
             "type": "ref",
             "name": "a"
-          }
-        }
-      ]
-    }
-  ],
-  [
-    "structure types",
-    "let p=struct{a:bool,b:bool}",
-    {
-      "type": "struct",
-      "children": [
-        {
-          "type": "var_decl",
-          "def": {
-            "type": "var_def",
-            "name": "p"
-          },
-          "value": {
-            "type": "struct",
-            "children": [
-              {
-                "type": "field",
-                "name": "a",
-                "field_type": {
-                  "type": "bool"
-                }
-              },
-              {
-                "type": "field",
-                "name": "b",
-                "field_type": {
-                  "type": "bool"
-                }
-              }
-            ]
           }
         }
       ]
@@ -523,7 +488,7 @@
   ],
   [
     "structure literals: implicit",
-    "let x=.{false,false}",
+    "let x=.{a:false,b:false}",
     {
       "type": "struct",
       "children": [
@@ -534,8 +499,8 @@
             "name": "x"
           },
           "value": {
-            "type": "struct_literal",
-            "args": {
+            "type": "object_literal",
+            "children": {
               "a": {
                 "type": "false"
               },
@@ -621,7 +586,7 @@
           },
           "value": {
             "type": "tuple_literal",
-            "args": [
+            "children": [
               {
                 "type": "false"
               },
@@ -696,6 +661,7 @@
                     "name": "x",
                     "field_type": {
                       "type": "int_type",
+
                       "size": 32
                     }
                   },
@@ -728,7 +694,7 @@
             "name": "x"
           },
           "value": {
-            "type": "enum_constant",
+            "type": "enum_literal",
             "name": "E"
           }
         }
@@ -1056,7 +1022,7 @@
           },
           "value": {
             "type": "array_literal",
-            "args": [
+            "children": [
               {
                 "type": "false"
               },
@@ -1076,7 +1042,7 @@
       "type": "struct",
       "children": [
         {
-          "type": "fn_decl",
+          "type": "function",
           "name": "a",
           "return_type": {
             "type": "void_type"
@@ -1095,7 +1061,7 @@
       "type": "struct",
       "children": [
         {
-          "type": "fn_decl",
+          "type": "function",
           "name": "a",
           "args": [
             {
@@ -1119,12 +1085,12 @@
   ],
   [
     "functions: multiple arguments, no modifiers",
-    "fn a b:any,c:any=>any a+b",
+    "fn a b:any,c:any=>any b+c",
     {
       "type": "struct",
       "children": [
         {
-          "type": "fn_decl",
+          "type": "function",
           "name": "a",
           "args": [
             {
@@ -1162,12 +1128,12 @@
   ],
   [
     "functions: multiple arguments, no modifiers (block)",
-    "fn a b:any,c:any=>any{==>a+b}",
+    "fn a b:any,c:any=>any\n{==>a+b}",
     {
       "type": "struct",
       "children": [
         {
-          "type": "fn_decl",
+          "type": "function",
           "name": "a",
           "args": [
             {
@@ -1218,12 +1184,12 @@
       "type": "struct",
       "children": [
         {
-          "type": "fn_decl",
+          "type": "function",
           "name": "a",
           "return_type": {
             "type": "void_type"
           },
-          "mods": [
+          "flags": [
             "inline"
           ],
           "body": {
@@ -1240,12 +1206,12 @@
       "type": "struct",
       "children": [
         {
-          "type": "fn_decl",
+          "type": "function",
           "name": "a",
           "return_type": {
             "type": "void_type"
           },
-          "mods": [
+          "flags": [
             "extern"
           ],
           "body": {
@@ -1262,12 +1228,12 @@
       "type": "struct",
       "children": [
         {
-          "type": "fn_decl",
+          "type": "function",
           "name": "a",
           "return_type": {
             "type": "void_type"
           },
-          "mods": [
+          "flags": [
             "export"
           ],
           "body": {
@@ -1284,12 +1250,12 @@
       "type": "struct",
       "children": [
         {
-          "type": "fn_decl",
+          "type": "function",
           "name": "a",
           "return_type": {
             "type": "void_type"
           },
-          "mods": [
+          "flags": [
             "comptime"
           ],
           "body": {
@@ -1306,12 +1272,12 @@
       "type": "struct",
       "children": [
         {
-          "type": "fn_decl",
+          "type": "function",
           "name": "a",
           "return_type": {
             "type": "void_type"
           },
-          "mods": [
+          "flags": [
             "public"
           ],
           "body": {
@@ -1328,12 +1294,12 @@
       "type": "struct",
       "children": [
         {
-          "type": "fn_decl",
+          "type": "function",
           "name": "a",
           "return_type": {
             "type": "void_type"
           },
-          "mods": [
+          "flags": [
             "private"
           ],
           "body": {
@@ -1350,12 +1316,12 @@
       "type": "struct",
       "children": [
         {
-          "type": "fn_decl",
+          "type": "function",
           "name": "a",
           "return_type": {
             "type": "void_type"
           },
-          "mods": [
+          "flags": [
             "entry"
           ],
           "body": {
@@ -1372,12 +1338,12 @@
       "type": "struct",
       "children": [
         {
-          "type": "fn_decl",
+          "type": "function",
           "name": "a",
           "return_type": {
             "type": "void_type"
           },
-          "mods": [
+          "flags": [
             "export",
             "entry"
           ],
@@ -1395,7 +1361,7 @@
       "type": "struct",
       "children": [
         {
-          "type": "fn_import",
+          "type": "function_import",
           "name": "a",
           "return_type": {
             "type": "void_type"
@@ -1417,13 +1383,10 @@
             "name": "x"
           },
           "value": {
-            "type": "fn_anon",
+            "type": "anonymous_function",
             "return_type": {
               "type": "void_type"
             },
-            "mods": [
-              "entry"
-            ],
             "body": {
               "type": "none"
             }
@@ -1781,7 +1744,7 @@
           "type": "var_def",
           "name": "x",
           "var_type": {
-            "type": "fn_type",
+            "type": "function_type",
             "return_type": {
               "type": "void_type"
             }
@@ -1800,7 +1763,7 @@
           "type": "var_def",
           "name": "x",
           "var_type": {
-            "type": "fn_type",
+            "type": "function_type",
             "args": [
               {
                 "type": "bool"
@@ -1824,7 +1787,7 @@
           "type": "var_def",
           "name": "x",
           "var_type": {
-            "type": "fn_type",
+            "type": "function_type",
             "args": [
               {
                 "type": "bool"
@@ -1848,7 +1811,7 @@
       "type": "struct",
       "children": [
         {
-          "type": "gen_decl",
+          "type": "generator",
           "name": "x",
           "return_type": {
             "type": "bool"
@@ -1873,7 +1836,7 @@
             "name": "x"
           },
           "value": {
-            "type": "gen_anon",
+            "type": "anonymous_generator",
             "return_type": {
               "type": "bool"
             },
@@ -1898,13 +1861,2245 @@
             "name": "x"
           },
           "value": {
-            "type": "gen_type",
+            "type": "generator_type",
             "return_type": {
               "type": "bool"
             }
           }
         }
       ]
+    }
+  ],
+  [
+    "structure types: empty",
+    "let p=struct",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "p"
+          },
+          "value": "struct"
+        }
+      ]
+    }
+  ],
+  [
+    "structure types: structure, no children, no interfaces",
+    "let p=struct{}",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "p"
+          },
+          "value": {
+            "type": "struct"
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "structure types: structure, single child, no interfaces",
+    "let p=struct{a:bool}",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "p"
+          },
+          "value": {
+            "type": "struct",
+            "children": [
+              {
+                "type": "field",
+                "name": "a",
+                "field_type": {
+                  "type": "bool"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "structure types: structure, multiple children, no interfaces",
+    "let p=struct{a:bool,b:bool}",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "p"
+          },
+          "value": {
+            "type": "struct",
+            "children": [
+              {
+                "type": "field",
+                "name": "a",
+                "field_type": {
+                  "type": "bool"
+                }
+              },
+              {
+                "type": "field",
+                "name": "b",
+                "field_type": {
+                  "type": "bool"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "structure types: structure, no children, single interface",
+    "let p=struct impl X {}",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "p"
+          },
+          "value": {
+            "type": "struct",
+            "interfaces": [
+              {
+                "type": "ref",
+                "name": "X"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "structure types: structure, single child, single interface",
+    "let p=struct impl X {a:bool}",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "p"
+          },
+          "value": {
+            "type": "struct",
+            "children": [
+              {
+                "type": "field",
+                "name": "a",
+                "field_type": {
+                  "type": "bool"
+                }
+              }
+            ],
+            "interfaces": [
+              {
+                "type": "ref",
+                "name": "X"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "structure types: structure, multiple children, single interface",
+    "let p=struct impl X {a:bool b:bool}",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "p"
+          },
+          "value": {
+            "type": "struct",
+            "children": [
+              {
+                "type": "field",
+                "name": "a",
+                "field_type": {
+                  "type": "bool"
+                }
+              },
+              {
+                "type": "field",
+                "name": "b",
+                "field_type": {
+                  "type": "bool"
+                }
+              }
+            ],
+            "interfaces": [
+              {
+                "type": "ref",
+                "name": "X"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "structure types: structure, no children, multiple interfaces",
+    "let p=struct impl X, Y {}",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "p"
+          },
+          "value": {
+            "type": "struct",
+            "interfaces": [
+              {
+                "type": "ref",
+                "name": "X"
+              },
+              {
+                "type": "ref",
+                "name": "Y"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "structure types: structure, single child, multiple interfaces",
+    "let p=struct impl X Y {a:bool}",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "p"
+          },
+          "value": {
+            "type": "struct",
+            "children": [
+              {
+                "type": "field",
+                "name": "a",
+                "field_type": {
+                  "type": "bool"
+                }
+              }
+            ],
+            "interfaces": [
+              {
+                "type": "ref",
+                "name": "X"
+              },
+              {
+                "type": "ref",
+                "name": "Y"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "structure types: structure, multiple children, multiple interfaces",
+    "let p=struct impl X, Y {a:bool,b:bool}",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "p"
+          },
+          "value": {
+            "type": "struct",
+            "children": [
+              {
+                "type": "field",
+                "name": "a",
+                "field_type": {
+                  "type": "bool"
+                }
+              },
+              {
+                "type": "field",
+                "name": "b",
+                "field_type": {
+                  "type": "bool"
+                }
+              }
+            ],
+            "interfaces": [
+              {
+                "type": "ref",
+                "name": "X"
+              },
+              {
+                "type": "ref",
+                "name": "Y"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "structure types: tuple, no children",
+    "let p=struct()",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "p"
+          },
+          "value": {
+            "type": "struct",
+            "tuple": true
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "structure types: tuple, single child",
+    "let p=struct(bool)",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "p"
+          },
+          "value": {
+            "type": "struct",
+            "tuple": true,
+            "children": [
+              "bool"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "structure types: tuple, multiple children",
+    "let p=struct(bool,bool)",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "p"
+          },
+          "value": {
+            "type": "struct",
+            "tuple": true,
+            "children": [
+              "bool",
+              "bool"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "mixins: single interface",
+    "impl p: X {}",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "mixin",
+          "mixin_type": {
+            "type": "ref",
+            "name": "p"
+          },
+          "mixins": [
+            {
+              "type": "ref",
+              "name": "X"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  [
+    "mixins: multiple interfaces",
+    "impl p: X,Y {}",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "mixin",
+          "mixin_type": {
+            "type": "ref",
+            "name": "p"
+          },
+          "mixins": [
+            {
+              "type": "ref",
+              "name": "X"
+            },
+            {
+              "type": "ref",
+              "name": "Y"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  [
+    "interfaces: static, no interfaces",
+    "let X=interface {}",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "X"
+          },
+          "value": "interface"
+        }
+      ]
+    }
+  ],
+  [
+    "interfaces: static, single interface",
+    "let X=interface impl Y {}",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "X"
+          },
+          "value": {
+            "type": "interface",
+            "interfaces": [
+              {
+                "type": "ref",
+                "name": "Y"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "interfaces: static, multiple interfaces",
+    "let X=interface impl Y,Z {}",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "X"
+          },
+          "value": {
+            "type": "interface",
+            "interfaces": [
+              {
+                "type": "ref",
+                "name": "Y"
+              },
+              {
+                "type": "ref",
+                "name": "Z"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "interfaces: dynamic, no interfaces",
+    "let X=interface dynamic {}",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "X"
+          },
+          "value": {
+            "type": "interface",
+            "dynamic": true
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "interfaces: static, single interface",
+    "let X=interface dynamic impl Y {}",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "X"
+          },
+          "value": {
+            "type": "interface",
+            "interfaces": [
+              {
+                "type": "ref",
+                "name": "Y"
+              }
+            ],
+            "dynamic": true
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "interfaces: static, multiple interfaces",
+    "let X=interface dynamic impl Y,Z {}",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "X"
+          },
+          "value": {
+            "type": "interface",
+            "interfaces": [
+              {
+                "type": "ref",
+                "name": "Y"
+              },
+              {
+                "type": "ref",
+                "name": "Z"
+              }
+            ],
+            "dynamic": true
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "named blocks",
+    "let x = :(name){<==(name)5}",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "x"
+          },
+          "value": {
+            "type": "named_block",
+            "name": "name",
+            "children": [
+              {
+                "type": "named_break",
+                "name": "name",
+                "value": {
+                  "type": "int",
+                  "value": 5
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "if expressions",
+    "fn abs x: i32 => i32 if x < 0 then -x else x",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "function",
+          "name": "x",
+          "args": [
+            {
+              "type": "arg",
+              "name": "x",
+              "arg_type": {
+                "type": "int_type",
+                "size": 32
+              }
+            }
+          ],
+          "return_type": {
+            "type": "int_type",
+            "size": 32
+          },
+          "body": {
+            "type": "if",
+            "condition": {
+              "type": "lesser",
+              "lhs": {
+                "type": "ref",
+                "name": "x"
+              },
+              "rhs": {
+                "type": "int",
+                "value": 0
+              }
+            },
+            "body": {
+              "type": "unary_minus",
+              "child": {
+                "type": "ref",
+                "name": "x"
+              }
+            },
+            "else": {
+              "type": "ref",
+              "name": "x"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "if unwrapping: copy",
+    "let x = if y : z z",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "x"
+          },
+          "value": {
+            "type": "if",
+            "condition": {
+              "type": "ref",
+              "name": "y"
+            },
+            "unwrap": {
+              "type": "copy_capture",
+              "name": "z"
+            },
+            "body": {
+              "type": "ref",
+              "name": "z"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "if unwrapping: ref",
+    "let x = if y : *z z",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "x"
+          },
+          "value": {
+            "type": "if",
+            "condition": {
+              "type": "ref",
+              "name": "y"
+            },
+            "unwrap": {
+              "type": "ref_capture",
+              "name": "z"
+            },
+            "body": {
+              "type": "ref",
+              "name": "z"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "if unwrapping: const ref",
+    "let x = if y : *~z z",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "x"
+          },
+          "value": {
+            "type": "if",
+            "condition": {
+              "type": "ref",
+              "name": "y"
+            },
+            "unwrap": {
+              "type": "const_ref_capture",
+              "name": "z"
+            },
+            "body": {
+              "type": "ref",
+              "name": "z"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "match statements: value constraints",
+    "let x = match y {0 => 0 1,2 => 1 3,4,5,6,7 => 2}",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "x"
+          },
+          "value": {
+            "type": "match",
+            "value": {
+              "type": "ref",
+              "name": "y"
+            },
+            "arms": [
+              {
+                "type": "match_arm",
+                "matches:": [
+                  {
+                    "type": "match_value",
+                    "value": {
+                      "type": "int",
+                      "value": 0
+                    }
+                  }
+                ],
+                "body": {
+                  "type": "int",
+                  "value": 0
+                }
+              },
+              {
+                "type": "match_arm",
+                "matches:": [
+                  {
+                    "type": "match_value",
+                    "value": {
+                      "type": "int",
+                      "value": 1
+                    }
+                  },
+                  {
+                    "type": "match_value",
+                    "value": {
+                      "type": "int",
+                      "value": 2
+                    }
+                  }
+                ],
+                "body": {
+                  "type": "int",
+                  "value": 1
+                }
+              },
+              {
+                "type": "match_arm",
+                "matches:": [
+                  {
+                    "type": "match_value",
+                    "value": {
+                      "type": "int",
+                      "value": 3
+                    }
+                  },
+                  {
+                    "type": "match_value",
+                    "value": {
+                      "type": "int",
+                      "value": 4
+                    }
+                  },
+                  {
+                    "type": "match_value",
+                    "value": {
+                      "type": "int",
+                      "value": 5
+                    }
+                  },
+                  {
+                    "type": "match_value",
+                    "value": {
+                      "type": "int",
+                      "value": 6
+                    }
+                  },
+                  {
+                    "type": "match_value",
+                    "value": {
+                      "type": "int",
+                      "value": 7
+                    }
+                  }
+                ],
+                "body": {
+                  "type": "int",
+                  "value": 2
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "match statements: range constraint",
+    "let x = match y { 0..7 => 0 }",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "x"
+          },
+          "value": {
+            "type": "match",
+            "value": {
+              "type": "ref",
+              "name": "y"
+            },
+            "arms": [
+              {
+                "type": "match_arm",
+                "matches": [
+                  {
+                    "type": "match_range",
+                    "begin": {
+                      "type": "int",
+                      "value": 0
+                    },
+                    "end": {
+                      "type": "int",
+                      "value": 7
+                    }
+                  }
+                ],
+                "body": {
+                  "type": "int",
+                  "value": 0
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "match statements: constrain",
+    "let x = match y { constrain isEven => 1 _ => 0}",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "x"
+          },
+          "value": {
+            "type": "match",
+            "value": {
+              "type": "ref",
+              "name": "y"
+            },
+            "arms": [
+              {
+                "type": "match_arm",
+                "matches": [
+                  {
+                    "type": "match_constraint",
+                    "constraint": {
+                      "type": "ref",
+                      "name": "isEven"
+                    }
+                  }
+                ],
+                "body": {
+                  "type": "int",
+                  "value": 1
+                }
+              },
+              {
+                "type": "match_arm",
+                "matches": [
+                  "match_all"
+                ],
+                "body": {
+                  "type": "int",
+                  "value": 0
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "match statements: catchall copy",
+    "let x = match y {_ -> z => z}",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "x"
+          },
+          "value": {
+            "type": "match",
+            "value": {
+              "type": "ref",
+              "name": "y"
+            },
+            "arms": [
+              {
+                "type": "match_arm",
+                "matches": [
+                  "match_all"
+                ],
+                "store": {
+                  "type": "copy_capture",
+                  "name": "z"
+                },
+                "body": {
+                  "type": "ref",
+                  "name": "z"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "match statements: catchall ref",
+    "let x = match y {_ -> *z => z}",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "x"
+          },
+          "value": {
+            "type": "match",
+            "value": {
+              "type": "ref",
+              "name": "y"
+            },
+            "arms": [
+              {
+                "type": "match_arm",
+                "matches": [
+                  "match_all"
+                ],
+                "store": {
+                  "type": "ref_capture",
+                  "name": "z"
+                },
+                "body": {
+                  "type": "ref",
+                  "name": "z"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "match statements: catchall constant ref",
+    "let x = match y {_ -> *~z => z}",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "x"
+          },
+          "value": {
+            "type": "match",
+            "value": {
+              "type": "ref",
+              "name": "y"
+            },
+            "arms": [
+              {
+                "type": "match_arm",
+                "matches": [
+                  "match_all"
+                ],
+                "store": {
+                  "type": "const_ref_capture",
+                  "name": "z"
+                },
+                "body": {
+                  "type": "ref",
+                  "name": "z"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "match statements, destructing with all refs, and constraints",
+    "let x = match y { .{a: .(_ -> i; _ -> *j\n 0..7 -> *~k); b: 1; c: constrain isEven} => 0}",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "x"
+          },
+          "value": {
+            "type": "match",
+            "arms": [
+              {
+                "type": "match_arm",
+                "matches": [
+                  {
+                    "type": "destructuring_match_arm",
+                    "matches": [
+                      {
+                        "type": "destructuring_match_structure",
+                        "children": {
+                          "a": {
+                            "type": "destructuring_match_arm",
+                            "matches": [
+                              {
+                                "type": "destructuring_match_tuple",
+                                "children": [
+                                  {
+                                    "type": "destructuring_match_arm",
+                                    "matches": [
+                                      "match_all"
+                                    ],
+                                    "store": {
+                                      "type": "copy_capture",
+                                      "name": "i"
+                                    }
+                                  },
+                                  {
+                                    "type": "destructuring_match_arm",
+                                    "matches": [
+                                      "match_all"
+                                    ],
+                                    "store": {
+                                      "type": "ref_capture",
+                                      "name": "j"
+                                    }
+                                  },
+                                  {
+                                    "type": "destructuring_match_arm",
+                                    "matches": [
+                                      {
+                                        "type": "match_range",
+                                        "begin": {
+                                          "type": "int",
+                                          "value": 0
+                                        },
+                                        "end": {
+                                          "type": "int",
+                                          "value": 7
+                                        }
+                                      }
+                                    ],
+                                    "store": {
+                                      "type": "const_ref_capture",
+                                      "name": "k"
+                                    }
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          "b": {
+                            "type": "destructuring_match_arm",
+                            "matches": [
+                              {
+                                "type": "match_value",
+                                "value": {
+                                  "type": "int",
+                                  "value": 1
+                                }
+                              }
+                            ]
+                          },
+                          "c": {
+                            "type": "destructuring_match_arm",
+                            "matches": [
+                              {
+                                "type": "match_constraint",
+                                "constraint": {
+                                  "type": "ref",
+                                  "name": "isEven"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ],
+                "body": {
+                  "type": "int",
+                  "value": 0
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "match statements: enum destructuring",
+    "let x = match n {.empty => 0 .integer(0..255 -> small_int) => 1 .integer(_ -> big_int) => 2 .add{lhs: constrain isConstant; rhs: constrain isConstant} => 3 .add{lhs: _; rhs: _} => 4 _ => 5}",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "x"
+          },
+          "value": {
+            "type": "match",
+            "value": {
+              "type": "ref",
+              "name": "n"
+            },
+            "arms": [
+              {
+                "type": "match_arm",
+                "matches": [
+                  {
+                    "type": "match_enum_empty",
+                    "enum_identifier": "empty"
+                  }
+                ],
+                "body": {
+                  "type": "int",
+                  "value": 0
+                }
+              },
+              {
+                "type": "match_arm",
+                "matches": [
+                  {
+                    "type": "match_enum_tuple",
+                    "enum_identifier": "integer",
+                    "children": [
+                      {
+                        "type": "destructuring_match_arm",
+                        "matches": [
+                          {
+                            "type": "match_range",
+                            "begin": {
+                              "type": "int",
+                              "value": 0
+                            },
+                            "end": {
+                              "type": "int",
+                              "value": 255
+                            }
+                          }
+                        ],
+                        "store": {
+                          "type": "copy_capture",
+                          "name": "small_int"
+                        }
+                      }
+                    ]
+                  }
+                ],
+                "body": {
+                  "type": "int",
+                  "value": 1
+                }
+              },
+              {
+                "type": "match_arm",
+                "matches": [
+                  {
+                    "type": "match_enum_tuple",
+                    "enum_identifier": "integer",
+                    "children": [
+                      {
+                        "type": "destructuring_match_arm",
+                        "matches": [
+                          "match_all"
+                        ],
+                        "store": {
+                          "type": "copy_capture",
+                          "name": "big_int"
+                        }
+                      }
+                    ]
+                  }
+                ],
+                "body": {
+                  "type": "int",
+                  "value": 2
+                }
+              },
+              {
+                "type": "match_arm",
+                "matches": [
+                  {
+                    "type": "match_enum_structure",
+                    "enum_identifier": "add",
+                    "children": {
+                      "lhs": {
+                        "type": "destructuring_match_arm",
+                        "matches": [
+                          {
+                            "type": "match_constraint",
+                            "constraint": {
+                              "type": "ref",
+                              "name": "isEven"
+                            }
+                          }
+                        ]
+                      },
+                      "lhs": {
+                        "type": "destructuring_match_arm",
+                        "matches": [
+                          {
+                            "type": "match_constraint",
+                            "constraint": {
+                              "type": "ref",
+                              "name": "isEven"
+                            }
+                          }
+                        ],
+                        "store": {
+                          "type": "copy_capture",
+                          "name": "big_int"
+                        }
+                      }
+                    }
+                  }
+                ],
+                "body": {
+                  "type": "int",
+                  "value": 3
+                }
+              },
+              {
+                "type": "match_arm",
+                "matches": [
+                  {
+                    "type": "match_enum_structure",
+                    "enum_identifier": "add",
+                    "children": {
+                      "lhs": {
+                        "type": "destructuring_match_arm",
+                        "matches": [
+                          "match_all"
+                        ]
+                      },
+                      "lhs": {
+                        "type": "destructuring_match_arm",
+                        "matches": [
+                          "match_all"
+                        ],
+                        "store": {
+                          "type": "copy_capture",
+                          "name": "big_int"
+                        }
+                      }
+                    }
+                  }
+                ],
+                "body": {
+                  "type": "int",
+                  "value": 4
+                }
+              },
+              {
+                "type": "match_arm",
+                "matches": [
+                  "match_all"
+                ],
+                "body": {
+                  "type": "int",
+                  "value": 5
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "loop: no yield",
+    "fn x => noreturn loop false",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "function",
+          "name": "x",
+          "return_type": "noreturn_type",
+          "body": {
+            "type": "loop",
+            "body": "false"
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "loop: yield",
+    "fn x => bool loop <== false",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "function",
+          "name": "x",
+          "return_type": "bool_type",
+          "body": {
+            "type": "loop",
+            "body": {
+              "type": "break",
+              "value": "false"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "while loops: no else, no continue",
+    "fn x=> noreturn while true do false",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "function",
+          "name": "x",
+          "return_type": "noreturn_type",
+          "body": {
+            "type": "while",
+            "condition": "true",
+            "body": "false"
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "while loops: else, no continue",
+    "fn x=> bool while false\nfalse\nelse\ntrue",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "function",
+          "name": "x",
+          "return_type": "bool_type",
+          "body": {
+            "type": "while",
+            "condition": "false",
+            "body": "false",
+            "else": "true"
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "while loops: no else, continue",
+    "fn x=> noreturn while true do continue",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "function",
+          "name": "x",
+          "return_type": "noreturn_type",
+          "body": {
+            "type": "while",
+            "condition": "true",
+            "body": "continue"
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "for loops: copy, no index, no filters, no maps, no else",
+    "fn x => noreturn for y : z\nfalse",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "function",
+          "name": "x",
+          "return_type": "noreturn_type",
+          "body": {
+            "type": "for",
+            "capture": {
+              "type": "copy_capture",
+              "name": "y"
+            },
+            "array": {
+              "type": "ref",
+              "name": "z"
+            },
+            "body": "false"
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "for loops: reference, no index, no filters, no maps, no else",
+    "fn x => noreturn for *y : z\nfalse",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "function",
+          "name": "x",
+          "return_type": "noreturn_type",
+          "body": {
+            "type": "for",
+            "capture": {
+              "type": "ref_capture",
+              "name": "y"
+            },
+            "array": {
+              "type": "ref",
+              "name": "z"
+            },
+            "body": "false"
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "for loops: constant reference, no index, no filters, no maps, no else",
+    "fn x => noreturn for *~y : z\nfalse",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "function",
+          "name": "x",
+          "return_type": "noreturn_type",
+          "body": {
+            "type": "for",
+            "capture": {
+              "type": "const_ref_capture",
+              "name": "y"
+            },
+            "array": {
+              "type": "ref",
+              "name": "z"
+            },
+            "body": "false"
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "for loops: copy, index, no filters, no maps, no else",
+    "fn x => noreturn for y,i : z\nfalse\nfn x2 => noreturn for y i : z\nfalse",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "function",
+          "name": "x",
+          "return_type": "noreturn_type",
+          "body": {
+            "type": "for",
+            "capture": {
+              "type": "copy_capture",
+              "name": "y"
+            },
+            "index": "i",
+            "array": {
+              "type": "ref",
+              "name": "z"
+            },
+            "body": "false"
+          }
+        },
+        {
+          "type": "function",
+          "name": "x2",
+          "return_type": "noreturn_type",
+          "body": {
+            "type": "for",
+            "capture": {
+              "type": "copy_capture",
+              "name": "y"
+            },
+            "index": "i",
+            "array": {
+              "type": "ref",
+              "name": "z"
+            },
+            "body": "false"
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "for loops: copy, no index, single filter, no maps, no else",
+    "fn x => noreturn for y : z ? isPrime do false",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "function",
+          "name": "x",
+          "return_type": "noreturn_type",
+          "body": {
+            "type": "for",
+            "capture": {
+              "type": "copy_capture",
+              "name": "y"
+            },
+            "array": {
+              "type": "ref",
+              "name": "z"
+            },
+            "transformation": [
+              {
+                "type": "filter_transform",
+                "filter": {
+                  "type": "ref",
+                  "name": "isPrime"
+                }
+              }
+            ],
+            "body": "false"
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "for loops: copy, no index, multiple filters, no maps, no else",
+    "fn x => noreturn for y : z ? isPrime ? greaterThanTen do false",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "function",
+          "name": "x",
+          "return_type": "noreturn_type",
+          "body": {
+            "type": "for",
+            "capture": {
+              "type": "copy_capture",
+              "name": "y"
+            },
+            "array": {
+              "type": "ref",
+              "name": "z"
+            },
+            "transformation": [
+              {
+                "type": "filter_transform",
+                "filter": {
+                  "type": "ref",
+                  "name": "isPrime"
+                }
+              },
+              {
+                "type": "filter_transform",
+                "filter": {
+                  "type": "ref",
+                  "name": "greaterThanTen"
+                }
+              }
+            ],
+            "body": "false"
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "for loops: copy, no index, no filters, single map, no else",
+    "fn x => noreturn for y : z : square do false",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "function",
+          "name": "x",
+          "return_type": "noreturn_type",
+          "body": {
+            "type": "for",
+            "capture": {
+              "type": "copy_capture",
+              "name": "y"
+            },
+            "array": {
+              "type": "ref",
+              "name": "z"
+            },
+            "transformation": [
+              {
+                "type": "map_transform",
+                "map": {
+                  "type": "ref",
+                  "name": "square"
+                }
+              }
+            ],
+            "body": "false"
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "for loops: copy, no index, no filters, multiple maps, no else",
+    "fn x => noreturn for y : z : square : addOne do false",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "function",
+          "name": "x",
+          "return_type": "noreturn_type",
+          "body": {
+            "type": "for",
+            "capture": {
+              "type": "copy_capture",
+              "name": "y"
+            },
+            "array": {
+              "type": "ref",
+              "name": "z"
+            },
+            "transformation": [
+              {
+                "type": "map_transform",
+                "map": {
+                  "type": "ref",
+                  "name": "square"
+                }
+              },
+              {
+                "type": "map_transform",
+                "map": {
+                  "type": "ref",
+                  "name": "addOne"
+                }
+              }
+            ],
+            "body": "false"
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "for loops: copy, no index, single filter, single map, no else",
+    "fn x => noreturn for y : z ? isPrime : square do false",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "function",
+          "name": "x",
+          "return_type": "noreturn_type",
+          "body": {
+            "type": "for",
+            "capture": {
+              "type": "copy_capture",
+              "name": "y"
+            },
+            "array": {
+              "type": "ref",
+              "name": "z"
+            },
+            "transformation": [
+              {
+                "type": "filter_transform",
+                "filter": {
+                  "type": "ref",
+                  "name": "isPrime"
+                }
+              },
+              {
+                "type": "map_transform",
+                "map": {
+                  "type": "ref",
+                  "name": "square"
+                }
+              }
+            ],
+            "body": "false"
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "for loops: copy, no index, multiple filters, single map, no else",
+    "fn x => noreturn for y : z ? isPrime : square ? greaterThanTen do false",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "function",
+          "name": "x",
+          "return_type": "noreturn_type",
+          "body": {
+            "type": "for",
+            "capture": {
+              "type": "copy_capture",
+              "name": "y"
+            },
+            "array": {
+              "type": "ref",
+              "name": "z"
+            },
+            "transformation": [
+              {
+                "type": "filter_transform",
+                "filter": {
+                  "type": "ref",
+                  "name": "isPrime"
+                }
+              },
+              {
+                "type": "map_transform",
+                "map": {
+                  "type": "ref",
+                  "name": "square"
+                }
+              },
+              {
+                "type": "filter_transform",
+                "filter": {
+                  "type": "ref",
+                  "name": "greaterThanTen"
+                }
+              }
+            ],
+            "body": "false"
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "for loops: copy, no index, single filter, multiple maps, no else",
+    "fn x => noreturn for y : z : square ? greaterThanTen : addOne do false",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "function",
+          "name": "x",
+          "return_type": "noreturn_type",
+          "body": {
+            "type": "for",
+            "capture": {
+              "type": "copy_capture",
+              "name": "y"
+            },
+            "array": {
+              "type": "ref",
+              "name": "z"
+            },
+            "transformation": [
+              {
+                "type": "map_transform",
+                "map": {
+                  "type": "ref",
+                  "name": "square"
+                }
+              },
+              {
+                "type": "filter_transform",
+                "filter": {
+                  "type": "ref",
+                  "name": "greaterThanTen"
+                }
+              },
+              {
+                "type": "map_transform",
+                "map": {
+                  "type": "ref",
+                  "name": "addOne"
+                }
+              }
+            ],
+            "body": "false"
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "for loops: copy, no index, multiple filters, multiple maps, no else",
+    "fn x => noreturn for y : z ? isPrime : square ? greaterThanTen : addOne do false",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "function",
+          "name": "x",
+          "return_type": "noreturn_type",
+          "body": {
+            "type": "for",
+            "capture": {
+              "type": "copy_capture",
+              "name": "y"
+            },
+            "array": {
+              "type": "ref",
+              "name": "z"
+            },
+            "transformation": [
+              {
+                "type": "filter_transform",
+                "filter": {
+                  "type": "ref",
+                  "name": "isPrime"
+                }
+              },
+              {
+                "type": "map_transform",
+                "map": {
+                  "type": "ref",
+                  "name": "square"
+                }
+              },
+              {
+                "type": "filter_transform",
+                "filter": {
+                  "type": "ref",
+                  "name": "greaterThanTen"
+                }
+              },
+              {
+                "type": "map_transform",
+                "map": {
+                  "type": "ref",
+                  "name": "addOne"
+                }
+              }
+            ],
+            "body": "false"
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "for loops: copy, no index, no filters, no maps, else",
+    "fn x => bool for y : z\nfalse else true",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "function",
+          "name": "x",
+          "return_type": "bool_type",
+          "body": {
+            "type": "for",
+            "capture": {
+              "type": "copy_capture",
+              "name": "y"
+            },
+            "array": {
+              "type": "ref",
+              "name": "z"
+            },
+            "body": "false",
+            "else": "true"
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "self keyword",
+    "fn x self => bool self.x",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "function",
+          "name": "x",
+          "arguments": [
+            "self"
+          ],
+          "return_type": "bool_type",
+          "body": {
+            "type": "subscript",
+            "lhs": "self",
+            "rhs": {
+              "type": "ref",
+              "name": "x"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "~self keyword",
+    "fn x ~self => bool self.x",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "function",
+          "name": "x",
+          "arguments": [
+            "const_self"
+          ],
+          "return_type": "bool_type",
+          "body": {
+            "type": "subscript",
+            "lhs": "self",
+            "rhs": {
+              "type": "ref",
+              "name": "x"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "Self keyword",
+    "fn x self => Self self",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "function",
+          "name": "x",
+          "arguments": [
+            "self"
+          ],
+          "return_type": "self_type",
+          "body": "self"
+        }
+      ]
+    }
+  ],
+  [
+    "macros",
+    "macro x a\na.x",
+    {
+      "type": "macro",
+      "children": [
+        {
+          "type": "macro",
+          "name": "x",
+          "arguments": [
+            "a"
+          ],
+          "body": {
+            "type": "subscript",
+            "lhs": {
+              "type": "ref",
+              "name": "a"
+            },
+            "rhs": {
+              "type": "ref",
+              "name": "x"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "operators: () overloading",
+    "operator () self => void\n{}",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "operator",
+          "operator": "tuple_call",
+          "args": [
+            "self"
+          ],
+          "return_type": "void",
+          "body": "block"
+        }
+      ]
+    }
+  ],
+  [
+    "operators: () static overloading",
+    "operator () => void\n{}",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "operator",
+          "operator": "tuple_call",
+          "args": [
+          ],
+          "return_type": "void",
+          "body": "block"
+        }
+      ]
+    }
+  ],
+  [
+    "operators: [] overloading",
+    "operator [] self => void\n{}",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "operator",
+          "operator": "array_call",
+          "args": [
+            "self"
+          ],
+          "return_type": "void",
+          "body": "block"
+        }
+      ]
+    }
+  ],
+  [
+    "operators: [] static overloading",
+    "operator [] => void\n{}",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "operator",
+          "operator": "array_call",
+          "args": [
+          ],
+          "return_type": "void",
+          "body": "block"
+        }
+      ]
+    }
+  ],
+  [
+    "operators: {} overloading",
+    "operator {} self x: any => void\n{}",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "operator",
+          "operator": "object_call",
+          "args": [
+            "self",
+            {
+              "type": "fn_arg",
+              "name": "x",
+              "arg_type": "any_type"
+            }
+          ],
+          "return_type": "void",
+          "body": "block"
+        }
+      ]
+    }
+  ],
+  [
+    "operators: {} static overloading",
+    "operator {} x: any => void\n{}",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "operator",
+          "operator": "object_call",
+          "args": [
+            {
+              "type": "fn_arg",
+              "name": "x",
+              "arg_type": "any_type"
+            }
+          ],
+          "return_type": "void",
+          "body": "block"
+        }
+      ]
+    }
+  ],
+  [
+    "operators: . overloading",
+    "operator . self => *X\n&x",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "operator",
+          "operator": "array_call",
+          "args": [
+            "self"
+          ],
+          "return_type": {
+            "type": "reference",
+            "child": {
+              "type": "ref",
+              "name": "X"
+            }
+          },
+          "body": {
+            "type": "address_of",
+            "child": {
+              "type": "ref",
+              "name": "x"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "operators: +x",
+    "let x = +(1)",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "var_decl",
+          "def": {
+            "type": "var_def",
+            "name": "x"
+          },
+          "value": {
+            "type": "unary_plus",
+            "child": {
+              "type": "int",
+              "value": 1
+            }
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "example full program (always last!!!)",
+    "fn abs arg: f64 => f64\nif arg < 0\n-arg\nelse\narg\n\nlet HSL=struct{\nh:f64\ns:f64\nl:f64\nfn to_rgb ~self=>RGB public{\nlet c =(1-abs(2.0*self.l-1.0))*self.s\nlet x=c*(1-abs((self.h/60.0)%2.0-1.0))\nlet m=self.l-self.c/2.0\nlet h60=(self.h/60.0)@u8\nlet(rprime, gprime, bprime)=switch h60{\n0=>\n.(c,x,0.0)\n1=>\n.(x,c,0.0)\n2=>\n.(0.0,x,c)\n3=>\n.(x,0.0,c)\n4=>\n.(c,0.0,x)\n_=>\n.(0.0,0.0,0.0)\n}\n==>.(\nr:((rprime+m)*255)@u8\ng:((gprime+m)*255)@u8\nb:((bprime+m)*255)@u8\n)\n}\n}\n\nlet RGB=struct{\nr:u8\ng:u8\nb:u8\n}\n\nfn main=>u8 entry{\nlet hsl=HSL{\nh:130.0\ns:0.5\nl:0.5\n}\n\nhsl.to_rgb()\n\n==>0\n}",
+    {
+      "type": "struct"
     }
   ]
 ]

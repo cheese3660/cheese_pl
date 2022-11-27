@@ -1,21 +1,30 @@
+IDEAS:
+'in' operator, that returns whether a value is in a range, will reduce to a loop and maybe optimized further.
+destructuring for 'for' loops
+
+
 TODO:
-- Make newlines end statements in the parser, such that we can return to a normal function call and object syntax
-- Have tuple literals that are different from struct literals, .{} vs .(), and also array literals .[]
-- Do the same .{:TYPE} or .[:TYPE] if the type cant be inferred for the literal
-- Have '...' function params that can get globbed into a tuple with the name ... basically (internally these parameters are passed as a tuple)
-- figure out how to link LLVM
-- internally tuples and structures are basically the same still
-- still units
-- interfaces
-- concepts
+[X] Make newlines end statements in the parser, such that we can return to a normal function call and object syntax
+[X] Have tuple literals that are different from struct literals, .{} vs .(), and also array literals .[]
+[S] Do the same .{:TYPE} or .[:TYPE] if the type cant be inferred for the literal
+    - Skipped cuz tuple type information has been changed
+[ ] - Syntax error recovery...
+[ ] Have '...' function params that can get globbed into a tuple with the name ... basically (internally these parameters are passed as a tuple)
+[X] figure out how to link LLVM
+[X] internally tuples and structures are basically the same still
+[ ] still units
+[X] interfaces
+[X] concepts
+
+
 
 
 ROADMAP:
 [X] Lexer
 [ ] AST
-    [ ] Use better representation with virtual classes and std::shared_ptr
+    [X] Use better representation with virtual classes and std::shared_ptr
 [ ] Translator
 [ ] Lowerer
     [ ] Redeveloping Representation
 [ ] LLVM Shit
-    [ ] Linking LLVM
+    [X] Linking LLVM

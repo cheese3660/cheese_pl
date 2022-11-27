@@ -38,9 +38,11 @@ namespace cheese::parser {
         std::uint16_t pub: 1;
         std::uint16_t priv: 1;
         std::uint16_t mut: 1;
+        std::uint16_t entry: 1;
     };
     typedef std::shared_ptr<Node> NodePtr;
     typedef std::vector<NodePtr> NodeList;
+    typedef std::map<std::string,NodePtr> NodeDict;
 
 
     bool compare_helper(const nlohmann::json &object, std::string name, const NodePtr &value);
@@ -82,9 +84,11 @@ namespace cheese::parser {
 
     bool implicit_compare_value(const math::BigInteger &value);
 
+    bool compare_helper(const nlohmann::json &object, std::string name, const NodeDict& value);
+
+    bool implicit_compare_value(const NodeDict& value);
 
     void implicit_compare_check(bool &success);
-
 
     template<typename T>
     bool compare_helper(const nlohmann::json &object, std::string name, const std::optional<T> &value) {
@@ -127,6 +131,9 @@ namespace cheese::parser {
         if (implicit_compare_value(value)) return;
         return build_json(object,name,value.value());
     }
+
+    template<>
+    void build_json<NodeDict>(nlohmann::json &object, std::string name, const NodeDict& value);
 
     template<typename T, typename ...Ts>
     void implicit_compare_check(bool &success, T &arg, Ts &... args) {

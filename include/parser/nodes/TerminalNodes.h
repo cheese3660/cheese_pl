@@ -17,10 +17,11 @@ namespace cheese::parser::nodes {
     TERMINAL_NODE(Complex64, "c64_type")
     TERMINAL_NODE(Opaque, "opaque_type")
     TERMINAL_NODE(Void, "void_type")
-    TERMINAL_NODE(ComptimeFloat, "comptime_float_type")
-    TERMINAL_NODE(ComptimeComplex, "comptime_complex_type")
-    TERMINAL_NODE(ComptimeString, "comptime_string_type")
-    TERMINAL_NODE(ComptimeInt, "comptime_int_type")
+    TERMINAL_NODE(AnyType,"any")
+    TERMINAL_NODE(ComptimeFloat, "comptime_float")
+    TERMINAL_NODE(ComptimeComplex, "comptime_complex")
+    TERMINAL_NODE(ComptimeString, "comptime_string")
+    TERMINAL_NODE(ComptimeInt, "comptime_int")
     TERMINAL_NODE(Type, "type_type")
     TERMINAL_NODE(NoReturn, "noreturn_type")
     TERMINAL_NODE(True, "true")
@@ -36,7 +37,6 @@ namespace cheese::parser::nodes {
     TERMINAL_NODE(ConstRefImplicitCapture,"const_ref_capture_implicit")
     TERMINAL_NODE(RefImplicitCapture,"ref_capture_implicit")
     TERMINAL_NODE(CopyImplicitCapture,"copy_capture_implicit")
-
 }
 
 #endif //CHEESE_TERMINALNODES_H

@@ -39,10 +39,11 @@ namespace cheese::parser::nodes {
     SINGLE_MEMBER_NODE(BuiltinReference,"builtin",std::string,builtin)
 
     SINGLE_MEMBER_NODE(CopyCapture,"copy_capture",std::string,name)
-
     SINGLE_MEMBER_NODE(RefCapture,"ref_capture",std::string,name)
     SINGLE_MEMBER_NODE(ConstRefCapture,"const_ref_capture",std::string,name)
 
+    SINGLE_MEMBER_NODE(ObjectLiteral,"object_literal",NodeDict,children)
+    SINGLE_MEMBER_NODE(Block,"block",NodeList,children)
 
     //Single child nodes
     //<== [value]
@@ -78,7 +79,6 @@ namespace cheese::parser::nodes {
     POSSIBLY_CONST_TYPE_NODE(Slice,"slice")
     //*(~)[subtype]
     POSSIBLY_CONST_TYPE_NODE(Reference,"reference")
-
 }
 
 

@@ -13,6 +13,7 @@
 #include "error.h"
 #include <sstream>
 #include <unordered_map>
+#include <future>
 namespace cheese::tests {
     std::unordered_map<std::uint32_t,TestSection*> all_test_sections;
     std::vector<std::uint32_t> all_priorities;
@@ -276,9 +277,9 @@ namespace cheese::tests {
 
     void gen_skip() {
         if (configuration::use_escape_sequences) {
-            io::setForegroundColor(io::Color::Yellow);
+            io::setForegroundColor(io::Color::Blue);
         }
-        std::cout << "[FAIL]\n";
+        std::cout << "[SKIP]\n";
         if (configuration::use_escape_sequences) {
             io::setForegroundColor(io::Color::Gray);
         }
@@ -383,7 +384,20 @@ namespace cheese::tests {
 
     TestResults TestCase::run(int nesting) {
         try {
-            auto res = test_case(nesting);
+//            auto res = test_case(nesting);
+            std::packaged_task<SingleResult(int)> task(test_case);
+            auto future = task.get_future();
+            std::thread thr(std::move(task),nesting);
+            SingleResult res = SingleResult::Skip;
+            if (future.wait_for(std::chrono::milliseconds(100)) != std::future_status::timeout) {
+                thr.join();
+                res = future.get();
+            } else {
+                thr.detach();
+                std::cout << '\n';
+                test_output_message(nesting,"Skipping due to timeout ");
+                gen_skip();
+            }
             switch (res) {
                 case SingleResult::Pass:
                     return TestResults{1,0,0};

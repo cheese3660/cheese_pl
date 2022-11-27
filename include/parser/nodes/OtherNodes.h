@@ -17,6 +17,7 @@ namespace cheese::parser::nodes {
     DOUBLE_MEMBER_NODE(ArrayCall,"array_call",NodePtr,object,NodeList,args)
     DOUBLE_MEMBER_NODE(NamedBlock,"named_block",std::string,name,NodeList,children)
     DOUBLE_MEMBER_NODE(NamedBreak,"named_break",std::string,name,NodePtr,value)
+    DOUBLE_MEMBER_NODE(ObjectCall,"object_call",NodePtr,object,NodeDict,args)
 
 
     //All the binary operators
@@ -140,9 +141,27 @@ namespace cheese::parser::nodes {
             flags(std::move(flags))
         {}
         void nested_display(std::uint32_t nesting) const override {}
-        JSON_FUNCS("function_prototype",{"name","arguments","return_type","flags"},name,arguments,return_type,flags)
+        JSON_FUNCS("function_prototype",{"name","args","return_type","flags"},name,arguments,return_type,flags)
         ~FunctionPrototype() override = default;
     };
+
+    struct FunctionImport final : public Node {
+        std::string name;
+        NodeList arguments;
+        NodePtr return_type;
+        FlagSet flags;
+        FunctionImport(Coordinate location, std::string name, NodeList arguments, NodePtr return_type, FlagSet flags):
+                Node(location),
+                name(std::move(name)),
+                arguments(std::move(arguments)),
+                return_type(std::move(return_type)),
+                flags(std::move(flags))
+        {}
+        void nested_display(std::uint32_t nesting) const override {}
+        JSON_FUNCS("function_import",{"name","args","return_type","flags"},name,arguments,return_type,flags)
+        ~FunctionImport() override = default;
+    };
+
 
     struct Function final : public Node {
         std::string name;
@@ -159,7 +178,7 @@ namespace cheese::parser::nodes {
                 body(std::move(body))
         {}
         void nested_display(std::uint32_t nesting) const override {}
-        JSON_FUNCS("function",{"name","arguments","return_type","flags","body"},name,arguments,return_type,flags,body)
+        JSON_FUNCS("function",{"name","args","return_type","flags","body"},name,arguments,return_type,flags,body)
         ~Function() override = default;
     };
 
@@ -176,8 +195,25 @@ namespace cheese::parser::nodes {
                 flags(std::move(flags))
         {}
         void nested_display(std::uint32_t nesting) const override {}
-        JSON_FUNCS("generator_prototype",{"name","arguments","return_type","flags"},name,arguments,return_type,flags)
+        JSON_FUNCS("generator_prototype",{"name","args","return_type","flags"},name,arguments,return_type,flags)
         ~GeneratorPrototype() override = default;
+    };
+
+    struct GeneratorImport final : public Node {
+        std::string name;
+        NodeList arguments;
+        NodePtr return_type;
+        FlagSet flags;
+        GeneratorImport(Coordinate location, std::string name, NodeList arguments, NodePtr return_type, FlagSet flags):
+                Node(location),
+                name(std::move(name)),
+                arguments(std::move(arguments)),
+                return_type(std::move(return_type)),
+                flags(std::move(flags))
+        {}
+        void nested_display(std::uint32_t nesting) const override {}
+        JSON_FUNCS("generator_import",{"name","args","return_type","flags"},name,arguments,return_type,flags)
+        ~GeneratorImport() override = default;
     };
 
     struct Generator final : public Node {
@@ -195,7 +231,7 @@ namespace cheese::parser::nodes {
                 body(std::move(body))
         {}
         void nested_display(std::uint32_t nesting) const override {}
-        JSON_FUNCS("generator",{"name","arguments","return_type","flags","body"},name,arguments,return_type,flags,body)
+        JSON_FUNCS("generator",{"name","args","return_type","flags","body"},name,arguments,return_type,flags,body)
         ~Generator() override = default;
     };
 
@@ -243,5 +279,126 @@ namespace cheese::parser::nodes {
         JSON_FUNCS("closure",{"args","captures","return_type","body"},args,captures,return_type,body)
     };
 
+    struct AnonymousFunction final : public Node {
+        NodeList arguments;
+        NodePtr return_type;
+        FlagSet flags;
+        NodePtr body;
+        AnonymousFunction(Coordinate location, NodeList arguments, NodePtr return_type, FlagSet flags, NodePtr body):
+                Node(location),
+                arguments(std::move(arguments)),
+                return_type(std::move(return_type)),
+                flags(std::move(flags)),
+                body(std::move(body))
+        {}
+        void nested_display(std::uint32_t nesting) const override {}
+        JSON_FUNCS("anonymous_function",{"args","return_type","flags","body"},arguments,return_type,flags,body)
+        ~AnonymousFunction() override = default;
+    };
+
+    struct AnonymousGenerator final : public Node {
+        NodeList arguments;
+        NodePtr return_type;
+        FlagSet flags;
+        NodePtr body;
+        AnonymousGenerator(Coordinate location, NodeList arguments, NodePtr return_type, FlagSet flags, NodePtr body):
+                Node(location),
+                arguments(std::move(arguments)),
+                return_type(std::move(return_type)),
+                flags(std::move(flags)),
+                body(std::move(body))
+        {}
+        void nested_display(std::uint32_t nesting) const override {}
+        JSON_FUNCS("anonymous_generator",{"args","return_type","flags","body"},arguments,return_type,flags,body)
+        ~AnonymousGenerator() override = default;
+    };
+    struct FunctionType final : public Node {
+        NodeList arguments;
+        NodePtr return_type;
+        FlagSet flags;
+        FunctionType(Coordinate location, NodeList arguments, NodePtr return_type, FlagSet flags):
+                Node(location),
+                arguments(std::move(arguments)),
+                return_type(std::move(return_type)),
+                flags(std::move(flags))
+        {}
+        void nested_display(std::uint32_t nesting) const override {}
+        JSON_FUNCS("function_type",{"args","return_type","flags"},arguments,return_type,flags)
+        ~FunctionType() override = default;
+    };
+
+    struct GeneratorType final : public Node {
+        NodeList arguments;
+        NodePtr return_type;
+        FlagSet flags;
+        GeneratorType(Coordinate location, NodeList arguments, NodePtr return_type, FlagSet flags):
+                Node(location),
+                arguments(std::move(arguments)),
+                return_type(std::move(return_type)),
+                flags(std::move(flags))
+        {}
+        void nested_display(std::uint32_t nesting) const override {}
+        JSON_FUNCS("generator_type",{"args","return_type","flags"},arguments,return_type,flags)
+        ~GeneratorType() override = default;
+    };
+
+    struct StructureDestructure final : public Node {
+        NodeDict children;
+        StructureDestructure(Coordinate location, NodeDict children):
+            Node(location),
+            children(std::move(children))
+        {}
+        void nested_display(std::uint32_t nesting) const override {}
+        JSON_FUNCS("structure_destructure",{"children"},children)
+        ~StructureDestructure() override = default;
+    };
+
+    struct TupleDestructure final : public Node {
+        NodeList children;
+        TupleDestructure(Coordinate location, NodeList children):
+            Node(location),
+            children(std::move(children))
+        {}
+        void nested_display(std::uint32_t nesting) const override {}
+        JSON_FUNCS("tuple_destructure",{"children"},children)
+        ~TupleDestructure() override = default;
+    };
+
+    struct ArrayDestructure final : public Node {
+        NodeList children;
+        ArrayDestructure(Coordinate location, NodeList children):
+                Node(location),
+                children(std::move(children))
+        {}
+        void nested_display(std::uint32_t nesting) const override {}
+        JSON_FUNCS("array_destructure",{"children"},children)
+        ~ArrayDestructure() override = default;
+    };
+
+
+    //Same as array destructure, but does a runtime check on size, also looks better
+    struct SliceDestructure final : public Node {
+        NodeList children;
+        SliceDestructure(Coordinate location, NodeList children):
+                Node(location),
+                children(std::move(children))
+        {}
+        void nested_display(std::uint32_t nesting) const override {}
+        JSON_FUNCS("slice_destructure",{"children"},children)
+        ~SliceDestructure() override = default;
+    };
+
+    struct Destructure final : public Node {
+        NodePtr structure;
+        NodePtr value;
+        Destructure(Coordinate location, NodePtr structure, NodePtr value):
+            Node(location),
+            structure(std::move(structure)),
+            value(std::move(value))
+        {}
+        void nested_display(std::uint32_t nesting) const override {}
+        JSON_FUNCS("destructure",{"structure","value"},structure,value)
+        ~Destructure() override = default;
+    };
 }
 #endif //CHEESE_OTHERNODES_H

@@ -116,6 +116,7 @@ namespace cheese::parser {
         bool pub = value.pub;
         bool priv = value.priv;
         bool mut = value.mut;
+        bool entry = value.entry;
         for (size_t i = 0; i < list.size(); i++) {
             auto& str = list[i];
             if (str == "inline") {
@@ -132,13 +133,15 @@ namespace cheese::parser {
                 priv = !priv;
             } else if (str == "mutable") {
                 mut = !mut;
+            } else if (str == "entry") {
+                entry = !entry;
             }
         }
-        return !(inlin || exter || exp || comptime || pub || priv || mut);
+        return !(inlin || exter || exp || comptime || pub || priv || mut || entry);
     }
 
     bool parser::implicit_compare_value(const FlagSet &value) {
-        return !(value.inlin || value.exter || value.exp || value.comptime || value.pub || value.priv || value.mut);
+        return !(value.inlin || value.exter || value.exp || value.comptime || value.pub || value.priv || value.mut || value.entry);
     }
 
     template<>
@@ -165,6 +168,9 @@ namespace cheese::parser {
         }
         if (value.mut) {
             object[name].push_back("mutable");
+        }
+        if (value.entry) {
+            object[name].push_back("entry");
         }
     }
 
@@ -201,5 +207,32 @@ namespace cheese::parser {
             return object["type"] == type;
         }
     }
+
+    bool parser::compare_helper(const nlohmann::json &object, std::string name, const NodeDict &value) {
+        if (!object.contains(name)) return implicit_compare_value(value);
+        if (!object[name].is_object()) return false;
+        const auto& lst = object[name];
+        if (lst.size() != value.size()) return false;
+        for (const auto& kv : value) {
+            if (!lst.contains(kv.first)) return false;
+            if (!compare_helper(lst,kv.first,kv.second)) return false;
+        }
+        return true;
+    }
+
+    bool parser::implicit_compare_value(const NodeDict &value) {
+        return value.size() == 0;
+    }
+
+    template<>
+    void parser::build_json<NodeDict>(nlohmann::json &object, std::string name, const NodeDict &value) {
+        if (implicit_compare_value(value)) return;
+        auto lst = nlohmann::json::object();
+        for (const auto& kv : value) {
+            build_json(lst,kv.first,kv.second);
+        }
+        object[name]=lst;
+    }
+
 
 }
