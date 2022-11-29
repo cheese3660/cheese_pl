@@ -8,6 +8,8 @@
 #include <cstdint>
 #include <sstream>
 #include <iostream>
+#include <fstream>
+#include <lexer/lexer.h>
 namespace cheese::error {
 
     std::string CompilerError::what() {
@@ -17,6 +19,9 @@ namespace cheese::error {
     }
 
     char getErrorPrefix(std::uint32_t code) {
+        if (code == 9999) {
+            return 'E';
+        }
         if (code % 1000 >= 500) {
             return 'W';
         }
@@ -40,11 +45,38 @@ namespace cheese::error {
         return getError(static_cast<std::uint32_t>(code));
     }
 
+    void point_to(Coordinate location) {
+        std::ifstream infile{filenames[location.file_index]};
+        if (!infile)
+            return;
+        std::uint32_t l = 1;
+        for (std::string line; getline(infile,line);) {
+            //At somepoint highlight this;
+            if (l == location.line_number) {
+                configuration::error_output_handler(line);
+                if (line[line.size()-1] != '\n') {
+                    configuration::error_output_handler("\n");
+                }
+            }
+            ++l;
+        }
+        if (configuration::use_escape_sequences) {
+            io::setForegroundColor(io::Color::Green);
+        }
+        for (int i = 1; i < location.column_number; i++) {
+            configuration::error_output_handler(" ");
+        }
+        configuration::error_output_handler("^\n");
+        if (configuration::use_escape_sequences) {
+            io::setForegroundColor(io::Color::Gray);
+        }
+    }
+
     void write_module(const char* module) {
         if (configuration::use_escape_sequences) {
             io::setForegroundColor(io::Color::Blue);
         }
-        std::cout << "[" << module << "] ";
+        configuration::error_output_handler("[" + std::string{module} + "] ");
         if (configuration::use_escape_sequences) {
             io::setForegroundColor(io::Color::Gray);
         }
@@ -54,7 +86,7 @@ namespace cheese::error {
         if (configuration::use_escape_sequences) {
             io::setForegroundColor(io::Color::Red);
         }
-        std::cout << "[ERROR] ";
+        configuration::error_output_handler("[ERROR] ");
         if (configuration::use_escape_sequences) {
             io::setForegroundColor(io::Color::Gray);
         }
@@ -64,7 +96,17 @@ namespace cheese::error {
         if (configuration::use_escape_sequences) {
             io::setForegroundColor(io::Color::Red);
         }
-        std::cout << "[WARN] ";
+        configuration::error_output_handler("[WARN] ");
+        if (configuration::use_escape_sequences) {
+            io::setForegroundColor(io::Color::Gray);
+        }
+    }
+
+    void write_note() {
+        if (configuration::use_escape_sequences) {
+            io::setForegroundColor(io::Color::DarkGray);
+        }
+        configuration::error_output_handler("[NOTE] ");
         if (configuration::use_escape_sequences) {
             io::setForegroundColor(io::Color::Gray);
         }
@@ -74,7 +116,7 @@ namespace cheese::error {
         if (configuration::use_escape_sequences) {
             io::setForegroundColor(io::Color::DarkGray);
         }
-        std::cout << "(" << getError(code) << ") ";
+        configuration::error_output_handler("(" + getError(code) +") ");
         if (configuration::use_escape_sequences) {
             io::setForegroundColor(io::Color::Gray);
         }
@@ -84,11 +126,11 @@ namespace cheese::error {
         if (configuration::use_escape_sequences) {
             io::setForegroundColor(io::Color::White);
         }
-        std::cout << location.toString();
+        configuration::error_output_handler(location.toString());
         if (configuration::use_escape_sequences) {
             io::setForegroundColor(io::Color::Gray);
         }
-        std::cout << ": ";
+        configuration::error_output_handler(": ");
     }
 
     [[noreturn]] void raise_exiting_error(const char* module, std::string message, Coordinate location, ErrorCode code) {
@@ -97,7 +139,8 @@ namespace cheese::error {
             write_err();
             write_code(code);
             write_location(location);
-            std::cout << message << '\n';
+            configuration::error_output_handler(message + "\n");
+            point_to(location);
         }
         throw CompilerError(location, code, message);
     }
@@ -111,7 +154,8 @@ namespace cheese::error {
             write_err();
             write_code(code);
             write_location(location);
-            std::cout << message << '\n';
+            configuration::error_output_handler(message + "\n");
+            point_to(location);
         }
     }
 
@@ -124,7 +168,18 @@ namespace cheese::error {
             write_warn();
             write_code(code);
             write_location(location);
-            std::cout << message << '\n';
+            configuration::error_output_handler(message + "\n");
+            point_to(location);
+        }
+    }
+
+    void make_note(const char* module, std::string message, Coordinate location) {
+        if (configuration::log_errors) {
+            write_module(module);
+            write_note();
+            write_location(location);
+            configuration::error_output_handler(message + "\n");
+            point_to(location);
         }
     }
 }

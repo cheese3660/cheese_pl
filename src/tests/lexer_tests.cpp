@@ -33,7 +33,8 @@ namespace cheese::tests::lexer_tests {
                  expected = "expected error: " + getError((error_code));          \
             }                                                                      \
             __TEST_CASE(OFFSET_NAME_1(__LINE__), "single line comments with '" # name "' in them should give a warning",true,true){ \
-                 std::string warning_comment = "//" # name "...";                 \
+                TEST_SETUP_ERROR_OUTPUT;                                                                 \
+                std::string warning_comment = "//" # name "...";                 \
                  TEST_EXPECT_MESSAGE(cheese::lexer::lex(warning_comment),error_code,expected);\
             }                                                                     \
             TEST_WARN("multi line comments with '" # name "' in them should give a warning"){ \
@@ -71,6 +72,7 @@ namespace cheese::tests::lexer_tests {
 
         TEST_SUBSECTION("validation")
             TEST_CASE("lexer should give correct locations") {
+                TEST_SETUP_ERROR_OUTPUT;
                 std::string loc_str = "a b c d\te\nf g h i j";
                 std::vector<std::pair<std::uint32_t,std::uint32_t>> locations{
                         {1,1},
@@ -126,6 +128,7 @@ namespace cheese::tests::lexer_tests {
 
                     for (auto& to_test : literals_to_test) {
                         TEST_GEN_BEGIN(std::get<0>(to_test))
+                            TEST_SETUP_ERROR_OUTPUT;
                             std::vector<cheese::lexer::Token> tokens;
                             TEST_TRY(tokens = cheese::lexer::lex(std::get<1>(to_test)));
                             std::string message = "expected: 1 token, got: " + std::to_string(tokens.size()-1) + "\n";
@@ -148,6 +151,7 @@ namespace cheese::tests::lexer_tests {
                     };
                     for (auto& to_test : operators_to_test) {
                         TEST_GEN_BEGIN(std::get<0>(to_test))
+                            TEST_SETUP_ERROR_OUTPUT;
                             std::vector<cheese::lexer::Token> tokens;
                             TEST_TRY(tokens = cheese::lexer::lex(std::get<1>(to_test)));
                             std::string message = "expected: 1 token, got: " + std::to_string(tokens.size()-1) + "\n";

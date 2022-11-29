@@ -14,11 +14,14 @@
 #include <sstream>
 #include <unordered_map>
 #include <future>
+#include <mutex>
 namespace cheese::tests {
     std::unordered_map<std::uint32_t,TestSection*> all_test_sections;
     std::vector<std::uint32_t> all_priorities;
     void run_all_builtin() {
-        configuration::log_errors = false;
+//        configuration::log_errors = false;
+        configuration::log_errors = true;
+//        configuration::use_escape_sequences = false;
         std::sort(all_priorities.begin(),all_priorities.end());
         TestResults results;
         for (auto prio : all_priorities) {
@@ -255,31 +258,31 @@ namespace cheese::tests {
         return true;
     }
 
-    void gen_pass() {
+    void gen_pass(std::uint32_t nesting) {
         if (configuration::use_escape_sequences) {
             io::setForegroundColor(io::Color::Green);
         }
-        std::cout << "[PASS]\n";
+        test_output_message(nesting,"[PASS]\n");
         if (configuration::use_escape_sequences) {
             io::setForegroundColor(io::Color::Gray);
         }
     }
 
-    void gen_fail() {
+    void gen_fail(std::uint32_t nesting) {
         if (configuration::use_escape_sequences) {
             io::setForegroundColor(io::Color::Red);
         }
-        std::cout << "[FAIL]\n";
+        test_output_message(nesting,"[FAIL]\n");
         if (configuration::use_escape_sequences) {
             io::setForegroundColor(io::Color::Gray);
         }
     }
 
-    void gen_skip() {
+    void gen_skip(std::uint32_t nesting) {
         if (configuration::use_escape_sequences) {
             io::setForegroundColor(io::Color::Blue);
         }
-        std::cout << "[SKIP]\n";
+        test_output_message(nesting,"[SKIP]\n");
         if (configuration::use_escape_sequences) {
             io::setForegroundColor(io::Color::Gray);
         }
@@ -303,27 +306,34 @@ namespace cheese::tests {
     }
 
     void test_output_message(std::uint32_t nesting, std::string message) {
+        static bool start_new_indentation = true;
+        static std::mutex mut;
+        mut.lock();
         auto split = internal_split(message);
         for (auto& line : split) {
-            for (std::uint32_t tabs = 0; tabs < nesting; tabs++) {
-                std::cout << '\t';
+            if (start_new_indentation) {
+                for (std::uint32_t tabs = 0; tabs < nesting; tabs++) {
+                    std::cout << '\t';
+                }
             }
             std::cout << line;
+            start_new_indentation = line[line.size()-1] == '\n';
         }
+        mut.unlock();
     }
 
     void TestResults::display_results(std::uint32_t nesting) {
         test_output_message(nesting, "results:\n");
         test_output_message(nesting+1, "total amount of tests: ");
-        std::cout << (pass + fail + skip) << '\n';
+        test_output_message(nesting+1,std::to_string(pass + fail + skip) + "\n");
         test_output_message(nesting+1,"passed: ");
-        std::cout << pass << '\n';
+        test_output_message(nesting+1,std::to_string(pass)+"\n");
         test_output_message(nesting+1,"failed: ");
-        std::cout << fail << '\n';
+        test_output_message(nesting+1,std::to_string(fail)+"\n");
         test_output_message(nesting+1,"skipped: ");
-        std::cout << skip << '\n';
+        test_output_message(nesting+1,std::to_string(skip)+"\n");
         test_output_message(nesting+1, "percentage: ");
-        std::cout << static_cast<std::uint32_t>( (static_cast<double>(pass)/static_cast<double>(pass+fail+skip)) * 100) << "%\n";
+        test_output_message(nesting+1,std::to_string(static_cast<std::uint32_t>( (static_cast<double>(pass)/static_cast<double>(pass+fail+skip)) * 100)) + "%\n");
     }
 
     TestResults SectionMember::run(int nesting) {
@@ -341,7 +351,7 @@ namespace cheese::tests {
             } else {
                 configuration::warnings_are_errors = false;
             }
-            test_output_message(nesting, test_case->description + "...");
+            test_output_message(nesting, test_case->description + "\n");
             return test_case->run(nesting+1);
         }
     }
@@ -394,7 +404,7 @@ namespace cheese::tests {
                 res = future.get();
             } else {
                 thr.detach();
-                std::cout << '\n';
+                test_output_message(nesting,"\n");
                 test_output_message(nesting,"Skipping due to timeout ");
                 gen_skip();
             }
@@ -409,13 +419,12 @@ namespace cheese::tests {
 
         } catch (error::CompilerError& c) {
             gen_fail();
-            test_output_message(nesting,c.what());
-            std::cout << '\n';
+            test_output_message(nesting,c.what() + "\n");
             return TestResults{0,1,0};
         } catch (std::exception& e) {
             gen_fail();
             test_output_message(nesting,e.what());
-            std::cout << '\n';
+            test_output_message(nesting,"\n");
             return TestResults{0,1,0};
         }
         return TestResults{0,0,0};

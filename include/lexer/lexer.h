@@ -177,6 +177,7 @@ namespace cheese::lexer {
         Error, //An error token in the lexer
         Opaque,
         Export,
+        Impl, //Impl
         EoF, //End of File, ALWAYS KEEP THIS AT THE END OF THE PROGRAM
     };
     struct Token {

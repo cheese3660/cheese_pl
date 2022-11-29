@@ -74,9 +74,9 @@ namespace cheese::tests {
     void run_all_builtin();
     void run_json_tests(std::string filename);
     bool run_single_json_test(nlohmann::json test);
-    void gen_pass();
-    void gen_fail();
-    void gen_skip();
+    void gen_pass(std::uint32_t nesting = 0);
+    void gen_fail(std::uint32_t nesting = 0);
+    void gen_skip(std::uint32_t nesting = 0);
 
     void test_output_message(std::uint32_t nesting, std::string message); //Will properly indent and everything depending on the level of nesting
 }
@@ -147,13 +147,13 @@ using __current_section = __next_section;
 #define TEST_SUBSECTION(section_description) __TEST_SUBSECTION(__LINE__, section_description)
 //The current test failed with a message
 //This will print the message on the lines afterwards properly indented
-#define TEST_FAIL_MESSAGE(message) do {gen_fail(); test_output_message(__nesting, (message)); return SingleResult::Fail;} while(0)
-#define TEST_FAIL do {gen_fail(); return SingleResult::Fail;} while(0)
+#define TEST_FAIL_MESSAGE(message) do {gen_fail(__nesting); test_output_message(__nesting, (message)); return SingleResult::Fail;} while(0)
+#define TEST_FAIL do {gen_fail(__nesting); return SingleResult::Fail;} while(0)
 
-#define TEST_SKIP_MESSAGE(message) do {gen_skip(); test_output_message(__nesting, (message) return SingleResult::Skip;)} while (0)
-#define TEST_SKIP do {gen_skip(); return SingleResult::Skip;} while(0)
+#define TEST_SKIP_MESSAGE(message) do {gen_skip(__nesting); test_output_message(__nesting, (message) return SingleResult::Skip;)} while (0)
+#define TEST_SKIP do {gen_skip(__nesting); return SingleResult::Skip;} while(0)
 
-#define TEST_PASS do {gen_pass(); return SingleResult::Pass;} while(0)
+#define TEST_PASS do {gen_pass(__nesting); return SingleResult::Pass;} while(0)
 
 #define TEST_ASSERT(condition) do {if ((condition)) TEST_PASS; else TEST_FAIL;} while(0)
 #define TEST_ASSERT_MESSAGE(condition,message) do {if ((condition)) TEST_PASS; else TEST_FAIL_MESSAGE(message);} while(0)
@@ -177,6 +177,9 @@ using __current_section = __next_section;
 
 #define TEST_SKIP_IF(X) do {if (X) TEST_SKIP;} while (0)
 #define TEST_SKIP_IF_MESSAGE(X,message) do {if (X) TEST_SKIP_MESSAGE(message);} while 0
+
+
+#define TEST_SETUP_ERROR_OUTPUT configuration::error_output_handler = [__nesting](std::string msg) { test_output_message(__nesting,msg);}
 
 
 #define TEST_END }

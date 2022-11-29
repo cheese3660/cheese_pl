@@ -6,12 +6,18 @@
 #define CHEESE_CONFIGURATION_H
 #include <filesystem>
 #include <map>
-
+#include <functional>
 namespace cheese::configuration {
     enum class ReleaseMode {
         Debug,
         Release,
     };
+    void default_error_output_handler(std::string);
+
+
+    extern std::function<void(std::string)> error_output_handler;
+
+
     extern bool use_escape_sequences;
     extern ReleaseMode release_mode;
     extern std::filesystem::path project_directory;

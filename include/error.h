@@ -31,7 +31,7 @@ namespace cheese::error {
         XXXFoundInComment,
 
         //Parsing errors next
-        ExpectedOperator = parser_error_start,
+        ExpectedPrimary = parser_error_start,
         ExpectedStructureStatement,
         ExpectedFieldDeclaration,
         ExpectedImportName,
@@ -46,6 +46,10 @@ namespace cheese::error {
         ExpectedReturnSpecifier,
         ExpectedDestructuringStatement,
         ExpectedClosingParentheses,
+        ExpectedClosingBrace,
+        ExpectedClosingBracket,
+        ExpectedClose,
+        ExpectedOpeningBrace,
 
         //General error (thrown for example when multiple previous errors were printed)
         GeneralCompilerError = 9999,
@@ -70,9 +74,9 @@ namespace cheese::error {
 
     [[noreturn]] void raise_exiting_error(const char* module, std::string message, Coordinate location, ErrorCode code);
 
+    void make_note(const char* module, std::string message, Coordinate location);
     void raise_error(const char* module, std::string message, Coordinate location, ErrorCode code);
     void raise_warning(const char* module, std::string message, Coordinate location, ErrorCode code);
-
 
     //TODO: Errors with call stack
 }

@@ -771,8 +771,9 @@ if SomeInterface @* SomeType : someTypeValue
 
 ## Match Expressions
 
-Match expressions in Cheese are begun with the `match` keyword, they are then followed by a list of "arms" which follow
-the match arm syntax.
+Match expressions in Cheese are begun with the `match` keyword, then the value to match to, then `with` if the brackets 
+are on the same line as the `match` otherwise a newline, then `{`, they are then followed by a list of "arms" which follow
+the match arm syntax. Then closed by `}`.
 
 ### Match Arms
 
@@ -831,7 +832,7 @@ Same as the destructuring constraint, but an enum identifier is placed in front 
 
 ```cheese
 
-match node {
+match node with {
   .empty => ...
   .integer(0..255 -> small_int) => ...
   .integer(_ -> big_int) => ...

@@ -14,31 +14,40 @@ static inline bool instanceof(const T ptr) {
 }
 namespace cheese::parser {
 
-
     using enum lexer::TokenType;
-    [[noreturn]] void unexpected(lexer::Token& token, const std::string& expected, cheese::error::ErrorCode code) {
-        if (token.ty == EoF) {
-            error::raise_exiting_error("parser","unexpected EOF. expected: " + expected, token.location, code);
-        } else if (token.ty == StringLiteral || token.ty == CharacterLiteral) {
-            error::raise_exiting_error("parser", "unexpected token " + std::string(token.value) + ", expected: " + expected,token.location, code);
-        } else if (token.ty == NewLine) {
-            error::raise_exiting_error("parser","unexpected newline. expected: " + expected, token.location, code);
-        } else {
-            error::raise_exiting_error("parser", "unexpected token '" + std::string(token.value) + "', expected: " + expected,token.location, code);
-        }
-    }
-
     struct parser_state {
         std::vector<lexer::Token>& tokens;
         size_t location=0;
+        std::vector<std::tuple<error::ErrorCode, Coordinate, std::string>> all_raised_errors;
         [[nodiscard]] lexer::Token& peek();
         [[nodiscard]] lexer::Token& peek_skip_nl();
-        void eat(lexer::TokenType expected_type, const std::string& expected_message, cheese::error::ErrorCode code);
+        [[nodiscard]] std::optional<NodePtr> eat(lexer::TokenType expected_type, const std::string& expected_message, cheese::error::ErrorCode code);
         void eatAny();
+        void previous();
+        [[nodiscard]] NodePtr unexpected(lexer::Token& token, const std::string& expected, cheese::error::ErrorCode code) {
+            if (token.ty == EoF) {
+                return raise("parser","unexpected EOF. expected: " + expected, token.location, code);
+            } else if (token.ty == StringLiteral || token.ty == CharacterLiteral) {
+                return raise("parser", "unexpected token " + std::string(token.value) + ", expected: " + expected,token.location, code);
+            } else if (token.ty == NewLine) {
+                return raise("parser","unexpected newline. expected: " + expected, token.location, code);
+            } else {
+                return raise("parser", "unexpected token '" + std::string(token.value) + "', expected: " + expected,token.location, code);
+            }
+        }
+        [[nodiscard]] NodePtr raise(const char* module, std::string message, Coordinate loc, error::ErrorCode code) {
+            all_raised_errors.push_back({code,loc,message});
+            error::raise_error(module,message,loc,code);
+            return (new nodes::ErrorNode(loc,static_cast<uint64_t>(code),message))->get();
+        }
     };
 
     lexer::Token& parser_state::peek() {
         return tokens[location];
+    }
+
+    void parser_state::previous() {
+        if (location > 0) location--;
     }
 
     lexer::Token& parser_state::peek_skip_nl() {
@@ -52,18 +61,28 @@ namespace cheese::parser {
         if (location < tokens.size() - 1) location++;
     }
 
-    void parser_state::eat(lexer::TokenType expected_type, const std::string& expected_message, cheese::error::ErrorCode code) {
+    std::optional<NodePtr> parser_state::eat(lexer::TokenType expected_type, const std::string& expected_message, cheese::error::ErrorCode code) {
         auto& token = peek();
-        eatAny();
         if (token.ty != expected_type) {
-            unexpected(token,expected_message,code);
+            return unexpected(token, expected_message, code);
+        } else {
+            eatAny();
+            return std::optional<NodePtr>{};
         }
     }
 
     NodePtr parse_program(parser_state& state);
     NodePtr parse(std::vector<lexer::Token> &tokens) {
+        auto location = tokens[0].location;
         parser_state state{tokens,0};
-        return parse_program(state);
+        auto program = parse_program(state);
+        if (state.all_raised_errors.size() == 1) {
+            auto first = state.all_raised_errors[0];
+            error::raise_exiting_error("parser",std::get<2>(first),std::get<1>(first),std::get<0>(first));
+        } else if (state.all_raised_errors.size() > 1){
+            error::raise_exiting_error("parser","multiple syntax errors detected",location,error::ErrorCode::GeneralCompilerError);
+        }
+        return program;
     }
 
     NodePtr parse_statement(parser_state& state);
@@ -76,19 +95,21 @@ namespace cheese::parser {
         while (front.ty != EoF) {
             if (front.ty == Comma) {
                 if (!last_was_field) {
-                    error::raise_exiting_error("parser","Expected a semicolon to separate 2 non-field declarations", front.location,error::ErrorCode::IncorrectSeparator);
+                    children.push_back(state.raise("parser","Expected a semicolon to separate 2 non-field declarations", front.location,error::ErrorCode::IncorrectSeparator));
+                    state.eatAny();
                 } else {
                     state.eatAny();
                 }
             } else if (front.ty == Semicolon) {
                 state.eatAny();
-            }
-            auto last = parse_statement(state);
-            children.push_back(last);
-            if (instanceof<nodes::Field>(last)) {
-                last_was_field = true;
             } else {
-                last_was_field = false;
+                auto last = parse_statement(state);
+                children.push_back(last);
+                if (instanceof<nodes::Field>(last)) {
+                    last_was_field = true;
+                } else {
+                    last_was_field = false;
+                }
             }
             front = state.peek_skip_nl();
         }
@@ -105,6 +126,7 @@ namespace cheese::parser {
     NodePtr parse_expression(parser_state& state);
     NodePtr parse_unnamed_field(parser_state& state);
     NodePtr parse_block_statement(parser_state& state);
+    NodePtr parse_mixin(parser_state& state);
     NodePtr parse_statement(parser_state& state) {
         auto& front = state.peek_skip_nl();
 
@@ -125,10 +147,14 @@ namespace cheese::parser {
                 return parse_definition(state);
             case Comptime:
                 return parse_comptime(state);
+            case Impl:
+                return parse_mixin(state);
 //            case BuiltinReference:
 //                return parse_expression(state);
             default:
-                unexpected(front, "a structure statement (i.e. an import, function declaration, variable declaration, variable definition, comptime, or a field)", error::ErrorCode::ExpectedStructureStatement);
+                auto val = state.unexpected(front, "a structure statement (i.e. an import, function declaration, variable declaration, variable definition, comptime, or a field)", error::ErrorCode::ExpectedStructureStatement);
+                state.eatAny();
+                return val;
         }
     }
 
@@ -155,14 +181,17 @@ namespace cheese::parser {
             state.eatAny();
         }
         if (path.empty()) {
-            error::raise_exiting_error("parser","Missing import path following import statement", location, error::ErrorCode::ExpectedImportPath);
+            return state.raise("parser","Missing import path following import statement", location, error::ErrorCode::ExpectedImportPath);
         }
         auto front = state.peek_skip_nl();
         if (front.ty == Cast) {
             state.eatAny();
             front = state.peek_skip_nl();
             resolved_name = front.value;
-            state.eat(Identifier,"an identifier following an '@' for an import statement", error::ErrorCode::ExpectedImportName);
+            auto ident = state.eat(Identifier,"an identifier following an '@' for an import statement", error::ErrorCode::ExpectedImportName);
+            if (ident.has_value()) {
+                return ident.value();
+            }
         } else {
             resolved_name = last_name;
         }
@@ -172,17 +201,20 @@ namespace cheese::parser {
         auto front = state.peek_skip_nl();
         auto location = front.location;
         if (front.ty == Semicolon) {
-            error::raise_exiting_error("parser","expected ',' as a separator, not ';'",front.location,error::ErrorCode::IncorrectSeparator);
+            return state.raise("parser","expected ',' as a separator, not ';'",front.location,error::ErrorCode::IncorrectSeparator);
         }
         if (front.ty != Underscore && front.ty != Identifier) {
-            unexpected(front,"'_' or IDENT",error::ErrorCode::ExpectedName);
+            return state.unexpected(front,"'_' or IDENT",error::ErrorCode::ExpectedName);
         }
         std::optional<std::string> name;
         if (front.ty == Identifier) {
             name = static_cast<std::string>(front.value);
         }
         state.eatAny();
-        state.eat(Colon,"a ':' to denote the argument type", error::ErrorCode::ExpectedColon);
+        auto colon = state.eat(Colon,"a ':' to denote the argument type", error::ErrorCode::ExpectedColon);
+        if (colon.has_value()) {
+            return colon.value();
+        }
         auto type = parse_expression(state);
         bool comptime = state.peek_skip_nl().ty == Comptime;
         if (comptime) {
@@ -225,7 +257,7 @@ namespace cheese::parser {
                     f.entry = true;
                     break;
                 default:
-                    //unreachable
+                    //Maybe panic here
                     break;
             }
             state.eatAny();
@@ -241,22 +273,34 @@ namespace cheese::parser {
         state.eatAny();
         //At the top level we don't expect functional types or the such here
         auto name = state.peek_skip_nl().value;
-        state.eat(Identifier,"a function name for a structure level 'fn'",error::ErrorCode::ExpectedFunctionGeneratorName);
+        static_cast<void>(state.eat(Identifier,"a function name for a structure level 'function'",error::ErrorCode::ExpectedFunctionGeneratorName));
         NodeList arguments{};
         auto front = state.peek_skip_nl();
-        while (front.ty != ThickArrow) {
+        while (front.ty != ThickArrow && front.ty != EoF) {
             if (front.ty == Comma) {
                 state.eatAny();
             }
             else {
-                arguments.push_back(parse_argument(state));
+                auto argument = parse_argument(state);
+                if (instanceof<nodes::ErrorNode>(argument)) {
+                    //Continue until the next argument begins
+                    front = state.peek_skip_nl();
+                    while (front.ty != ThickArrow && front.ty != Identifier && front.ty != Underscore && front.ty !=EoF) {
+                        state.eatAny();
+                        front = state.peek_skip_nl();
+                    }
+                }
+                arguments.push_back(argument);
             }
             front = state.peek_skip_nl();
         }
-        state.eatAny();
+        static_cast<void>(state.eat(ThickArrow,"a '=>' to denote the return type", error::ErrorCode::ExpectedReturnSpecifier));
         NodePtr return_type = parse_expression(state);
+        if (instanceof<nodes::ObjectCall>(return_type)) {
+            error::make_note("parse","possibly ambiguous syntax, '{' is being treated as an object call rather than the body of a function, if this is not what you want this can be fixed by inserting  newline before the '{'",return_type->location);
+        }
         FlagSet fn_flags = parse_flags(state);
-        if (state.peek_skip_nl().ty == Prototype) {
+        if (state.peek_skip_nl().ty == Prototype ){
             state.eatAny();
             return (new nodes::FunctionPrototype(location,static_cast<std::string>(name),arguments,return_type,fn_flags))->get();
         } else if (state.peek_skip_nl().ty == Import) {
@@ -273,22 +317,34 @@ namespace cheese::parser {
         state.eatAny();
         //At the top level we don't expect functional types or the such here
         auto name = state.peek_skip_nl().value;
-        state.eat(Identifier,"a generator name for a structure level 'generator'",error::ErrorCode::ExpectedFunctionGeneratorName);
+        static_cast<void>(state.eat(Identifier,"a generator name for a structure level 'generator'",error::ErrorCode::ExpectedFunctionGeneratorName));
         NodeList arguments{};
         auto front = state.peek_skip_nl();
-        while (front.ty != ThickArrow) {
+        while (front.ty != ThickArrow && front.ty != EoF) {
             if (front.ty == Comma) {
                 state.eatAny();
             }
             else {
-                arguments.push_back(parse_argument(state));
+                auto argument = parse_argument(state);
+                if (instanceof<nodes::ErrorNode>(argument)) {
+                    //Continue until the next argument begins
+                    front = state.peek_skip_nl();
+                    while (front.ty != ThickArrow && front.ty != Identifier && front.ty != Underscore && front.ty !=EoF) {
+                        state.eatAny();
+                        front = state.peek_skip_nl();
+                    }
+                }
+                arguments.push_back(argument);
             }
             front = state.peek_skip_nl();
         }
-        state.eatAny();
+        static_cast<void>(state.eat(ThickArrow,"a '=>' to denote the return type", error::ErrorCode::ExpectedReturnSpecifier));
         NodePtr return_type = parse_expression(state);
+        if (instanceof<nodes::ObjectCall>(return_type)) {
+            error::make_note("parse","possibly ambiguous syntax, '{' is being treated as an object call rather than the body of a generator, if this is not what you want this can be fixed by inserting  newline before the '{'",return_type->location);
+        }
         FlagSet fn_flags = parse_flags(state);
-        if (state.peek_skip_nl().ty == Prototype) {
+        if (state.peek_skip_nl().ty == Prototype ){
             state.eatAny();
             return (new nodes::GeneratorPrototype(location,static_cast<std::string>(name),arguments,return_type,fn_flags))->get();
         } else if (state.peek_skip_nl().ty == Import) {
@@ -304,7 +360,7 @@ namespace cheese::parser {
         auto front = state.peek_skip_nl();
         auto location = front.location;
         auto name = front.value;
-        state.eat(Identifier,"a variable name",error::ErrorCode::ExpectedName);
+        static_cast<void>(state.eat(Identifier,"a variable name",error::ErrorCode::ExpectedName));
         front = state.peek_skip_nl();
         std::optional<NodePtr> ty;
         if (front.ty == Colon) {
@@ -312,7 +368,9 @@ namespace cheese::parser {
             ty = parse_expression(state);
         }
         auto flags = parse_flags(state);
-
+//        if (err.has_value()) {
+//            return err.value(); //Parse everything else first as it means there is a higher chance of recovery
+//        }
         return (new nodes::VariableDefinition(location,static_cast<std::string>(name),ty,flags))->get();
     }
 
@@ -331,7 +389,7 @@ namespace cheese::parser {
         state.eatAny();
         auto front = state.peek_skip_nl();
         NodeList children{};
-        while (front.ty != RightBracket) {
+        while (front.ty != RightBracket && front.ty != EoF) {
             if (front.ty == Comma) {
                 state.eatAny();
             }
@@ -340,26 +398,11 @@ namespace cheese::parser {
             }
             front = state.peek_skip_nl();
         }
-        state.eatAny();
+        auto err = state.eat(RightBracket, "a ']' to close off an array destructuring", error::ErrorCode::ExpectedClosingBracket);
+        if (err.has_value()) {
+            children.push_back(err.value());
+        }
         return (new nodes::ArrayDestructure(location,children))->get();
-    }
-
-    NodePtr parse_destructure_slice(parser_state& state) {
-        auto location = state.peek_skip_nl().location;
-        state.eatAny();
-        auto front = state.peek_skip_nl();
-        NodeList children{};
-        while (front.ty != GreaterThan) {
-            if (front.ty == Comma) {
-                state.eatAny();
-            }
-            else {
-                children.push_back(parse_destructure_statement(state));
-            }
-            front = state.peek_skip_nl();
-        }
-        state.eatAny();
-        return (new nodes::SliceDestructure(location,children))->get();
     }
 
     NodePtr parse_destructure_tuple(parser_state& state) {
@@ -367,7 +410,7 @@ namespace cheese::parser {
         state.eatAny();
         auto front = state.peek_skip_nl();
         NodeList children{};
-        while (front.ty != RightParen) {
+        while (front.ty != RightParen && front.ty != EoF) {
             if (front.ty == Comma) {
                 state.eatAny();
             }
@@ -376,7 +419,10 @@ namespace cheese::parser {
             }
             front = state.peek_skip_nl();
         }
-        state.eatAny();
+        auto err = state.eat(RightParen,"a ')' to close off a tuple destructuring", error::ErrorCode::ExpectedClosingParentheses);
+        if (err.has_value()) {
+            children.push_back(err.value());
+        }
         return (new nodes::TupleDestructure(location,children))->get();
     }
 
@@ -385,21 +431,29 @@ namespace cheese::parser {
         state.eatAny();
         auto front = state.peek_skip_nl();
         NodeDict children;
-        while (front.ty != RightBrace) {
+        std::uint64_t error_num = 0;
+        while (front.ty != RightBrace && front.ty != EoF) {
             if (front.ty == Comma) {
                 state.eatAny();
             } else if (front.ty == Underscore || front.ty == Identifier) {
                 auto name = static_cast<std::string>(front.value);
                 state.eatAny();
-                state.eat(Colon,"a ':'",error::ErrorCode::ExpectedColon);
+                auto err = state.eat(Colon,"a ':'",error::ErrorCode::ExpectedColon);
+                if (err.has_value()) {
+                    return err.value();
+                }
                 auto value = parse_destructure_statement(state);
                 children[name] = value;
             } else {
-                unexpected(front,"a structure destructuring specifier",error::ErrorCode::ExpectedDestructuringStatement);
+                children["$e"+ std::to_string(error_num++)] = state.unexpected(front,"a structure destructuring specifier",error::ErrorCode::ExpectedDestructuringStatement);
+                state.eatAny();
             }
             front = state.peek_skip_nl();
         }
-        state.eatAny();
+        auto err = state.eat(RightBrace,"a '}' to close off a destructuring statement", error::ErrorCode::ExpectedClosingBrace);
+        if (err.has_value()) {
+            children["$e"+std::to_string(error_num)] = err.value();
+        }
         return (new nodes::StructureDestructure(location,children))->get();
     }
 
@@ -411,8 +465,6 @@ namespace cheese::parser {
                 return (new nodes::Underscore(front.location))->get();
             case LeftBracket:
                 return parse_destructure_array(state);
-            case LessThan:
-                return parse_destructure_slice(state);
             case LeftParen:
                 return parse_destructure_tuple(state);
             case LeftBrace:
@@ -424,8 +476,13 @@ namespace cheese::parser {
 
     NodePtr parse_destructure(parser_state& state, Coordinate location) {
         auto structure = parse_destructure_statement(state);
-        state.eat(Assign,"an '=' for a variable destructuring",error::ErrorCode::UninitializedDeclaration);
-        auto value = parse_expression(state);
+        auto err = state.eat(Assign,"an '=' for a variable destructuring",error::ErrorCode::UninitializedDeclaration);
+        NodePtr value;
+        if (err.has_value()) {
+            value = err.value();
+        } else {
+            value = parse_expression(state);
+        }
         return (new nodes::Destructure(location,structure,value))->get();
     }
 
@@ -433,13 +490,18 @@ namespace cheese::parser {
         auto location = state.peek_skip_nl().location;
         state.eatAny();
         auto fty = state.peek_skip_nl().ty;
-        if (fty == LeftBrace || fty == LeftBracket || fty == LeftParen || fty == Underscore || fty == LessThan) {
+        if (fty == LeftBrace || fty == LeftBracket || fty == LeftParen || fty == Underscore) {
             return parse_destructure(state,location);
         }
 
         auto def = parse_def(state);
-        state.eat(Assign,"an '=' for a variable declaration",error::ErrorCode::UninitializedDeclaration);
-        auto val = parse_expression(state);
+        auto err = state.eat(Assign,"an '=' for a variable declaration",error::ErrorCode::UninitializedDeclaration);
+        NodePtr val;
+        if (err.has_value()) {
+            val = err.value();
+        } else {
+            val = parse_expression(state);
+        }
         return (new nodes::VariableDeclaration(location,def,val))->get();
     }
 
@@ -447,10 +509,14 @@ namespace cheese::parser {
         auto location = state.peek_skip_nl().location;
         std::optional<std::string> name = static_cast<std::string>(state.peek_skip_nl().value);
         state.eatAny();
-        state.eat(Colon,"a ':' for a field declaration",error::ErrorCode::ExpectedColon);
-        auto type = parse_expression(state);
+        auto err = state.eat(Colon,"a ':' for a field declaration",error::ErrorCode::ExpectedColon);
+        NodePtr type;
+        if (err.has_value()) {
+            type = err.value();
+        } else {
+            type = parse_expression(state);
+        }
         auto flags = parse_flags(state);
-
         return (new nodes::Field(location,name,type,flags))->get();
     }
 
@@ -458,10 +524,15 @@ namespace cheese::parser {
         auto location = state.peek_skip_nl().location;
         std::optional<std::string> name;
         state.eatAny();
-        state.eat(Colon,"a ':' for a field declaration",error::ErrorCode::ExpectedColon);
-        auto type = parse_expression(state);
-        auto flags = parse_flags(state);
-
+        auto err = state.eat(Colon,"a ':' for a field declaration",error::ErrorCode::ExpectedColon);
+        NodePtr type;
+        FlagSet flags;
+        if (err.has_value()) {
+            type = err.value();
+        } else {
+            type = parse_expression(state);
+            flags = parse_flags(state);
+        }
         return (new nodes::Field(location,name,type,flags))->get();
     }
 
@@ -470,6 +541,67 @@ namespace cheese::parser {
         auto location = state.peek_skip_nl().location;
         state.eatAny();
         return (new nodes::Comptime(location, parse_expression(state)))->get();
+    }
+
+    NodePtr parse_mixin(parser_state& state) {
+        auto location = state.peek_skip_nl().location;
+        state.eatAny();
+        auto structure = parse_expression(state);
+        NodeList interfaces{};
+        NodeList children{};
+        auto err = state.eat(Colon,"a ':' to begin a mixin",error::ErrorCode::ExpectedColon);
+        if (err.has_value()) {
+            interfaces.push_back(err.value());
+        }
+        auto front = state.peek_skip_nl();
+        while (front.ty != EoF && front.ty != LeftBrace) {
+            if (front.ty == Comma) {
+                state.eatAny();
+            } else {
+                auto expr = parse_expression(state);
+                if (instanceof<nodes::ObjectCall>(expr)) {
+                    error::make_note("parse","possibly ambiguous syntax, '{' is being treated as an object call rather than the body of a mixin, if this is not what you want this can be fixed by inserting a comma or newline before the '{'",expr->location);
+                }
+                interfaces.push_back(expr);
+            }
+            front = state.peek_skip_nl();
+        }
+        err = state.eat(LeftBrace, "a '{' to begin the body of a mixin",error::ErrorCode::ExpectedOpeningBrace);
+        if (err.has_value()) {
+            children.push_back(err.value());
+            //Return an empty mixin
+            return (new nodes::Mixin(location,structure,interfaces,children))->get();
+        }
+
+        front = state.peek_skip_nl();
+        bool last_was_field = false;
+        while (front.ty != EoF && front.ty != RightBrace) {
+            if (front.ty == Comma) {
+                if (!last_was_field) {
+                    children.push_back(state.raise("parser","Expected a semicolon to separate 2 non-field declarations", front.location,error::ErrorCode::IncorrectSeparator));
+                    state.eatAny();
+                } else {
+                    state.eatAny();
+                }
+            } else if (front.ty == Semicolon) {
+                state.eatAny();
+            } else {
+
+                auto last = parse_statement(state);
+                children.push_back(last);
+                if (instanceof<nodes::Field>(last)) {
+                    last_was_field = true;
+                } else {
+                    last_was_field = false;
+                }
+            }
+            front = state.peek_skip_nl();
+        }
+        err = state.eat(RightBrace,"a '}' to end a structure declaration",error::ErrorCode::ExpectedClosingBrace);
+        if (err.has_value()) {
+            children.push_back(err.value());
+        }
+        return (new nodes::Mixin(location,structure,interfaces,children))->get();
     }
     NodePtr parse_primary(parser_state& state);
     NodePtr parse_expression(parser_state& state, NodePtr old_lhs, uint8_t min_precedence);
@@ -648,31 +780,44 @@ namespace cheese::parser {
 
     NodeList parse_call_list(parser_state& state, lexer::TokenType ending_type) {
         NodeList list;
-        while (state.peek_skip_nl().ty != ending_type) {
+        while (state.peek_skip_nl().ty != ending_type && state.peek_skip_nl().ty != EoF) {
             if (state.peek_skip_nl().ty == Comma) {
                 state.eatAny();
                 continue;
             }
             list.push_back(parse_expression(state));
         }
-        state.eatAny();
+        auto err = state.eat(ending_type,"a matching bracket to close a call list (either ']' or ')')", error::ErrorCode::ExpectedClose);
+        if (err.has_value()) {
+            list.push_back(err.value());
+        }
         return list;
     }
 
     NodeDict parse_object_list(parser_state& state) {
         NodeDict dict;
-        while (state.peek_skip_nl().ty != RightBrace) {
+        std::uint64_t err_num{0};
+        while (state.peek_skip_nl().ty != RightBrace && state.peek_skip_nl().ty != EoF) {
             if (state.peek_skip_nl().ty == Comma) {
                 state.eatAny();
                 continue;
             }
             std::string name = static_cast<std::string>(state.peek_skip_nl().value);
-            state.eat(Identifier,"a field name for an object",error::ErrorCode::ExpectedName);
-            state.eat(Colon,"a ':' for an object",error::ErrorCode::ExpectedColon);
+            auto err = state.eat(Identifier,"a field name for an object",error::ErrorCode::ExpectedName);
+            if (err.has_value()) {
+                dict["$e"+std::to_string(err_num++)] = err.value();
+            }
+            err = state.eat(Colon,"a ':' for an object",error::ErrorCode::ExpectedColon);
+            if (err.has_value()) {
+                dict["$e"+std::to_string(err_num++)] = err.value();
+            }
             NodePtr value = parse_expression(state);
             dict[name] = value;
         }
-        state.eatAny();
+        auto err = state.eat(RightBrace,"a '}' to close off an object literal", error::ErrorCode::ExpectedClosingBrace);
+        if (err.has_value()) {
+            dict["$e"+std::to_string(err_num)] = err.value();
+        }
         return dict;
     }
 
@@ -747,7 +892,7 @@ namespace cheese::parser {
         } else if (front.ty == ConstPointer) {
             capture_type = 2;
         } else {
-            unexpected(front,"'*', '*~', '=' for a capture",error::ErrorCode::ExpectedCaptureSpecifier);
+            return state.unexpected(front,"'*', '*~', '=' for a capture",error::ErrorCode::ExpectedCaptureSpecifier);
         }
         state.eatAny();
         front = state.peek_skip_nl();
@@ -786,7 +931,10 @@ namespace cheese::parser {
             }
             front = state.peek_skip_nl();
         }
-        state.eat(Pipe,"'|' to end an argument list", error::ErrorCode::UnexpectedEoF);
+        auto err = state.eat(Pipe,"'|' to end an argument list", error::ErrorCode::UnexpectedEoF);
+        if (err.has_value()) {
+            arguments.push_back(err.value());
+        }
         front = state.peek_skip_nl();
         NodeList captures;
         if (front.ty == LeftBracket) {
@@ -800,12 +948,18 @@ namespace cheese::parser {
                 }
                 front = state.peek_skip_nl();
             }
-            state.eat(RightBracket,"']' to end a capture list", error::ErrorCode::UnexpectedEoF);
+            err = state.eat(RightBracket,"']' to end a capture list", error::ErrorCode::UnexpectedEoF);
+            if (err.has_value()) {
+                captures.push_back(err.value());
+            }
         }
         std::optional<NodePtr> return_type;
         if (front.ty == ThickArrow) {
             state.eatAny();
             return_type = parse_expression(state);
+            if (instanceof<nodes::ObjectCall>(return_type.value())) {
+                error::make_note("parse","possibly ambiguous syntax, '{' is being treated as an object call rather than the body of a closure, if this is not what you want this can be fixed by inserting  newline before the '{'",return_type.value()->location);
+            }
         }
         NodePtr body = parse_block_statement(state);
         return (new nodes::Closure(location,arguments,captures,return_type,body))->get();
@@ -813,7 +967,7 @@ namespace cheese::parser {
 
     NodePtr parse_function_type(parser_state& state, Coordinate location) {
         auto arg_types = parse_call_list(state,RightParen);
-        state.eat(ThickArrow,"a '=>' for signalling the return type of a function type",error::ErrorCode::ExpectedReturnSpecifier);
+        static_cast<void>(state.eat(ThickArrow,"a '=>' for signalling the return type of a function type",error::ErrorCode::ExpectedReturnSpecifier));
         NodePtr return_type = parse_expression(state);
         FlagSet fn_flags = parse_flags(state);
         return (new nodes::FunctionType(location,arg_types,return_type,fn_flags))->get();
@@ -828,17 +982,29 @@ namespace cheese::parser {
         } else {
             NodeList arguments{};
             auto front = state.peek_skip_nl();
-            while (front.ty != ThickArrow) {
+            while (front.ty != ThickArrow && front.ty != EoF) {
                 if (front.ty == Comma) {
                     state.eatAny();
                 }
                 else {
-                    arguments.push_back(parse_argument(state));
+                    auto argument = parse_argument(state);
+                    if (instanceof<nodes::ErrorNode>(argument)) {
+                        //Continue until the next argument begins
+                        front = state.peek_skip_nl();
+                        while (front.ty != ThickArrow && front.ty != Identifier && front.ty != Underscore && front.ty !=EoF) {
+                            state.eatAny();
+                            front = state.peek_skip_nl();
+                        }
+                    }
+                    arguments.push_back(argument);
                 }
                 front = state.peek_skip_nl();
             }
-            state.eatAny();
+            static_cast<void>(state.eat(ThickArrow,"a '=>' to specify a return",error::ErrorCode::ExpectedReturnSpecifier));
             NodePtr return_type = parse_expression(state);
+            if (instanceof<nodes::ObjectCall>(return_type)) {
+                error::make_note("parse","possibly ambiguous syntax, '{' is being treated as an object call rather than the body of a function, if this is not what you want this can be fixed by inserting  newline before the '{'",return_type->location);
+            }
             FlagSet fn_flags = parse_flags(state);
             NodePtr body = parse_block_statement(state);
             return (new nodes::AnonymousFunction(location,arguments,return_type,fn_flags,body))->get();
@@ -847,7 +1013,7 @@ namespace cheese::parser {
 
     NodePtr parse_generator_type(parser_state& state, Coordinate location) {
         auto arg_types = parse_call_list(state,RightParen);
-        state.eat(ThickArrow,"a '=>' for signalling the return type of a generator type",error::ErrorCode::ExpectedReturnSpecifier);
+        static_cast<void>(state.eat(ThickArrow,"a '=>' for signalling the return type of a generator type",error::ErrorCode::ExpectedReturnSpecifier));
         NodePtr return_type = parse_expression(state);
         FlagSet fn_flags = parse_flags(state);
         return (new nodes::GeneratorType(location,arg_types,return_type,fn_flags))->get();
@@ -863,17 +1029,29 @@ namespace cheese::parser {
             NodeList arguments{};
             auto front = state.peek_skip_nl();
 
-            while (front.ty != ThickArrow) {
+            while (front.ty != ThickArrow && front.ty != EoF) {
                 if (front.ty == Comma) {
                     state.eatAny();
                 }
                 else {
-                    arguments.push_back(parse_argument(state));
+                    auto argument = parse_argument(state);
+                    if (instanceof<nodes::ErrorNode>(argument)) {
+                        //Continue until the next argument begins
+                        front = state.peek_skip_nl();
+                        while (front.ty != ThickArrow && front.ty != Identifier && front.ty != Underscore && front.ty !=EoF) {
+                            state.eatAny();
+                            front = state.peek_skip_nl();
+                        }
+                    }
+                    arguments.push_back(argument);
                 }
                 front = state.peek_skip_nl();
             }
-            state.eatAny();
+            static_cast<void>(state.eat(ThickArrow,"a '=>' to specify a return",error::ErrorCode::ExpectedReturnSpecifier));
             NodePtr return_type = parse_expression(state);
+            if (instanceof<nodes::ObjectCall>(return_type)) {
+                error::make_note("parse","possibly ambiguous syntax, '{' is being treated as an object call rather than the body of a function, if this is not what you want this can be fixed by inserting  newline before the '{'",return_type->location);
+            }
             FlagSet fn_flags = parse_flags(state);
             NodePtr body = parse_block_statement(state);
             return (new nodes::AnonymousGenerator(location,arguments,return_type,fn_flags,body))->get();
@@ -898,6 +1076,74 @@ namespace cheese::parser {
         }
         state.eatAny();
         return (new nodes::Block(location,nodes))->get();
+    }
+
+    NodePtr parse_structure(parser_state& state) {
+        auto location = state.peek_skip_nl().location;
+        state.eatAny();
+        bool is_tuple = false;
+        NodeList children{};
+        NodeList interfaces{};
+        auto front = state.peek_skip_nl();
+        if (front.ty != LeftBrace&& front.ty != LeftParen && front.ty != Impl) {
+            return (new nodes::Structure(location,interfaces,children,is_tuple))->get();
+        }
+        if (front.ty == Impl) {
+            state.eatAny();
+            front = state.peek_skip_nl();
+            while (front.ty != EoF && front.ty != LeftBrace) {
+                if (front.ty == Comma) {
+                    state.eatAny();
+                } else {
+                    auto expr = parse_expression(state);
+                    if (instanceof<nodes::ObjectCall>(expr)) {
+                        error::make_note("parse","possibly ambiguous syntax, '{' is being treated as an object call rather than the body of a structure, if this is not what you want this can be fixed by inserting a comma or newline before the '{'",expr->location);
+                    }
+                    interfaces.push_back(expr);
+                }
+                front = state.peek_skip_nl();
+            }
+            if (front.ty != LeftBrace) {
+                children.push_back(state.unexpected(front,"a '{' to begin a structure",error::ErrorCode::ExpectedOpeningBrace));
+                return (new nodes::Structure(location,interfaces,children,is_tuple))->get();
+            }
+        }
+        if (front.ty == LeftParen) {
+            state.eatAny();
+            is_tuple = true;
+            children = parse_call_list(state,RightParen);
+        } else {
+            state.eatAny();
+            front = state.peek_skip_nl();
+            bool last_was_field = false;
+            while (front.ty != EoF && front.ty != RightBrace) {
+                if (front.ty == Comma) {
+                    if (!last_was_field) {
+                        children.push_back(state.raise("parser","Expected a semicolon to separate 2 non-field declarations", front.location,error::ErrorCode::IncorrectSeparator));
+                        state.eatAny();
+                    } else {
+                        state.eatAny();
+                    }
+                } else if (front.ty == Semicolon) {
+                    state.eatAny();
+                } else {
+
+                    auto last = parse_statement(state);
+                    children.push_back(last);
+                    if (instanceof<nodes::Field>(last)) {
+                        last_was_field = true;
+                    } else {
+                        last_was_field = false;
+                    }
+                }
+                front = state.peek_skip_nl();
+            }
+            auto err = state.eat(RightBrace,"a '}' to end a structure declaration",error::ErrorCode::ExpectedClosingBrace);
+            if (err.has_value()) {
+                children.push_back(err.value());
+            }
+        }
+        return (new nodes::Structure(location,interfaces,children,is_tuple))->get();
     }
 
     NodePtr parse_primary_base(parser_state& state) {
@@ -1061,7 +1307,10 @@ namespace cheese::parser {
             {
                 state.eatAny();
                 auto id = static_cast<std::string>(state.peek_skip_nl().value);
-                state.eat(Identifier,"an identifier for an enum literal",error::ErrorCode::ExpectedName);
+                auto err = state.eat(Identifier,"an identifier for an enum literal",error::ErrorCode::ExpectedName);
+                if (err.has_value()) {
+                    return err.value();
+                }
                 return (new nodes::EnumLiteral(location,id))->get();
             }
             case Any:
@@ -1078,39 +1327,12 @@ namespace cheese::parser {
             {
                 return parse_block(state);
             }
-            default:
-                std::string not_impl_for = static_cast<std::string>(lexer::name_of(front.ty)) + " (" + static_cast<std::string>(front.value) + ")";
-                NOT_IMPL_FOR(not_impl_for)
-        }
-    }
-    bool valid_assignment_operator(lexer::TokenType ty) {
-        switch (ty) {
-            case Redefine:
-            case Assign:
-            case AddAssign:
-            case SubAssign:
-            case MulAssign:
-            case DivAssign:
-            case ModAssign:
-            case XorAssign:
-            case OrAssign:
-            case AndAssign:
-            case LeftShiftAssign:
-            case RightShiftAssign:
-                return true;
-            default:
-                return false;
-        }
-    }
-
-    NodePtr parse_block_statement(parser_state& state) {
-        auto front = state.peek_skip_nl();
-        auto location = front.location;
-        switch (front.ty) {
-            case Let:
-                return parse_variable_decl(state);
-            case Def:
-                return parse_definition(state);
+            case LeftParen: {
+                state.eatAny();
+                auto result = parse_expression(state);
+                static_cast<void>(state.eat(RightParen,"a ')' to close off a '('", error::ErrorCode::ExpectedClosingParentheses));
+                return result;
+            }
             case DoubleThickArrow:
             {
                 state.eatAny();
@@ -1144,8 +1366,8 @@ namespace cheese::parser {
                 state.eatAny();
                 front = state.peek();
                 auto name = static_cast<std::string>(front.value);
-                state.eat(Identifier,"a block name",error::ErrorCode::ExpectedName);
-                state.eat(RightParen,"a ')' to close off a named block yield", error::ErrorCode::ExpectedClosingParentheses);
+                static_cast<void>(state.eat(Identifier,"a block name",error::ErrorCode::ExpectedName));
+                static_cast<void>(state.eat(RightParen,"a ')' to close off a named block yield", error::ErrorCode::ExpectedClosingParentheses));
                 auto result = parse_expression(state);
                 return (new nodes::NamedBreak(location,name,result))->get();
             }
@@ -1155,6 +1377,47 @@ namespace cheese::parser {
             case Break:
                 state.eatAny();
                 return (new nodes::EmptyBreak(location))->get();
+            case Comptime:
+                return parse_comptime(state);
+            case Struct:
+                return parse_structure(state);
+            default:
+                auto res = state.unexpected(front,"any primary value",error::ErrorCode::ExpectedPrimary);
+                if (front.ty == EoF) {
+                    return res;
+                }
+                state.eatAny();
+                return parse_primary_base(state);
+        }
+    }
+    bool valid_assignment_operator(lexer::TokenType ty) {
+        switch (ty) {
+            case Redefine:
+            case Assign:
+            case AddAssign:
+            case SubAssign:
+            case MulAssign:
+            case DivAssign:
+            case ModAssign:
+            case XorAssign:
+            case OrAssign:
+            case AndAssign:
+            case LeftShiftAssign:
+            case RightShiftAssign:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    NodePtr parse_block_statement(parser_state& state) {
+        auto front = state.peek_skip_nl();
+        auto location = front.location;
+        switch (front.ty) {
+            case Let:
+                return parse_variable_decl(state);
+            case Def:
+                return parse_definition(state);
             default: {
                 auto base = parse_expression(state);
                 front = state.peek();

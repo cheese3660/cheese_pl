@@ -8,6 +8,7 @@
 #else
 #include <unistd.h>
 #endif
+#include <iostream>
 namespace cheese::configuration {
     bool use_escape_sequences = true;
     ReleaseMode release_mode = ReleaseMode::Debug;
@@ -17,6 +18,8 @@ namespace cheese::configuration {
     bool log_errors = true;
     bool warnings_are_errors = false;
     bool die_on_first_error = false;
+
+    std::function<void(std::string)> error_output_handler = default_error_output_handler;
 
     void setup_escape_sequences() {
 #ifdef WIN32
@@ -41,5 +44,9 @@ namespace cheese::configuration {
             use_escape_sequences = false;
         }
 #endif
+    }
+
+    void default_error_output_handler(std::string err) {
+        std::cout << err;
     }
 } // cheese::configuration

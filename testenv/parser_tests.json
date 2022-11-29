@@ -1128,7 +1128,7 @@
   ],
   [
     "functions: multiple arguments, no modifiers (block)",
-    "fn a b:any,c:any=>any\n{==>a+b}",
+    "fn a b:any,c:any=>any\n{==>b+c}",
     {
       "type": "struct",
       "children": [
@@ -1971,7 +1971,7 @@
   ],
   [
     "structure types: structure, no children, single interface",
-    "let p=struct impl X {}",
+    "let p=struct impl X, {}",
     {
       "type": "struct",
       "children": [
@@ -1996,7 +1996,7 @@
   ],
   [
     "structure types: structure, single child, single interface",
-    "let p=struct impl X {a:bool}",
+    "let p=struct impl X\n{a:bool}",
     {
       "type": "struct",
       "children": [
@@ -2030,7 +2030,7 @@
   ],
   [
     "structure types: structure, multiple children, single interface",
-    "let p=struct impl X {a:bool b:bool}",
+    "let p=struct impl X,{a:bool b:bool}",
     {
       "type": "struct",
       "children": [
@@ -2071,7 +2071,7 @@
   ],
   [
     "structure types: structure, no children, multiple interfaces",
-    "let p=struct impl X, Y {}",
+    "let p=struct impl X, Y\n{}",
     {
       "type": "struct",
       "children": [
@@ -2100,7 +2100,7 @@
   ],
   [
     "structure types: structure, single child, multiple interfaces",
-    "let p=struct impl X Y {a:bool}",
+    "let p=struct impl X Y, {a:bool}",
     {
       "type": "struct",
       "children": [
@@ -2138,7 +2138,7 @@
   ],
   [
     "structure types: structure, multiple children, multiple interfaces",
-    "let p=struct impl X, Y {a:bool,b:bool}",
+    "let p=struct impl X, Y\n{a:bool,b:bool}",
     {
       "type": "struct",
       "children": [
@@ -2250,17 +2250,17 @@
   ],
   [
     "mixins: single interface",
-    "impl p: X {}",
+    "impl p: X,{}",
     {
       "type": "struct",
       "children": [
         {
           "type": "mixin",
-          "mixin_type": {
+          "structure": {
             "type": "ref",
             "name": "p"
           },
-          "mixins": [
+          "interfaces": [
             {
               "type": "ref",
               "name": "X"
@@ -2272,17 +2272,17 @@
   ],
   [
     "mixins: multiple interfaces",
-    "impl p: X,Y {}",
+    "impl p: X,Y\n{}",
     {
       "type": "struct",
       "children": [
         {
           "type": "mixin",
-          "mixin_type": {
+          "structure": {
             "type": "ref",
             "name": "p"
           },
-          "mixins": [
+          "interfaces": [
             {
               "type": "ref",
               "name": "X"

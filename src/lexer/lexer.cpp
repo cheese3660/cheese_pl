@@ -73,6 +73,7 @@ namespace cheese::lexer {
         RESERVED(is,TokenType::Is)
         RESERVED(opaque,TokenType::Opaque)
         RESERVED(export,TokenType::Export)
+        RESERVED(impl, TokenType::Impl)
     };
 #undef  RESERVED
     const auto builtin_macros = std::vector<std::string_view>{
@@ -608,6 +609,7 @@ namespace cheese::lexer {
                 }
                 case ':':
                     ADVANCE;
+                    view_size++;
                     if (PEEK == '=') {
                         SINGLE(TokenType::Redefine);
                     } else {
@@ -790,7 +792,8 @@ namespace cheese::lexer {
                     } else if (validDBeg(current)) {
                         tokens.push_back(number());
                     } else if (errorInvalid) {
-                        error::raise_exiting_error("LEXER", "unexpected character", start_location, error::ErrorCode::UnexpectedCharacter);
+                        error::raise_error("lexer", "unexpected character", start_location, error::ErrorCode::UnexpectedCharacter);
+                        ADVANCE;
                     } else {
                         SINGLE(TokenType::Error);
                     }
@@ -951,6 +954,7 @@ namespace cheese::lexer {
             MAP(Is),
             MAP(Opaque),
             MAP(Export),
+            MAP(Impl)
     };
 
 #undef MAP

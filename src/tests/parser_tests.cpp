@@ -12,8 +12,19 @@
 #include "error.h"
 #include "fstream"
 #include "sstream"
-
+#include "filesystem"
 namespace cheese::tests::parser_tests {
+    struct TempFile {
+        std::string name;
+        TempFile(std::string name, std::string data) : name(name) {
+            std::ofstream f{name};
+            f << data;
+        }
+        ~TempFile() {
+            std::filesystem::remove(name);
+        }
+    };
+
     TEST_SECTION("parser", 1)
         TEST_SUBSECTION("generated tests")
             //This should contain the minimized and deflated json in the parser_tests.json file in this same directory.
@@ -29,9 +40,14 @@ namespace cheese::tests::parser_tests {
                     for (size_t i = 0; i < generated_tests_json.size(); i++) {
                         auto test = generated_tests_json[i];
                         TEST_GEN_BEGIN(test[0].get<std::string>())
+
+                            configuration::error_output_handler = [__nesting](std::string msg) {
+                                test_output_message(__nesting,msg);
+                            };
                             std::vector<lexer::Token> tokens;
                             auto buffer = test[1].get<std::string>();
-                            TEST_TRY(tokens = lexer::lex(buffer));
+                            auto tf = TempFile("__testing_temp_file__",buffer);
+                            TEST_TRY(tokens = lexer::lex(buffer,"__testing_temp_file__"));
                             //Lets for the sake of testing output the lexed stream
 //                            std::cout << '\n';
 //                            test_output_message(__nesting,lexer::to_stream(tokens));
@@ -43,6 +59,9 @@ namespace cheese::tests::parser_tests {
                     }
                 }
             TEST_END
+            TEST_DESTROY {
+                configuration::error_output_handler = configuration::default_error_output_handler;
+            }
         TEST_END
         TEST_SUBSECTION("parser errors")
             TEST_GENERATOR {

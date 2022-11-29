@@ -18,6 +18,7 @@ namespace cheese::parser::nodes {
     DOUBLE_MEMBER_NODE(NamedBlock,"named_block",std::string,name,NodeList,children)
     DOUBLE_MEMBER_NODE(NamedBreak,"named_break",std::string,name,NodePtr,value)
     DOUBLE_MEMBER_NODE(ObjectCall,"object_call",NodePtr,object,NodeDict,args)
+    DOUBLE_MEMBER_NODE(ErrorNode,"error",std::uint64_t,error_code,std::string,message);
 
 
     //All the binary operators
@@ -76,11 +77,11 @@ namespace cheese::parser::nodes {
         }
 
         [[nodiscard]] nlohmann::json as_json() const override {
-            return build_json("field",{"name","type","flags"},name,type,flags);
+            return build_json("field",{"name","field_type","flags"},name,type,flags);
         }
 
         [[nodiscard]] bool compare_json(const nlohmann::json& json) const override {
-            return compare_helper(json,"field",{"name","type","flags"},name,type,flags);
+            return compare_helper(json,"field",{"name","field_type","flags"},name,type,flags);
         }
 
         ~Field() override = default;
@@ -399,6 +400,21 @@ namespace cheese::parser::nodes {
         void nested_display(std::uint32_t nesting) const override {}
         JSON_FUNCS("destructure",{"structure","value"},structure,value)
         ~Destructure() override = default;
+    };
+
+    struct Mixin final : public Node {
+        NodePtr structure;
+        NodeList interfaces;
+        NodeList children;
+        Mixin(Coordinate location, NodePtr structure, NodeList interfaces, NodeList children):
+            Node(location),
+            structure(std::move(structure)),
+            interfaces(std::move(interfaces)),
+            children(std::move(children))
+        {}
+        void nested_display(std::uint32_t nesting) const override {NOT_IMPL}
+        JSON_FUNCS("mixin",{"structure","interfaces","children"},structure,interfaces,children);
+        ~Mixin() override = default;
     };
 }
 #endif //CHEESE_OTHERNODES_H

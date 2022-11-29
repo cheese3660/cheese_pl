@@ -45,6 +45,7 @@ namespace cheese::parser::nodes {
     SINGLE_MEMBER_NODE(ObjectLiteral,"object_literal",NodeDict,children)
     SINGLE_MEMBER_NODE(Block,"block",NodeList,children)
 
+
     //Single child nodes
     //<== [value]
     SINGLE_CHILD_NODE(Break,"break")
