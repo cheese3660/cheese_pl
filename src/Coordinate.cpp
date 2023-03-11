@@ -20,4 +20,8 @@ namespace cheese {
     std::string Coordinate::toString() {
         return filenames[file_index] + ":" + std::to_string(line_number) + ":" + std::to_string(column_number);
     }
+
+    bool Coordinate::operator!=(const Coordinate &other) const {
+        return file_index != other.file_index && line_number != other.line_number && column_number != other.column_number;
+    }
 }

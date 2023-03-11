@@ -50,6 +50,10 @@ namespace cheese::error {
         ExpectedClosingBracket,
         ExpectedClose,
         ExpectedOpeningBrace,
+        ExpectedOpeningParentheses,
+        AccidentalNamedBlock,
+        MissingSemicolon,
+        ExpectedMatchBodySpecifier,
 
         //General error (thrown for example when multiple previous errors were printed)
         GeneralCompilerError = 9999,

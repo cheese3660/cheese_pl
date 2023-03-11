@@ -44,6 +44,11 @@ namespace cheese::parser::nodes {
 
     SINGLE_MEMBER_NODE(ObjectLiteral,"object_literal",NodeDict,children)
     SINGLE_MEMBER_NODE(Block,"block",NodeList,children)
+    SINGLE_MEMBER_NODE(MatchValue,"match_value",NodePtr,value)
+    SINGLE_MEMBER_NODE(MatchConstraint,"match_constraint",NodePtr,constraint)
+    SINGLE_MEMBER_NODE(DestructuringMatchStructure,"destructuring_match_structure",NodeDict,children)
+    SINGLE_MEMBER_NODE(DestructuringMatchTuple,"destructuring_match_tuple",NodeList,children)
+    SINGLE_MEMBER_NODE(DestructuringMatchArray,"destructuring_match_array",NodeList,children)
 
 
     //Single child nodes
@@ -67,7 +72,8 @@ namespace cheese::parser::nodes {
     SINGLE_CHILD_NODE(Constrain,"constrain")
     //loop [expression]
     SINGLE_CHILD_NODE(Loop,"loop")
-    //*[value]
+
+
 
 
     SINGLE_CHILD_NODE(Comptime,"comptime")

@@ -409,7 +409,7 @@
   ],
   [
     "destructuring",
-    "let{a:(x mut, y, z),b:w,c:_}=a",
+    "let{a: (x mut, y, z),b:w,c:_}=a",
     {
       "type": "struct",
       "children": [
@@ -2315,7 +2315,7 @@
   ],
   [
     "interfaces: static, single interface",
-    "let X=interface impl Y {}",
+    "let X=interface impl Y\n{}",
     {
       "type": "struct",
       "children": [
@@ -2340,7 +2340,7 @@
   ],
   [
     "interfaces: static, multiple interfaces",
-    "let X=interface impl Y,Z {}",
+    "let X=interface impl Y,Z, {}",
     {
       "type": "struct",
       "children": [
@@ -2388,8 +2388,8 @@
     }
   ],
   [
-    "interfaces: static, single interface",
-    "let X=interface dynamic impl Y {}",
+    "interfaces: dynamic, single interface",
+    "let X=interface dynamic impl Y\n{}",
     {
       "type": "struct",
       "children": [
@@ -2414,8 +2414,8 @@
     }
   ],
   [
-    "interfaces: static, multiple interfaces",
-    "let X=interface dynamic impl Y,Z {}",
+    "interfaces: dynamic, multiple interfaces",
+    "let X=interface dynamic impl Y,Z, {}",
     {
       "type": "struct",
       "children": [
@@ -2481,7 +2481,7 @@
       "children": [
         {
           "type": "function",
-          "name": "x",
+          "name": "abs",
           "args": [
             {
               "type": "arg",
@@ -2620,7 +2620,7 @@
   ],
   [
     "match statements: value constraints",
-    "let x = match y {0 => 0 1,2 => 1 3,4,5,6,7 => 2}",
+    "let x = match y\n{0 => 0 1,2 => 1 3,4,5,6,7 => 2}",
     {
       "type": "struct",
       "children": [
@@ -2639,23 +2639,17 @@
             "arms": [
               {
                 "type": "match_arm",
-                "matches:": [
+                "matches": [
                   {
                     "type": "match_value",
-                    "value": {
-                      "type": "int",
-                      "value": 0
-                    }
+                    "value": "int"
                   }
                 ],
-                "body": {
-                  "type": "int",
-                  "value": 0
-                }
+                "body": "int"
               },
               {
                 "type": "match_arm",
-                "matches:": [
+                "matches": [
                   {
                     "type": "match_value",
                     "value": {
@@ -2678,7 +2672,7 @@
               },
               {
                 "type": "match_arm",
-                "matches:": [
+                "matches": [
                   {
                     "type": "match_value",
                     "value": {
@@ -2728,7 +2722,7 @@
   ],
   [
     "match statements: range constraint",
-    "let x = match y { 0..7 => 0 }",
+    "let x = match y with { 0 .. 7 => 0 }",
     {
       "type": "struct",
       "children": [
@@ -2773,7 +2767,7 @@
   ],
   [
     "match statements: constrain",
-    "let x = match y { constrain isEven => 1 _ => 0}",
+    "let x = match y\n{ constrain isEven => 1 _ => 0}",
     {
       "type": "struct",
       "children": [
@@ -2824,7 +2818,7 @@
   ],
   [
     "match statements: catchall copy",
-    "let x = match y {_ -> z => z}",
+    "let x = match y with {_ -> z => z}",
     {
       "type": "struct",
       "children": [
@@ -2863,7 +2857,7 @@
   ],
   [
     "match statements: catchall ref",
-    "let x = match y {_ -> *z => z}",
+    "let x = match y\n{_ -> *z => z}",
     {
       "type": "struct",
       "children": [
@@ -2902,7 +2896,7 @@
   ],
   [
     "match statements: catchall constant ref",
-    "let x = match y {_ -> *~z => z}",
+    "let x = match y with {_ -> *~z => z}",
     {
       "type": "struct",
       "children": [
@@ -2941,7 +2935,7 @@
   ],
   [
     "match statements, destructing with all refs, and constraints",
-    "let x = match y { .{a: .(_ -> i; _ -> *j\n 0..7 -> *~k); b: 1; c: constrain isEven} => 0}",
+    "let x = match y\n{ .{a: .(_ -> i; _ -> *j\n 0 .. 7 -> *~k); b: 1; c: constrain isEven} => 0}",
     {
       "type": "struct",
       "children": [
@@ -2953,93 +2947,92 @@
           },
           "value": {
             "type": "match",
+            "value": {
+              "type": "ref",
+              "name": "y"
+            },
             "arms": [
               {
                 "type": "match_arm",
                 "matches": [
                   {
-                    "type": "destructuring_match_arm",
-                    "matches": [
-                      {
-                        "type": "destructuring_match_structure",
-                        "children": {
-                          "a": {
-                            "type": "destructuring_match_arm",
-                            "matches": [
+                    "type": "destructuring_match_structure",
+                    "children": {
+                      "a": {
+                        "type": "destructuring_match_arm",
+                        "matches": [
+                          {
+                            "type": "destructuring_match_tuple",
+                            "children": [
                               {
-                                "type": "destructuring_match_tuple",
-                                "children": [
+                                "type": "destructuring_match_arm",
+                                "matches": [
+                                  "match_all"
+                                ],
+                                "store": {
+                                  "type": "copy_capture",
+                                  "name": "i"
+                                }
+                              },
+                              {
+                                "type": "destructuring_match_arm",
+                                "matches": [
+                                  "match_all"
+                                ],
+                                "store": {
+                                  "type": "ref_capture",
+                                  "name": "j"
+                                }
+                              },
+                              {
+                                "type": "destructuring_match_arm",
+                                "matches": [
                                   {
-                                    "type": "destructuring_match_arm",
-                                    "matches": [
-                                      "match_all"
-                                    ],
-                                    "store": {
-                                      "type": "copy_capture",
-                                      "name": "i"
-                                    }
-                                  },
-                                  {
-                                    "type": "destructuring_match_arm",
-                                    "matches": [
-                                      "match_all"
-                                    ],
-                                    "store": {
-                                      "type": "ref_capture",
-                                      "name": "j"
-                                    }
-                                  },
-                                  {
-                                    "type": "destructuring_match_arm",
-                                    "matches": [
-                                      {
-                                        "type": "match_range",
-                                        "begin": {
-                                          "type": "int",
-                                          "value": 0
-                                        },
-                                        "end": {
-                                          "type": "int",
-                                          "value": 7
-                                        }
-                                      }
-                                    ],
-                                    "store": {
-                                      "type": "const_ref_capture",
-                                      "name": "k"
+                                    "type": "match_range",
+                                    "begin": {
+                                      "type": "int",
+                                      "value": 0
+                                    },
+                                    "end": {
+                                      "type": "int",
+                                      "value": 7
                                     }
                                   }
-                                ]
-                              }
-                            ]
-                          },
-                          "b": {
-                            "type": "destructuring_match_arm",
-                            "matches": [
-                              {
-                                "type": "match_value",
-                                "value": {
-                                  "type": "int",
-                                  "value": 1
-                                }
-                              }
-                            ]
-                          },
-                          "c": {
-                            "type": "destructuring_match_arm",
-                            "matches": [
-                              {
-                                "type": "match_constraint",
-                                "constraint": {
-                                  "type": "ref",
-                                  "name": "isEven"
+                                ],
+                                "store": {
+                                  "type": "const_ref_capture",
+                                  "name": "k"
                                 }
                               }
                             ]
                           }
-                        }
+                        ]
+                      },
+                      "b": {
+                        "type": "destructuring_match_arm",
+                        "matches": [
+                          {
+                            "type": "match_value",
+                            "value": {
+                              "type": "int",
+                              "value": 1
+                            }
+                          }
+                        ]
+                      },
+                      "c": {
+                        "type": "destructuring_match_arm",
+                        "matches": [
+                          {
+                            "type": "match_constraint",
+                            "constraint": {
+                              "type": "ref",
+                              "name": "isEven"
+                            }
+                          }
+                        ]
                       }
-                    ]
+                    }
                   }
                 ],
                 "body": {
@@ -3055,7 +3048,7 @@
   ],
   [
     "match statements: enum destructuring",
-    "let x = match n {.empty => 0 .integer(0..255 -> small_int) => 1 .integer(_ -> big_int) => 2 .add{lhs: constrain isConstant; rhs: constrain isConstant} => 3 .add{lhs: _; rhs: _} => 4 _ => 5}",
+    "let x = match n with {.empty => 0\n.integer(0 .. 255 -> small_int) => 1\n.integer(_ -> big_int) => 2\n.add{lhs: constrain isConstant; rhs: constrain isConstant} => 3\n.add{lhs: _; rhs: _} => 4 _ => 5}",
     {
       "type": "struct",
       "children": [
@@ -3076,14 +3069,14 @@
                 "type": "match_arm",
                 "matches": [
                   {
-                    "type": "match_enum_empty",
-                    "enum_identifier": "empty"
+                    "type": "match_value",
+                    "value": {
+                      "name": "empty",
+                      "type": "enum_literal"
+                    }
                   }
                 ],
-                "body": {
-                  "type": "int",
-                  "value": 0
-                }
+                "body": "int"
               },
               {
                 "type": "match_arm",
@@ -3097,10 +3090,7 @@
                         "matches": [
                           {
                             "type": "match_range",
-                            "begin": {
-                              "type": "int",
-                              "value": 0
-                            },
+                            "begin": "int",
                             "end": {
                               "type": "int",
                               "value": 255
@@ -3152,14 +3142,14 @@
                     "type": "match_enum_structure",
                     "enum_identifier": "add",
                     "children": {
-                      "lhs": {
+                      "rhs": {
                         "type": "destructuring_match_arm",
                         "matches": [
                           {
                             "type": "match_constraint",
                             "constraint": {
                               "type": "ref",
-                              "name": "isEven"
+                              "name": "isConstant"
                             }
                           }
                         ]
@@ -3171,14 +3161,10 @@
                             "type": "match_constraint",
                             "constraint": {
                               "type": "ref",
-                              "name": "isEven"
+                              "name": "isConstant"
                             }
                           }
-                        ],
-                        "store": {
-                          "type": "copy_capture",
-                          "name": "big_int"
-                        }
+                        ]
                       }
                     }
                   }
@@ -3195,7 +3181,7 @@
                     "type": "match_enum_structure",
                     "enum_identifier": "add",
                     "children": {
-                      "lhs": {
+                      "rhs": {
                         "type": "destructuring_match_arm",
                         "matches": [
                           "match_all"
@@ -3205,11 +3191,7 @@
                         "type": "destructuring_match_arm",
                         "matches": [
                           "match_all"
-                        ],
-                        "store": {
-                          "type": "copy_capture",
-                          "name": "big_int"
-                        }
+                        ]
                       }
                     }
                   }

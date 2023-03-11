@@ -294,11 +294,11 @@ namespace cheese::math {
     }
 
     BigInteger BigInteger::operator<<(const size_t other) const {
-        return *this * BigInteger(1 << other);
+        return *this * BigInteger(1, other);
     }
 
     BigInteger BigInteger::operator>>(const size_t other) const {
-        return *this / BigInteger(1 << other);
+        return *this / BigInteger(1, other);
     }
 
     BigInteger BigInteger::operator++(int) {

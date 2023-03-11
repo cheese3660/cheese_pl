@@ -37,6 +37,8 @@ namespace cheese::parser::nodes {
     TERMINAL_NODE(ConstRefImplicitCapture,"const_ref_capture_implicit")
     TERMINAL_NODE(RefImplicitCapture,"ref_capture_implicit")
     TERMINAL_NODE(CopyImplicitCapture,"copy_capture_implicit")
+    TERMINAL_NODE(MatchAll,"match_all")
+    TERMINAL_NODE(NonExhaustive,"non_exhaustive")
 }
 
 #endif //CHEESE_TERMINALNODES_H

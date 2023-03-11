@@ -17,6 +17,7 @@ namespace cheese {
         std::uint32_t column_number;
         std::size_t file_index;
         std::string toString();
+        bool operator !=(const Coordinate& other) const;
     };
 }
 

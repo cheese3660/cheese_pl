@@ -101,7 +101,7 @@ namespace cheese::lexer {
         Float64, //f64
         Complex32, //c32
         Complex64, //c64
-        Switch, //switch
+        Match, //match
         If, //if
         Elif, //elif
         Else, //else
@@ -178,6 +178,10 @@ namespace cheese::lexer {
         Opaque,
         Export,
         Impl, //Impl
+        Interface,
+        Dynamic,
+        With,
+        Constrain,
         EoF, //End of File, ALWAYS KEEP THIS AT THE END OF THE PROGRAM
     };
     struct Token {

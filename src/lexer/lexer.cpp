@@ -31,7 +31,7 @@ namespace cheese::lexer {
         RESERVED(f64, TokenType::Float64)
         RESERVED(c32, TokenType::Complex32)
         RESERVED(c64, TokenType::Complex64)
-        RESERVED(switch, TokenType::Switch)
+        RESERVED(match, TokenType::Match)
         RESERVED(if, TokenType::If)
         RESERVED(elif, TokenType::Elif)
         RESERVED(else, TokenType::Else)
@@ -74,6 +74,10 @@ namespace cheese::lexer {
         RESERVED(opaque,TokenType::Opaque)
         RESERVED(export,TokenType::Export)
         RESERVED(impl, TokenType::Impl)
+        RESERVED(interface, TokenType::Interface)
+        RESERVED(dynamic, TokenType::Dynamic)
+        RESERVED(with, TokenType::With)
+        RESERVED(constrain,TokenType::Constrain)
     };
 #undef  RESERVED
     const auto builtin_macros = std::vector<std::string_view>{
@@ -582,8 +586,12 @@ namespace cheese::lexer {
                     }
                     break;
                 }
-                case '\'': tokens.push_back(character());
-                case '\"': tokens.push_back(str());
+                case '\'':
+                    tokens.push_back(character());
+                    break;
+                case '\"':
+                    tokens.push_back(str());
+                    break;
                 case '.':
                 {
                     ADVANCE;
@@ -612,9 +620,14 @@ namespace cheese::lexer {
                     view_size++;
                     if (PEEK == '=') {
                         SINGLE(TokenType::Redefine);
-                    } else {
+                    } else if (PEEK == '(') {
+                        SINGLE(TokenType::Block);
+                    }
+                    else
+                    {
                         ADD(TokenType::Colon);
                     }
+
                     break;
                 case ',':
                     SINGLE(TokenType::Comma);
@@ -891,7 +904,7 @@ namespace cheese::lexer {
             MAP(Float64),
             MAP(Complex32),
             MAP(Complex64),
-            MAP(Switch),
+            MAP(Match),
             MAP(If),
             MAP(Elif),
             MAP(Else),
@@ -939,6 +952,7 @@ namespace cheese::lexer {
             MAP(EoF),
             MAP(Then),
             MAP(Do),
+            MAP(With),
             MAP(Exclamation),
             MAP(NewLine),
             MAP(Bool),
@@ -954,7 +968,10 @@ namespace cheese::lexer {
             MAP(Is),
             MAP(Opaque),
             MAP(Export),
-            MAP(Impl)
+            MAP(Impl),
+            MAP(Interface),
+            MAP(Dynamic),
+            MAP(Constrain)
     };
 
 #undef MAP
