@@ -906,7 +906,6 @@ namespace cheese::parser {
 
     bool is_binary_operation(lexer::TokenType ty) {
         switch (ty) {
-            case Dot: //Subscription
             case Star: //Multiplication
             case Slash: //Division
             case Ampersand: //Combination
@@ -936,8 +935,6 @@ namespace cheese::parser {
 
     uint8_t precedence(lexer::TokenType ty) {
         switch (ty) {
-            case Dot:
-                return 11;
             case Star:
             case Slash:
             case Percent:
@@ -978,8 +975,6 @@ namespace cheese::parser {
 
     NodePtr create_node_from_binary_operator(lexer::Token tok, const NodePtr &lhs, const NodePtr &rhs) {
         switch (tok.ty) {
-            case Dot:
-                RETURN_NODE(Subscription)
             case Star:
                 RETURN_NODE(Multiplication)
             case Slash:
@@ -1135,6 +1130,12 @@ namespace cheese::parser {
             auto front = state.peek();
             auto should_break = false;
             switch (front.ty) {
+                case Dot: {
+                    state.eatAny();
+                    auto next = parse_primary_base(state);
+                    base = (new nodes::Subscription(front.location,base,next))->get();
+                    break;
+                }
                 case LeftParen: {
                     auto location = front.location;
                     state.eatAny();
@@ -2582,6 +2583,9 @@ namespace cheese::parser {
                 return parse_while_loop(state);
             case For:
                 return parse_for_loop(state);
+            case Underscore:
+                state.eatAny();
+                return (new nodes::Underscore(location))->get();
             default:
                 auto res = state.unexpected(front, "any primary value", error::ErrorCode::ExpectedPrimary);
                 if (front.ty == EoF) {

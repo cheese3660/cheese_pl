@@ -6083,11 +6083,11 @@
                             "args": [
                               {
                                 "lhs": {
-                                  "type": "float",
-                                  "value": 2.0
-                                },
-                                "rhs": {
                                   "lhs": {
+                                    "type": "float",
+                                    "value": 2.0
+                                  },
+                                  "rhs": {
                                     "lhs": "self",
                                     "rhs": {
                                       "name": "l",
@@ -6095,13 +6095,13 @@
                                     },
                                     "type": "subscript"
                                   },
-                                  "rhs": {
-                                    "type": "float",
-                                    "value": 1.0
-                                  },
-                                  "type": "subtract"
+                                  "type": "multiply"
                                 },
-                                "type": "multiply"
+                                "rhs": {
+                                  "type": "float",
+                                  "value": 1.0
+                                },
+                                "type": "subtract"
                               }
                             ],
                             "object": {
@@ -6606,18 +6606,18 @@
                 }
               },
               {
-                "lhs": {
-                  "name": "hsl",
-                  "type": "ref"
-                },
-                "rhs": {
-                  "object": {
+                "object": {
+                  "lhs": {
+                    "name": "hsl",
+                    "type": "ref"
+                  },
+                  "rhs": {
                     "name": "to_rgb",
                     "type": "ref"
                   },
-                  "type": "tuple_call"
+                  "type": "subscript"
                 },
-                "type": "subscript"
+                "type": "tuple_call"
               },
               {
                 "child": "int",

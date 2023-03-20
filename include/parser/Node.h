@@ -11,6 +11,7 @@
 #include "Coordinate.h"
 #include "math/BigInteger.h"
 #include <optional>
+#include <iostream>
 
 namespace cheese::parser {
     class Node {
@@ -18,8 +19,6 @@ namespace cheese::parser {
         cheese::Coordinate location;
 
         explicit Node(cheese::Coordinate location) : location(location) {}
-
-        virtual void nested_display(std::uint32_t nesting) const = 0;
 
         [[nodiscard]] virtual nlohmann::json as_json() const = 0;
 
@@ -206,7 +205,6 @@ namespace cheese::parser {
         build_json_helper<0>(result, arg_names, args...);
         return result;
     }
-
 }
 
 
@@ -214,9 +212,6 @@ namespace cheese::parser {
 
 #define TERMINAL_NODE(N, T) struct N final : public Node { \
     explicit N(Coordinate location) : Node(location) {}     \
-    void nested_display(std::uint32_t nesting) const override {   \
-        NOT_IMPL                                   \
-    }                                              \
     [[nodiscard]] nlohmann::json as_json() const override {             \
         return build_json(T,{});                   \
     }                                                \
@@ -230,9 +225,6 @@ namespace cheese::parser {
 #define SINGLE_MEMBER_NODE(N, T, C, CN) struct N final : public Node { \
     C CN;                                                 \
     N(Coordinate location, C CN) : Node(location), CN(std::move(CN)) {} \
-    void nested_display(std::uint32_t nesting) const override {     \
-        NOT_IMPL                                              \
-    }                                                         \
     [[nodiscard]] nlohmann::json as_json() const override {                       \
         return build_json(T,{# CN},CN);                       \
     }                                                         \
@@ -248,9 +240,6 @@ namespace cheese::parser {
     NodePtr child;                                              \
     bool constant;                                                            \
     N(Coordinate location, NodePtr child, bool constant = false) : Node(location), child(std::move(child)), constant(constant) {} \
-    void nested_display(std::uint32_t nesting) const override {     \
-        NOT_IMPL                                              \
-    }                                                         \
     [[nodiscard]] nlohmann::json as_json() const override {                       \
         return build_json(T,{"child","constant"},child,constant);                       \
     }                                                         \
@@ -264,9 +253,6 @@ namespace cheese::parser {
     C1 C1N;                                                         \
     C2 C2N;                                                         \
     N(Coordinate location, C1 C1N, C2 C2N) : Node(location), C1N(std::move(C1N)), C2N(std::move(C2N)) {} \
-    void nested_display(std::uint32_t nesting) const override {              \
-        NOT_IMPL                                                       \
-    }                                                                  \
     [[nodiscard]] nlohmann::json as_json() const override {                                \
         return build_json(T,{# C1N,# C2N},C1N,C2N);                  \
     }                                                                  \

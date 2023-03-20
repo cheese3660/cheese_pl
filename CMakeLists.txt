@@ -63,7 +63,7 @@ add_executable(
         include/parser/nodes/TerminalNodes.h
         include/parser/nodes/SingleMemberNodes.h
         include/math/BigInteger.h
-        src/math/BigInteger.cpp include/parser/nodes/OtherNodes.h)
+        src/math/BigInteger.cpp include/parser/nodes/OtherNodes.h include/tools/parse.h src/tools/parse.cpp include/curdle/curdle.h)
 if (UNIX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++ -Wall")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++ -lc++abi")

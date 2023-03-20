@@ -121,12 +121,7 @@ namespace cheese::parser::nodes {
                 type(std::move(type)),
                 flags(std::move(flags)) {
         }
-
-
-        void nested_display(std::uint32_t nesting) const override {
-            NOT_IMPL
-        }
-
+        
         [[nodiscard]] nlohmann::json as_json() const override {
             return build_json("field", {"name", "field_type", "flags"}, name, type, flags);
         }
@@ -151,10 +146,6 @@ namespace cheese::parser::nodes {
                 comptime(std::move(comptime)) {
         }
 
-        void nested_display(std::uint32_t nesting) const override {
-            NOT_IMPL
-        }
-
         JSON_FUNCS("arg", { "name", "arg_type", "comptime" }, name, type, comptime)
 
         ~Argument() override = default;
@@ -167,8 +158,6 @@ namespace cheese::parser::nodes {
 
         Import(Coordinate location, std::string path, std::string name) : Node(location), path(std::move(path)),
                                                                           name(std::move(name)) {}
-
-        void nested_display(std::uint32_t nesting) const override;
 
         [[nodiscard]] nlohmann::json as_json() const override;
 
@@ -188,8 +177,6 @@ namespace cheese::parser::nodes {
                                                                                                 children(std::move(
                                                                                                         children)),
                                                                                                 is_tuple(is_tuple) {}
-
-        void nested_display(std::uint32_t nesting) const override;
 
         [[nodiscard]] nlohmann::json as_json() const override;
 
@@ -213,8 +200,6 @@ namespace cheese::parser::nodes {
                 return_type(std::move(return_type)),
                 flags(std::move(flags)) {}
 
-        void nested_display(std::uint32_t nesting) const override {}
-
         JSON_FUNCS("function_prototype", { "name", "args", "return_type", "flags" }, name, arguments, return_type,
                    flags)
 
@@ -233,8 +218,6 @@ namespace cheese::parser::nodes {
                 arguments(std::move(arguments)),
                 return_type(std::move(return_type)),
                 flags(std::move(flags)) {}
-
-        void nested_display(std::uint32_t nesting) const override {}
 
         JSON_FUNCS("function_import", { "name", "args", "return_type", "flags" }, name, arguments, return_type, flags)
 
@@ -258,8 +241,6 @@ namespace cheese::parser::nodes {
                 flags(std::move(flags)),
                 body(std::move(body)) {}
 
-        void nested_display(std::uint32_t nesting) const override {}
-
         JSON_FUNCS("function", { "name", "args", "return_type", "flags", "body" }, name, arguments, return_type, flags,
                    body)
 
@@ -281,8 +262,6 @@ namespace cheese::parser::nodes {
                 return_type(std::move(return_type)),
                 flags(std::move(flags)),
                 body(std::move(body)) {}
-
-        void nested_display(std::uint32_t nesting) const override {}
 
         JSON_FUNCS("operator", { "operator", "args", "return_type", "flags", "body" }, op, arguments, return_type,
                    flags,
@@ -306,8 +285,6 @@ namespace cheese::parser::nodes {
                 return_type(std::move(return_type)),
                 flags(std::move(flags)) {}
 
-        void nested_display(std::uint32_t nesting) const override {}
-
         JSON_FUNCS("generator_prototype", { "name", "args", "return_type", "flags" }, name, arguments, return_type,
                    flags)
 
@@ -326,8 +303,6 @@ namespace cheese::parser::nodes {
                 arguments(std::move(arguments)),
                 return_type(std::move(return_type)),
                 flags(std::move(flags)) {}
-
-        void nested_display(std::uint32_t nesting) const override {}
 
         JSON_FUNCS("generator_import", { "name", "args", "return_type", "flags" }, name, arguments, return_type, flags)
 
@@ -350,8 +325,6 @@ namespace cheese::parser::nodes {
                 flags(std::move(flags)),
                 body(std::move(body)) {}
 
-        void nested_display(std::uint32_t nesting) const override {}
-
         JSON_FUNCS("generator", { "name", "args", "return_type", "flags", "body" }, name, arguments, return_type, flags,
                    body)
 
@@ -366,8 +339,6 @@ namespace cheese::parser::nodes {
                 Node(location),
                 def(std::move(def)),
                 value(std::move(value)) {}
-
-        void nested_display(std::uint32_t nesting) const override {}
 
         JSON_FUNCS("var_decl", { "def", "value" }, def, value)
 
@@ -384,8 +355,6 @@ namespace cheese::parser::nodes {
                 name(std::move(name)),
                 type(std::move(type)),
                 flags(std::move(flags)) {}
-
-        void nested_display(std::uint32_t nesting) const override {}
 
         JSON_FUNCS("var_def", { "name", "var_type", "flags" }, name, type, flags)
     };
@@ -404,8 +373,6 @@ namespace cheese::parser::nodes {
                 return_type(std::move(return_type)),
                 body(std::move(body)) {}
 
-        void nested_display(std::uint32_t nesting) const override {}
-
         JSON_FUNCS("closure", { "args", "captures", "return_type", "body" }, args, captures, return_type, body)
     };
 
@@ -421,8 +388,6 @@ namespace cheese::parser::nodes {
                 return_type(std::move(return_type)),
                 flags(std::move(flags)),
                 body(std::move(body)) {}
-
-        void nested_display(std::uint32_t nesting) const override {}
 
         JSON_FUNCS("anonymous_function", { "args", "return_type", "flags", "body" }, arguments, return_type, flags,
                    body)
@@ -443,8 +408,6 @@ namespace cheese::parser::nodes {
                 flags(std::move(flags)),
                 body(std::move(body)) {}
 
-        void nested_display(std::uint32_t nesting) const override {}
-
         JSON_FUNCS("anonymous_generator", { "args", "return_type", "flags", "body" }, arguments, return_type, flags,
                    body)
 
@@ -462,7 +425,6 @@ namespace cheese::parser::nodes {
                 return_type(std::move(return_type)),
                 flags(std::move(flags)) {}
 
-        void nested_display(std::uint32_t nesting) const override {}
 
         JSON_FUNCS("function_type", { "args", "return_type", "flags" }, arguments, return_type, flags)
 
@@ -480,8 +442,6 @@ namespace cheese::parser::nodes {
                 return_type(std::move(return_type)),
                 flags(std::move(flags)) {}
 
-        void nested_display(std::uint32_t nesting) const override {}
-
         JSON_FUNCS("generator_type", { "args", "return_type", "flags" }, arguments, return_type, flags)
 
         ~GeneratorType() override = default;
@@ -493,8 +453,6 @@ namespace cheese::parser::nodes {
         StructureDestructure(Coordinate location, NodeDict children) :
                 Node(location),
                 children(std::move(children)) {}
-
-        void nested_display(std::uint32_t nesting) const override {}
 
         JSON_FUNCS("structure_destructure", { "children" }, children)
 
@@ -508,8 +466,6 @@ namespace cheese::parser::nodes {
                 Node(location),
                 children(std::move(children)) {}
 
-        void nested_display(std::uint32_t nesting) const override {}
-
         JSON_FUNCS("tuple_destructure", { "children" }, children)
 
         ~TupleDestructure() override = default;
@@ -521,8 +477,6 @@ namespace cheese::parser::nodes {
         ArrayDestructure(Coordinate location, NodeList children) :
                 Node(location),
                 children(std::move(children)) {}
-
-        void nested_display(std::uint32_t nesting) const override {}
 
         JSON_FUNCS("array_destructure", { "children" }, children)
 
@@ -538,8 +492,6 @@ namespace cheese::parser::nodes {
                 Node(location),
                 children(std::move(children)) {}
 
-        void nested_display(std::uint32_t nesting) const override {}
-
         JSON_FUNCS("slice_destructure", { "children" }, children)
 
         ~SliceDestructure() override = default;
@@ -553,8 +505,6 @@ namespace cheese::parser::nodes {
                 Node(location),
                 structure(std::move(structure)),
                 value(std::move(value)) {}
-
-        void nested_display(std::uint32_t nesting) const override {}
 
         JSON_FUNCS("destructure", { "structure", "value" }, structure, value)
 
@@ -574,7 +524,6 @@ namespace cheese::parser::nodes {
                 interfaces(std::move(interfaces)),
                 children(std::move(children)) {}
 
-        void nested_display(std::uint32_t nesting) const override { NOT_IMPL }
 
         JSON_FUNCS("mixin", { "structure", "arguments", "interfaces", "children" }, structure, arguments, interfaces,
                    children);
@@ -593,7 +542,6 @@ namespace cheese::parser::nodes {
                 children(std::move(children)),
                 dynamic(dynamic) {}
 
-        void nested_display(std::uint32_t nesting) const override { NOT_IMPL }
 
         JSON_FUNCS("interface", { "interfaces", "children", "dynamic" }, interfaces, children, dynamic);
 
@@ -614,7 +562,6 @@ namespace cheese::parser::nodes {
                 body(std::move(body)),
                 els(std::move(els)) {}
 
-        void nested_display(std::uint32_t nesting) const override { NOT_IMPL }
 
         JSON_FUNCS("if", { "condition", "unwrap", "body", "else" }, condition, unwrap, body, els);
 
@@ -632,7 +579,6 @@ namespace cheese::parser::nodes {
                 body(std::move(body)),
                 els(std::move(els)) {}
 
-        void nested_display(std::uint32_t nesting) const override { NOT_IMPL }
 
         JSON_FUNCS("while", { "condition", "body", "else" }, condition, body, els);
 
@@ -658,8 +604,6 @@ namespace cheese::parser::nodes {
                 body(std::move(body)),
                 els(std::move(els)) {}
 
-        void nested_display(std::uint32_t nesting) const override { NOT_IMPL }
-
         JSON_FUNCS("for", { "capture", "index", "iterable", "transformations", "body", "else" },
                    capture, index, iterable, transformations, body, els);
 
@@ -676,7 +620,6 @@ namespace cheese::parser::nodes {
                 store(std::move(store)),
                 body(std::move(body)) {}
 
-        void nested_display(std::uint32_t nesting) const override { NOT_IMPL }
 
         JSON_FUNCS("match_arm", { "matches", "store", "body" }, matches, store, body);
 
@@ -696,7 +639,6 @@ namespace cheese::parser::nodes {
                 children(std::move(children)),
                 value(std::move(value)) {}
 
-        void nested_display(std::uint32_t nesting) const override { NOT_IMPL }
 
         JSON_FUNCS("enum_constant", { "name", "tuple", "children", "value" }, name, tuple, children, value);
 
@@ -714,7 +656,6 @@ namespace cheese::parser::nodes {
                 child(std::move(child)),
                 constant(constant) {}
 
-        void nested_display(std::uint32_t nesting) const override { NOT_IMPL }
 
         JSON_FUNCS("array_type", { "dimensions", "child", "constant" }, dimensions, child, constant);
 
