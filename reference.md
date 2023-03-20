@@ -3,6 +3,7 @@ title: 'Cheese Language Reference'
 subtitle: 'A Reference of The Cheese Programming Language, Including Syntax, Builtins, and The Standard Library.'
 author: 'Lexi Allen'
 date: 'September 2022'
+monofont: "Fira Code"
 ---
 
 \pagebreak
@@ -10,26 +11,33 @@ date: 'September 2022'
 \pagebreak
 
 # Cheese Language Reference
+
 ## Description and Philosophy
-The Cheese Programming Language is a language primarily designed by me (Lexi Allen), the main driving goal behind it is to create a language that I would want to use.
+
+The Cheese Programming Language is a language primarily designed by me (Lexi Allen), the main driving goal behind it is
+to create a language that I would want to use.
 But, don't let that stop you from using it, as I am also designing this to be a language for others to use as well.
 To this effect, the following few points are somewhat guiding me. (Subject to change as this project goes on)
 
 * Make a compiled language I would want to use
 * Make it fun and easy to write
-* Also make it easy to understand what is going on, but not to the point where it makes it overly verbose (i.e. allow for hidden control flow with operators and such)
-* Don't rely on one Paradigm (i.e. OOP, functional programming, imperative), instead allow for users to use one of their choice, or a mix.
+* Also make it easy to understand what is going on, but not to the point where it makes it overly verbose (i.e. allow
+  for hidden control flow with operators and such)
+* Don't rely on one Paradigm (i.e. OOP, functional programming, imperative), instead allow for users to use one of their
+  choice, or a mix.
 * Don't design for one target only (i.e. only systems, only game dev, etc..)
 * Have a decent standard library to make things easier for the programmer, for both bare-metal and hosted
 * Have an extremely powerful metaprogramming interface that is readable (unlike C++ TMP)
-* Don't be afraid about borrowing ideas from other languages 
+* Don't be afraid about borrowing ideas from other languages
 * Rely on separators as little as possible
 
-A few other goals that are driving this language are: to be able to use this in an OS at some point, and for this language to be able to compile itself
+A few other goals that are driving this language are: to be able to use this in an OS at some point, and for this
+language to be able to compile itself
 
 ------------------------------------------------------------------------------------------------------------------------
 
 # Example Program
+
 ```cheese
 fn fibbo n: i32 => i32
     if n == 0 or n == 1
@@ -38,46 +46,66 @@ fn fibbo n: i32 => i32
         fibbo(n-1)+fibbo(n-2)
 fn main => i32 entry fibbo(10)
 ```
+
 Let's go through this example line by line to see what's going on
+
 ```cheese
 fn fibbo n: i32 => i32
 ```
+
 This line is declaring a function for us (rather a function template as all function declarations are templates),
-`fn` is a token that signifies the start of a function template declaration, it is followed by the name of the function `fibbo`.
+`fn` is a token that signifies the start of a function template declaration, it is followed by the name of the
+function `fibbo`.
 Then after the name of the function follows its list of arguments, in this example there is one argument, `n`.
-Each argument is followed by a `:` and then the type, which in this case is `i32` or a signed integer with a width of 32 bits.
-After the argument list, follows `=>` which signifies that following the token is the return type, which in this case is again `i32`.
+Each argument is followed by a `:` and then the type, which in this case is `i32` or a signed integer with a width of 32
+bits.
+After the argument list, follows `=>` which signifies that following the token is the return type, which in this case is
+again `i32`.
+
 ```cheese
     if n == 0 or n == 1
 ```
+
 Since this function is only a single expression, no return statement is necessary. `if` starts an if expressions,
 conditional expressions in Cheese can yield values when they are followed by anything but an unnamed block. After the if
 statement follows the condition, `n == 0 or n == 1`, in this case. `or` being the boolean or operator.
+
 ```cheese
             1
 ```
+
 Following the condition of the if expression is the body, which is `1` here. All this means is that if the preceding
 condition is true then the if expression yields a 1 value.
+
 ```cheese
         else
 ```
-Optionally, following the body of an if expression is `else` and then an expression to be run after that if the condition
+
+Optionally, following the body of an if expression is `else` and then an expression to be run after that if the
+condition
 was not true.
+
 ```cheese
             fibbo(n-1)+fibbo(n-2)
 ```
-This is the expression that was following the prior `else` expression, it's calling the function `fibbo` twice and adding the sum.
+
+This is the expression that was following the prior `else` expression, it's calling the function `fibbo` twice and
+adding the sum.
 Notice that arguments in Cheese are passed within parentheses (`()`)
+
 ```cheese
 fn main => i32 entry fibbo(10)
 ```
+
 This is declaring the main function as the entrypoint, and that it returns an `i32` that is the result of calling
 `fibbo` with 10 as `n`.
 
 ------------------------------------------------------------------------------------------------------------------------
 
 # Syntax
+
 ## Comments
+
 ```cheese
 //This is a single line comment
 /*
@@ -89,9 +117,12 @@ This is declaring the main function as the entrypoint, and that it returns an `i
     */
 */
 ```
-Cheese has 2 types of comments, single line comments denoted by `//` and block comments opened by `/*` and closed with `*/`
+
+Cheese has 2 types of comments, single line comments denoted by `//` and block comments opened by `/*` and closed
+with `*/`
 
 ## Values
+
 ```cheese
 // Structure level (top-level) declarations are lazily evaluated and as such are order independant    
 let x const = 5 + y //Integer
@@ -150,7 +181,9 @@ fn main => void public {
     let enum_structure: enumeration = .Structure{x: 5.5, y: -1.3}
 }
 ```
+
 ### Primitive Types
+
 | Type               | Equivalent In C  | Description                                                              |
 |--------------------|------------------|--------------------------------------------------------------------------|
 | `bool`             | `bool`           | A type who's value can either be `true` or `false`.                      |
@@ -179,29 +212,40 @@ fn main => void public {
 | `none`          | Literal of type `void` |
 
 ### String literals
+
 ```cheese
 let str = "This is a string literal"
 ```
+
 String literals are values of type `comptime_string` which can be coerced at runtime to `<>~u8`, `[?]~u8` or `[]~u8`,
 which are a constant slice of `u8`, a pointer to an unknown amount of constant `u8`, or an array of `u8`
 
 ### Assignment
+
 The `let` keyword binds a value to an identifier, it is by default immutable
+
 ```cheese
 let x = 3
 ```
+
 If the value must be mutable add `mut` after the name
+
 ```cheese
 let x mut = 3
 ```
+
 To define an uninitialized variable use `def`
+
 ```cheese
 def x: comptime_int
 ```
+
 Before this variable is used, all prior code paths must have initialized this variable
 
 ### Destructuring
+
 Cheese also allows you to destructure tuples and structures, including nested ones with `let`
+
 ```cheese
 let internal = struct (i32 i32 i32)
 let external = struct {
@@ -242,6 +286,7 @@ let coordinate = struct {
     let z = 0
 }
 ```
+
 Note a few things, fields are defined by an identifier followed by a `:`, and then a type. Structures can also have
 "static" variables with the `let` or def keywords, and that functions can be declared within structures.
 
@@ -259,13 +304,16 @@ let coordinate2: coordinate = .{x: x, y: y}
 ```
 
 ### Tuple Types
+
 Tuple types are defined in Cheese with the keyword `struct` followed by parentheses.
+
 ```cheese
 let coordinate = struct (
     i32
     i32
 )
 ```
+
 Tuples cannot have member functions, nor can they implement interfaces.
 
 #### Tuple Literals
@@ -279,14 +327,18 @@ let coordinate2: coordinate = .(5, 3)
 ```
 
 ### Empty Structure
+
 An empty structure type can be defined in Cheese by the keyword `struct` followed by nothing
+
 ```cheese
 let Empty = struct
 ```
 
 ### Enumerations
+
 Enumerations in Cheese are defined via the `enum` keyword. They are then followed by a list of enumerated items. These
-items can be followed by `{...}` or `(...)` much like structure and tuple declarations. But they may not have member functions. After the enumerated item then
+items can be followed by `{...}` or `(...)` much like structure and tuple declarations. But they may not have member
+functions. After the enumerated item then
 is optionally followed by an `=` and a value of the item. Optionally following the `enum` keyword is an integer type
 which is the "containing" type of the enumeration
 
@@ -306,6 +358,7 @@ let Node = enum u8 {
 Values of enumerations can then be declared with the field name preceded by a `.` if the type is implicitly known, or
 the full enumeration name followed by a `.` followed by the field name to explicitly declare the enum type. if it is
 a structural or tuple field, then following this is either a `{...}` or `(...)`.
+
 ```cheese
 let node1 = Node.Empty
 let node2: Node = .Integer(5)
@@ -409,8 +462,10 @@ let slice_value_2: slice_type = .[1, 2]
 ```
 
 ### Results
+
 Results in Cheese are created via the `Result`, `Result(T)`, and `Result(T,E)` builtins, by default `T` and `E`
 are `void`.
+
 ```cheese
 let res = Result(u32)
 ```
@@ -455,13 +510,17 @@ Optionals in Cheese are defined via the `Optional(T)` type, this is internally a
 `.Some(T)`
 
 #### Optional literals
+
 Values of type `T` implicitly convert to an `.Some(T)` when using optionals, and values of type `void` implicitly
 convert to `.None` unless it is an `Optional(Void)` or an `Optional(Optional(T))`, though you can create both things
 with the enum literals.
 
 ### Functions
-Functions in Cheese as described earlier are defined via the `fn` keyword, functions in Cheese are also by definition function
+
+Functions in Cheese as described earlier are defined via the `fn` keyword, functions in Cheese are also by definition
+function
 templates and as such you can have multiple definitions for the same function, functions are also values.
+
 ```cheese
 //Simple one expression function definition
 fn square x: any => any x*x
@@ -472,6 +531,7 @@ fn complex x: any => any {
     ==> square_1+square_2
 }
 ```
+
 Notice a few things, first off `any` on the return type, that means the return type of the function is deduced from its
 body, secondly, that the single line function declaration is not enclosed in `{}` as the block is optional if the body
 is a single expression, and in that case no return statement is necessary. Functions can also have modifiers that change
@@ -479,17 +539,18 @@ how they work, they go after the return type declaration. Possible modifiers are
 
 <!---                  V Note the padding must be to here to prevent overlap in the pdf!--->
 
-| Modifier            | Description                                                                                                                                                                                                      |
-|---------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `inline`            | Tells the compiler to insert the function body at all call sites.                                                                                                                                                |
-| `extern`            | Tells the compiler to use external linkage for this function. i.e. that the functions name doesn't get mangled and it uses a defined ABI                                                                         |
-| `export`            | This function always gets made if it gets imported, and the compiler will export this symbol in the resulting object, implicitly `extern`, and also implicitly `public`                                          |
-| `comptime`          | This function can only be run at compile time                                                                                                                                                                    |
-| `public`            | This function is usable outside of the structure it was defined within                                                                                                                                           |
-| `private`           | All functions are `private` by default, this only means that this function can only be used within the structure it was defined in                                                                               |
-| `entry`             | Used in executables, this tells the compiler that this is the symbol it should start generating code from, if there are multiple functions defined with entry, then the compiler generates the first one it sees |
+| Modifier   | Description                                                                                                                                                                                                      |
+|------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `inline`   | Tells the compiler to insert the function body at all call sites.                                                                                                                                                |
+| `extern`   | Tells the compiler to use external linkage for this function. i.e. that the functions name doesn't get mangled and it uses a defined ABI                                                                         |
+| `export`   | This function always gets made if it gets imported, and the compiler will export this symbol in the resulting object, implicitly `extern`, and also implicitly `public`                                          |
+| `comptime` | This function can only be run at compile time                                                                                                                                                                    |
+| `public`   | This function is usable outside of the structure it was defined within                                                                                                                                           |
+| `private`  | All functions are `private` by default, this only means that this function can only be used within the structure it was defined in                                                                               |
+| `entry`    | Used in executables, this tells the compiler that this is the symbol it should start generating code from, if there are multiple functions defined with entry, then the compiler generates the first one it sees |
 
 An example of a function using one of said modifiers is
+
 ```cheese
 fn doSomething arg: i32 => i32 export arg+1
 ```
@@ -500,18 +561,22 @@ Values are implicitly returned from one line functions with no return statements
 function you use the `==> value` or `==>` keywords, where the latter is the same as returning nothing from the function.
 (note to do so in a one line environment you must use the keyword none after it like such `==> none`)
 
-
 #### Importing Functions From Other Objects
+
 To import a function symbol for your program to use, you define a function as you normally would, but you put `import`
 after it instead of a body. These are implicitly `extern`. If said function uses `void*` instead use `*opaque` to define
 the type.
+
 ```cheese
 fn malloc amount: usize => *opaque import //Import the malloc function from the C standard library
 ```
+
 #### Anonymous functions
+
 Anonymous functions are functions that are not bound to a name, they do not capture their scope though, examples of
 their usage though is for returning functions. They can refer to compile time values in their scope when creating them.
 Anonymous functions can be templates.
+
 ```cheese
 fn accessor index: comptime_int comptime => fn (any) => any
     fn x: any => any
@@ -519,6 +584,7 @@ fn accessor index: comptime_int comptime => fn (any) => any
 ```
 
 #### Closures
+
 Closures in Cheese start with a list of arguments enclosed in `|` tokens. following this list of arguments is an
 option list of captures enclosed in `[]`, by default if no list is supplied it defaults to `[*~]` or implicit constant
 reference capture.
@@ -545,10 +611,13 @@ fn main => void entry {
 ```
 
 #### Function Composition
-Functions and function-like objects can be composited together with all the arithmetic operators to produce function-like
+
+Functions and function-like objects can be composited together with all the arithmetic operators to produce
+function-like
 objects that when called in turn call both of the base functions and perform the operation on the results, this still
 respects `and`/`or` short-circuiting. There is also the special function composition operator `|` which "pipes" the
 output of the first function into the second one
+
 ```cheese
 fn square x: any => any ==> x*x
 let fourth_first = square(square) //square(square) --> square*square
@@ -559,19 +628,25 @@ let fourth_fourth = (|x: f64| x*x)*(|x: f64| x*x)
 ```
 
 #### Function Types
+
 Function types are defined by the syntax, these types are comptime only but can be templates
+
 ```
 fn(args...) => return_type modifiers...
 ```
 
 #### Function Pointers
+
 Function pointers are defined by the above syntax with a `*` prepended, but can only be made of runtime known types
+
 ```cheese
 let fn_ptr = *fn(i32)=>i32
 ```
+
 Functions can generally be coerced into pointers, and also taking the address of the function with `&` will also coerce
 them, this is if the function is not templated or has multiple definitions, if that is the case then you use
-`funct.$FnPtr(...)` where ... is an example of the arguments you are passing in used. You can also do `$FnPtr(funct,...)`
+`funct.$FnPtr(...)` where ... is an example of the arguments you are passing in used. You can also
+do `$FnPtr(funct,...)`
 
 ### Generators
 
@@ -601,10 +676,12 @@ x() //3
 ```
 
 ### Interfaces
+
 Interfaces are defined via the `interface` keyword followed by brackets.
 Inside the brackets then follows a list of function declarations, the functions cannot be extern, comptime, export,
 etc..., and all the types must be concretely defined and not inferred. You can still define operators from within
 interfaces.
+
 ```cheese
 let Nameable = interface {
     fn setName self, name: std.String => void
@@ -613,6 +690,7 @@ let Nameable = interface {
 ```
 
 Interfaces can be combined with the `&` keyword
+
 ```cheese
 let C = A & B
 ```
@@ -620,6 +698,7 @@ let C = A & B
 #### Implementing Interfaces
 
 Interfaces can be implemented for structures via the `impl` keyword following the structure.
+
 ```cheese
 let Person = struct impl Nameable {
     ...
@@ -629,19 +708,37 @@ let Person = struct impl Nameable {
         ==> self.name
 }
 ```
+
 For functions that you are implementing in an interface, they must have a "self" parameter which is either an immutable
 reference or mutable reference to an object of the type of the structure implementing said interface, depending on
 whether the interfaces function was defined immutable or not.
 
 Interfaces can also be implemented as a kind of mix-in sort of thing using the following syntax
+
 ```cheese
 impl SomeType: interfaces... {
     ...
 }
 ```
+
 The body of the implementation is the same as a structure, it is just unable to contain any fields
 
-Note: Internally interfaces are implemented as essentially the following 
+Interfaces finally can be implemented for a generic type using a function call kind of syntax
+
+```cheese
+impl SomeType(A: type, B: type): interfaces... {
+    ...
+}
+```
+
+This is a strange thing on how it works, it looks for a function that returns a type called SomeType and with the
+arguments
+provide and attaches itself to all the instances of that returned function that have already been created and to any new
+ones when it is called. Constraints can be used for the types to make it attach to specific forms of the generic type
+only.
+
+Note: Internally interfaces are implemented as essentially the following
+
 ```cheese
 let _Nameable = struct {
     let _VTable = struct {
@@ -682,6 +779,7 @@ fn nameObject input: *Nameable => void
 fn getObjectName input: *~Nameable => std.string
     input.getName()
 ```
+
 Note how to refer to an interface type at runtime you must use a reference or const reference, this is for 2 reasons,
 it makes it more obvious that the interface contains a reference to an object rather than a copy of an object, and also
 it maintains mutability
@@ -699,6 +797,7 @@ if an interface is a type down the implementation tree, and/or the original type
 dynamically cast back to the original type with the `@*` operator which returns an `Optional(*T)`
 
 ### Concepts
+
 Concepts are defined via the `concept` keyword followed by brackets.
 
 ```Cheese
@@ -720,12 +819,15 @@ let Number = concept {
 let x: Number = 5 @ i32 // The type of x is deduced to be i32
 let y = Number(void) // false
 ```
+
 Concepts can be combined much like interfaces with the `&` keyword
 
 ## Blocks
+
 Blocks in Cheese are enclosed in `{` and `}` characters. And must be put on a separate line or a context where it does
 not immediately follow an expression, as then it would be interpreted as an object constructor. Their type is always
 `void`
+
 ```cheese
 fn main => void entry {
     {
@@ -735,6 +837,7 @@ fn main => void entry {
 ```
 
 ## Named Blocks
+
 Named blocks in Cheese are a block label which is an identifier enclosed in `:(` and `)` followed by a block, their
 type is the peer type of all `<==(NAME)` statements in the block with the name referencing the block name
 
@@ -771,8 +874,9 @@ if SomeInterface @* SomeType : someTypeValue
 
 ## Match Expressions
 
-Match expressions in Cheese are begun with the `match` keyword, then the value to match to, then `with` if the brackets 
-are on the same line as the `match` otherwise a newline, then `{`, they are then followed by a list of "arms" which follow
+Match expressions in Cheese are begun with the `match` keyword, then the value to match to, then `with` if the brackets
+are on the same line as the `match` otherwise a newline, then `{`, they are then followed by a list of "arms" which
+follow
 the match arm syntax. Then closed by `}`.
 
 ### Match Arms
@@ -794,6 +898,7 @@ Value constraints are just that, values, such as `3` or `.None`, or compile time
 
 Range constraints are a value constraint followed by `..` followed by another value constraint.
 Range constraints are inclusive of both ends
+
 ```cheese
 1..10 => ....
 ```
@@ -814,10 +919,10 @@ other arms.
 
 #### Destructuring Constraint
 
-The destructuring constraint for structures is a `.{` followed by a list of field variable names with constraints, and 
-by default, if no variable name is provided with the `->` syntax then the field name is used, unless the constraint is 
+The destructuring constraint for structures is a `.{` followed by a list of field variable names with constraints, and
+by default, if no variable name is provided with the `->` syntax then the field name is used, unless the constraint is
 `_`. If only the field name is provided and no `: constraint...` then the constraint is implicitly catchall and then the
-constraint 
+constraint
 
 ```cheese
 .{x: 0..3; y: constrain isEven; z: _} => ...
@@ -848,8 +953,10 @@ match statements must be exhaustive, meaning that all possible values must be co
 default assumed to match *no* values, and as such alternatives to them must *always* be provided.
 
 ## Loop
+
 Cheese contains the `loop` keyword if you wish to loop something infinitely (until it breaks), its return type is
 defined by the peer type of `<==` statements within the loop, if none are present, it is `noreturn`
+
 ```cheese
 fn main => void entry
     loop
@@ -857,7 +964,9 @@ fn main => void entry
 ```
 
 ### Yielding from loops
+
 Cheese has a yield symbol `<==` which also functions as the break symbol if followed by `none`
+
 ```cheese
 fn main => void entry
     let x = loop
@@ -866,9 +975,11 @@ fn main => void entry
 ```
 
 ## While Loops
+
 Cheese also has while loops, which loop until the given condition is false. Note, that if you wish for the body to be a
 block, you must put `do` after the condition, or put the block on the next line, otherwise it will be interpreted as an
 object constructor
+
 ```cheese
 fn main => void entry
 {
@@ -883,8 +994,10 @@ fn main => void entry
 ```
 
 ### While Else
+
 If you have a while loop that loops until a condition, that you also want to return a default value from if it breaks
 before it can yield, then you use a `while` ... `else` loop
+
 ```cheese
 fn main => void entry
 {
@@ -900,12 +1013,14 @@ fn main => void entry
 ```
 
 ### Continuing
+
 Continuing to the next loop in Cheese is done with the `continue` keyword
 
 ## For Loops
+
 For loops in Cheese are created via the `for` keyword, followed by a value variable name (optionally prefixed w/ `*` or
 `*~` for reference based values instead of copies), and then optionally a `,` and an index variable name followed by a
-`:` and then the iterator, which can be a slice, an array, or an object that implements the `Iterable(T)` or 
+`:` and then the iterator, which can be a slice, an array, or an object that implements the `Iterable(T)` or
 `ConstIterable(T)` interfaces, or defines the functions mandated within either of them. It can also be an expression
 that returns an `Option(T)` and will loop until said function result is `.empty`, and it will automatically unwrap the
 `Option(T)` to a value of type `T`. Or if the object implements the `Generator(T)` interface, or implements the
@@ -928,6 +1043,7 @@ for x : NumbersUpTo(100) ? isPrime : square
 ```
 
 ### For Else
+
 For else works in the same way as while else, if the loop finishes without yielding a value, it yields the else value
 
 ## `self`/`~self`/`Self` keywords
@@ -946,23 +1062,9 @@ The `self`/`~self` keywords when used as function arguments mark the function as
 self argument of type `*Self`/`*~Self` depending on whether `self` or `~self` was used respectively, with the name of
 `self` that can be referred to within the function.
 
-
 ### `Self`
 
 The `Self` keyword returns the containing structure of whatever scope you are within.
-
-## Macros
-
-Macros in `Cheese` are defined via the `macro` keyword, these cannot be overloaded unlike functions, but do function as
-values like functions. Their arguments do not have types, and it is essentially a drop in replacement. Macros must
-either replace a single expression or define a new block and therefore a new scope. But macros replace by name rather
-than reference or value as w/ functions.
-
-```cheese
-let x = macro a
-    a.x
-```
-
 
 ## Operators
 
@@ -1033,6 +1135,7 @@ can still be constructed normally with the `.{}` object constructor and in infer
 the parentheses which will be used to specialize which template is called if the object being called is a template.
 
 #### Example
+
 ```cheese
 let x = tup(1,2,3)
 function(a,b,c,d)
@@ -1052,6 +1155,7 @@ operator () self...,args... => return_type...
 the brackets.
 
 #### Example
+
 ```cheese
 let arr = u32[1, 2, 3, 4]
 let arr2 = u32[.[1,2],.[3,4],.[5,6]]
@@ -1072,6 +1176,7 @@ operator [] self...,args... => return_type...
 `{}` is the structure construction operator, it takes a list of `field_name: value` within the braces.
 
 #### Example
+
 ```cheese
 let x = struc{a: 5, b: 3, c: 2}
 ```
@@ -1250,6 +1355,7 @@ let inverse = (not x) + 1
 ```
 
 #### Overloading
+
 `not` can be overloaded with the `operator not` operator, it takes no arguments other than self.
 
 ```cheese
@@ -1379,7 +1485,6 @@ the second one.
 #### `+` w/ `comptime_string` values
 
 The `+` operator can be used at comptime to concatenate 2 `comptime_string` values into a new string.
-
 
 ### `-`
 
@@ -1908,12 +2013,12 @@ and everything else passes through. It then defines the following values to be u
 
 It first checks if `$projectDir/$path.chs` exists, if it does, it imports it and defines `$newProjectDir` as the folder
 containing `$projectDir/$path.chs`. It then checks if `$projectDir/$path/lib.chs` exists, and if it does, it imports it
-and defines `$newProjectDir` as `$projectDir/$path/lib.chs`. Then for each `$libraryPath` in `$libraryPaths` it checks if
+and defines `$newProjectDir` as `$projectDir/$path/lib.chs`. Then for each `$libraryPath` in `$libraryPaths` it checks
+if
 `$libraryPath/$path.chs` exists, and if it does, it imports it and defines `$newProjectDir` as the folder containing
 `$libraryPath/$path.chs`, and if it doesn't it checks if `$libraryPath/$path/lib.chs` exists, and if it does, it defines
 `$newProjectDir` as `$libraryPath/$path` and imports it. At any point when the compiler has imported something, it then
 stops the import resolution process.
-
 
 ## Note on Commas and Semicolons
 
@@ -1926,10 +2031,11 @@ compiler will still recognize it correctly except in cases where it is ambiguous
 multiple lines how the compiler recognizes it. If a list of statements ends with a trailing comma or semicolon the
 formatter will multiline it in that case as well.
 
-
 ### Top Level Declarations
+
 In top level declarations, semicolons are recognized for putting multiple declarations on one line. And commas are used
 for putting multiple fields in one line
+
 ```cheese
 /* file with commas/semicolons */
 a: i32 public, b: i32 public, c: i32 public
@@ -1946,7 +2052,9 @@ fn C => void {}
 ```
 
 ### Function Declarations
+
 In function declarations, commas are recognized to split the argument declarations up, semicolons are not recognized.
+
 ```cheese
 /* function with commas */
 fn fma a: f32, b: f32, c: f32 => f32
@@ -1962,7 +2070,9 @@ fn fma
 ```
 
 ### Tuple Declarations
+
 In tuple declarations, commas are recognized to split the field types up, semicolons are not recognized.
+
 ```cheese
 /* tuple with commas */
 tuple (i32, i32, i32)
@@ -1976,15 +2086,19 @@ tuple (
 ```
 
 ### Structure Declarations
+
 Within structure declarations, commas and semicolons follow the same rules as within top level declarations
 
 ### Blocks
+
 Within blocks, semicolons are recognized to split up individual statements.
 
 ### Structure Literals, Array Literals, Tuple Literals, Function Calls, Array Indices
+
 Within the aforementioned constructs, commas are recognized to split up the individual expressions within them.
 
 ### Match Statements
+
 Within match statement arms, commas are recognized to split up the different constraints
 Within destructured match arms, semicolons are recognized to split up the fields, new lines do the same
 
@@ -2003,47 +2117,46 @@ not shown on this table, then attempting to find the peer type between them will
 
 <!---                                    V                                      V paddings must stay at these points for proper rendering--->
 
-| Type A                                | Type B                               | Peer Type                                                                                                                                     |
-|---------------------------------------|--------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
-| `u(N1)`                               | `u(N2)`                              | `u(max(N1,N2)`                                                                                                                                |
-| `i(N1)`                               | `i(N2)`                              | `i(max(N1,N2)`                                                                                                                                |
-| `u(N1)`                               | `i(N2)`                              | `i(max(N1,N2)` but panics if `u(N1)` would cause a negative number to be represented when safety is enabled                                   |
-| `u/i(N)`                              | `f32`                                | `f32`                                                                                                                                         |
-| `u/i(N)`                              | `f64`                                | `f64`                                                                                                                                         |
-| `u/i(N)`                              | `c32`                                | `c32`                                                                                                                                         |
-| `u/i(N)`                              | `c64`                                | `c64`                                                                                                                                         |
-| `f32`                                 | `f64`                                | `f64`                                                                                                                                         |
-| `f32`                                 | `c32`                                | `c32`                                                                                                                                         |
-| `f32`                                 | `c64`                                | `f64`                                                                                                                                         |
-| `f64`                                 | `c32`                                | `c32`                                                                                                                                         |
-| `f64`                                 | `c64`                                | `c64`                                                                                                                                         |
-| `comptime_int`                        | `u(N)`                               | `u(N)` but errors if the `comptime_int` is negative or is not representable within N bits                                                     |
-| `comptime_int`                        | `i(N)`                               | `i(N)` but errors if the `comptime_int` is not representable within N bits                                                                    |
-| `comptime_int`                        | `f32`                                | `f32`                                                                                                                                         |
-| `comptime_int`                        | `f64`                                | `f64`                                                                                                                                         |
-| `comptime_int`                        | `c32`                                | `c32`                                                                                                                                         |
-| `comptime_int`                        | `c64`                                | `c64`                                                                                                                                         |
-| `comptime_int`                        | `comptime_float`                     | `comptime_float`                                                                                                                              |
-| `comptime_int`                        | `comptime_complex`                   | `comptime_complex`                                                                                                                            |
-| `comptime_float`                      | `u(N)`                               | `u(N)` but errors if the `comptime_float` is negative or not a representable integer within N bits                                            |
-| `comptime_float`                      | `i(N)`                               | `i(N)` but errors if the `comptime_float` is not a representable integer within N bits                                                        |
-| `comptime_float`                      | `f32`                                | `f32`                                                                                                                                         |
-| `comptime_float`                      | `f64`                                | `f64`                                                                                                                                         |
-| `comptime_float`                      | `c32`                                | `c32`                                                                                                                                         |
-| `comptime_float`                      | `c64`                                | `c64`                                                                                                                                         |
-| `comptime_float`                      | `comptime_complex`                   | `comptime_complex`                                                                                                                            |
-| `comptime_complex`                    | `c32`                                | `c32`                                                                                                                                         |
-| `comptime_complex`                    | `c64`                                | `c64`                                                                                                                                         |
-| `comptime_string`                     | `[*](~)u8`                           | `[*](~)u8` (with the string being null-terminated)                                                                                            |
-| `comptime_string`                     | `<>(~)u8`                            | `<>(~)u8` (with the string not being null-terminated)                                                                                         |
-| `comptime_string`                     | `[...](~)u8`                         | `[...](~)u8` but errors if the string is not the exact length stated in the one dimensional array (with the string not being null terminated) |
-| `T`                                   | `Result(T,E)`                        | `Result(T,E)` with the T being put into the .Ok form                                                                                          |
-| `E`                                   | `Result(T,E)`                        | `Result(T,E)` with the E being put into the .Err form                                                                                         |
-| `T`                                   | `Optional(T)`                        | `Optional(T)` with the T being put into the .Some form                                                                                        |
-| `noreturn`                            | `T`                                  | `T` if the types aren't part of a binary operation where the value can't be short-circuited otherwise `noreturn`                              |
+| Type A             | Type B             | Peer Type                                                                                                                                     |
+|--------------------|--------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
+| `u(N1)`            | `u(N2)`            | `u(max(N1,N2)`                                                                                                                                |
+| `i(N1)`            | `i(N2)`            | `i(max(N1,N2)`                                                                                                                                |
+| `u(N1)`            | `i(N2)`            | `i(max(N1,N2)` but panics if `u(N1)` would cause a negative number to be represented when safety is enabled                                   |
+| `u/i(N)`           | `f32`              | `f32`                                                                                                                                         |
+| `u/i(N)`           | `f64`              | `f64`                                                                                                                                         |
+| `u/i(N)`           | `c32`              | `c32`                                                                                                                                         |
+| `u/i(N)`           | `c64`              | `c64`                                                                                                                                         |
+| `f32`              | `f64`              | `f64`                                                                                                                                         |
+| `f32`              | `c32`              | `c32`                                                                                                                                         |
+| `f32`              | `c64`              | `f64`                                                                                                                                         |
+| `f64`              | `c32`              | `c32`                                                                                                                                         |
+| `f64`              | `c64`              | `c64`                                                                                                                                         |
+| `comptime_int`     | `u(N)`             | `u(N)` but errors if the `comptime_int` is negative or is not representable within N bits                                                     |
+| `comptime_int`     | `i(N)`             | `i(N)` but errors if the `comptime_int` is not representable within N bits                                                                    |
+| `comptime_int`     | `f32`              | `f32`                                                                                                                                         |
+| `comptime_int`     | `f64`              | `f64`                                                                                                                                         |
+| `comptime_int`     | `c32`              | `c32`                                                                                                                                         |
+| `comptime_int`     | `c64`              | `c64`                                                                                                                                         |
+| `comptime_int`     | `comptime_float`   | `comptime_float`                                                                                                                              |
+| `comptime_int`     | `comptime_complex` | `comptime_complex`                                                                                                                            |
+| `comptime_float`   | `u(N)`             | `u(N)` but errors if the `comptime_float` is negative or not a representable integer within N bits                                            |
+| `comptime_float`   | `i(N)`             | `i(N)` but errors if the `comptime_float` is not a representable integer within N bits                                                        |
+| `comptime_float`   | `f32`              | `f32`                                                                                                                                         |
+| `comptime_float`   | `f64`              | `f64`                                                                                                                                         |
+| `comptime_float`   | `c32`              | `c32`                                                                                                                                         |
+| `comptime_float`   | `c64`              | `c64`                                                                                                                                         |
+| `comptime_float`   | `comptime_complex` | `comptime_complex`                                                                                                                            |
+| `comptime_complex` | `c32`              | `c32`                                                                                                                                         |
+| `comptime_complex` | `c64`              | `c64`                                                                                                                                         |
+| `comptime_string`  | `[*](~)u8`         | `[*](~)u8` (with the string being null-terminated)                                                                                            |
+| `comptime_string`  | `<>(~)u8`          | `<>(~)u8` (with the string not being null-terminated)                                                                                         |
+| `comptime_string`  | `[...](~)u8`       | `[...](~)u8` but errors if the string is not the exact length stated in the one dimensional array (with the string not being null terminated) |
+| `T`                | `Result(T,E)`      | `Result(T,E)` with the T being put into the .Ok form                                                                                          |
+| `E`                | `Result(T,E)`      | `Result(T,E)` with the E being put into the .Err form                                                                                         |
+| `T`                | `Optional(T)`      | `Optional(T)` with the T being put into the .Some form                                                                                        |
+| `noreturn`         | `T`                | `T` if the types aren't part of a binary operation where the value can't be short-circuited otherwise `noreturn`                              |
 
 ## Comptime vs. Runtime
-
 
 ------------------------------------------------------------------------------------------------------------------------
 
@@ -2091,7 +2204,7 @@ Denotes a non-copyable, non-droppable interface that says this object is callabl
 
 * Mandates an `operator() Args... => R` function
 
-### `CallableObject(Args...,R)` 
+### `CallableObject(Args...,R)`
 
 Denotes a function much the same as `Callable(Args...R)`, but implies copyable and droppable.
 
@@ -2099,12 +2212,14 @@ Denotes a function much the same as `Callable(Args...R)`, but implies copyable a
 * Also mandates a `copy ~self => CallableObject(...)` function
 * And a `drop self => void` function
 
-### `Droppable` 
+### `Droppable`
+
 Denotes that the object gets destroyed when it leaves scope.
 
 * Mandates a `drop => void` function
 
 ### `Allocator`
+
 Denotes an allocator.
 
 * Todo `Allocator` mandates
@@ -2112,5 +2227,6 @@ Denotes an allocator.
 ------------------------------------------------------------------------------------------------------------------------
 
 # Standard Library
+
 TODO: Standard library documentation (and standard library)
 ------------------------------------------------------------------------------------------------------------------------

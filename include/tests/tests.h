@@ -4,10 +4,12 @@
 #ifndef CHEESE_NO_SELF_TESTS
 #ifndef CHEESE_TESTS_H
 #define CHEESE_TESTS_H
+
 #include <functional>
 #include <string>
 #include <optional>
 #include "thirdparty/json.hpp"
+
 namespace cheese::tests {
 
     enum class SingleResult {
@@ -22,9 +24,10 @@ namespace cheese::tests {
         std::uint32_t skip = 0;
 
         TestResults operator+(TestResults other) const {
-            return TestResults{pass+other.pass,fail+other.fail, skip+other.skip};
+            return TestResults{pass + other.pass, fail + other.fail, skip + other.skip};
         }
-        void display_results(std::uint32_t nesting); //Displays #tests ran, #passed, #failed, and the percentage
+
+        void display_results(std::uint32_t nesting) const; //Displays #tests ran, #passed, #failed, and the percentage
     };
 
     //Do a better testing system, that allows for sections and subsections
@@ -34,11 +37,11 @@ namespace cheese::tests {
     struct SectionMember {
         bool is_subsection;
         union {
-            TestSection* subsection;
-            TestCase* test_case;
+            TestSection *subsection;
+            TestCase *test_case;
         };
 
-        TestResults run(int nesting);
+        TestResults run(int nesting) const;
     };
 
     typedef std::function<void()> TestSetupDestroy;
@@ -49,12 +52,15 @@ namespace cheese::tests {
         std::optional<TestSetupDestroy> destroy;
         std::string section_name;
 
-        TestSection(std::string name, std::uint32_t priority); //priority is used for determining the global order of tests to be run
-        TestSection(std::string name, TestSection* parent);
+        TestSection(std::string name,
+                    std::uint32_t priority); //priority is used for determining the global order of tests to be run
+        TestSection(std::string name, TestSection *parent);
 
 
-        void add(TestSection* subsection);
-        void add(TestCase* subcase);
+        void add(TestSection *subsection);
+
+        void add(TestCase *subCase);
+
         TestResults run(int nesting); //It will then display the results at the bottom
 
     };
@@ -67,23 +73,31 @@ namespace cheese::tests {
         std::string description;
         bool expects_error = false;
         bool expects_warning = false; //If this is true the previous thing should be true
-        TestCase(TestSection* parent, std::string description, TestCaseWithNesting test_case, bool expects_error, bool expects_warning);
+        TestCase(TestSection *parent, std::string description, TestCaseWithNesting test_case, bool expects_error,
+                 bool expects_warning);
+
         TestResults run(int nesting); //Will do the entire display the test name, and then the results
     };
 
     void run_all_builtin();
-    void run_json_tests(std::string filename);
+
+    void run_json_tests(const std::string &filename);
+
     bool run_single_json_test(nlohmann::json test);
+
     void gen_pass(std::uint32_t nesting = 0);
+
     void gen_fail(std::uint32_t nesting = 0);
+
     void gen_skip(std::uint32_t nesting = 0);
 
-    void test_output_message(std::uint32_t nesting, std::string message); //Will properly indent and everything depending on the level of nesting
+    void test_output_message(std::uint32_t nesting,
+                             std::string message); //Will properly indent and everything depending on the level of nesting
 }
 
 using namespace cheese::tests; //Because all the testing macros require this
 
-#define TEST_NAME_MERGE(a,b)  a##b
+#define TEST_NAME_MERGE(a, b)  a##b
 #define SECTION_NAMESPACE(a) TEST_NAME_MERGE(section_,a)
 #define SECTION_STRUCTURE(a) TEST_NAME_MERGE(__section_,a)
 #define SUBSECTION_NAMESPACE(a) TEST_NAME_MERGE(subsection_,a)
@@ -156,30 +170,29 @@ using __current_section = __next_section;
 #define TEST_PASS do {gen_pass(__nesting); return SingleResult::Pass;} while(0)
 
 #define TEST_ASSERT(condition) do {if ((condition)) TEST_PASS; else TEST_FAIL;} while(0)
-#define TEST_ASSERT_MESSAGE(condition,message) do {if ((condition)) TEST_PASS; else TEST_FAIL_MESSAGE(message);} while(0)
+#define TEST_ASSERT_MESSAGE(condition, message) do {if ((condition)) TEST_PASS; else TEST_FAIL_MESSAGE(message);} while(0)
 #define TEST_ASSERT_CONTINUE(condition) do {if (!(condition)) TEST_FAIL;} while(0)
-#define TEST_ASSERT_CONTINUE_MESSAGE(condition,message) do {if (!(condition)) TEST_FAIL_MESSAGE(message);} while(0)
+#define TEST_ASSERT_CONTINUE_MESSAGE(condition, message) do {if (!(condition)) TEST_FAIL_MESSAGE(message);} while(0)
 
 
-
-#define TEST_ASSERT_EQ(X,Y) TEST_ASSERT((X) == (Y))
-#define TEST_ASSERT_NEQ(X,Y) TEST_ASSERT((X) != (Y))
-#define TEST_ASSERT_EQ_MESSAGE(X,Y,message) TEST_ASSERT_MESSAGE((X) == (Y),message)
-#define TEST_ASSERT_NEQ_MESSAGE(X,Y,message) TEST_ASSERT_MESSAGE((X) != (Y),message)
-#define TEST_ASSERT_EQ_CONTINUE(X,Y) TEST_ASSERT_CONTINUE((X) == (Y))
-#define TEST_ASSERT_NEQ_CONTINUE(X,Y) TEST_ASSERT_CONTINUE((X) != (Y))
-#define TEST_ASSERT_EQ_CONTINUE_MESSAGE(X,Y,message) TEST_ASSERT_CONTINUE_MESSAGE((X) == (Y),message)
-#define TEST_ASSERT_NEQ_CONTINUE_MESSAGE(X,Y,message) TEST_ASSERT_CONTINUE_MESSAGE((X) != (Y),message)
+#define TEST_ASSERT_EQ(X, Y) TEST_ASSERT((X) == (Y))
+#define TEST_ASSERT_NEQ(X, Y) TEST_ASSERT((X) != (Y))
+#define TEST_ASSERT_EQ_MESSAGE(X, Y, message) TEST_ASSERT_MESSAGE((X) == (Y),message)
+#define TEST_ASSERT_NEQ_MESSAGE(X, Y, message) TEST_ASSERT_MESSAGE((X) != (Y),message)
+#define TEST_ASSERT_EQ_CONTINUE(X, Y) TEST_ASSERT_CONTINUE((X) == (Y))
+#define TEST_ASSERT_NEQ_CONTINUE(X, Y) TEST_ASSERT_CONTINUE((X) != (Y))
+#define TEST_ASSERT_EQ_CONTINUE_MESSAGE(X, Y, message) TEST_ASSERT_CONTINUE_MESSAGE((X) == (Y),message)
+#define TEST_ASSERT_NEQ_CONTINUE_MESSAGE(X, Y, message) TEST_ASSERT_CONTINUE_MESSAGE((X) != (Y),message)
 #define TEST_TRY(expr) do {try { expr; } catch (cheese::error::CompilerError& c) {TEST_FAIL_MESSAGE(NEWLINE(c.what()));} catch (std::exception& e) {TEST_FAIL_MESSAGE(NEWLINE(e.what()));}} while(0)
-#define TEST_TRY_MESSAGE(expr,message) do {try { expr; } catch (cheese::error::CompilerError& c) {TEST_FAIL_MESSAGE(std::string(message) + c.what() + "\n");} catch (std::exception& e) {TEST_FAIL_MESSAGE(std::string(message) + NEWLINE(e.what()));}} while(0)
+#define TEST_TRY_MESSAGE(expr, message) do {try { expr; } catch (cheese::error::CompilerError& c) {TEST_FAIL_MESSAGE(std::string(message) + c.what() + "\n");} catch (std::exception& e) {TEST_FAIL_MESSAGE(std::string(message) + NEWLINE(e.what()));}} while(0)
 #define TEST_EXPECT(expr, expected_error) do { try {expr; TEST_FAIL; } catch (cheese::error::CompilerError& c) {if (c.code == (expected_error)) {TEST_PASS;} else {TEST_FAIL_MESSAGE(NEWLINE(c.what()));}} catch (std::exception& e) {TEST_FAIL_MESSAGE(NEWLINE(e.what()));}} while(0)
 #define TEST_EXPECT_MESSAGE(expr, expected_error, message)  do { try {expr; TEST_FAIL_MESSAGE(message); } catch (cheese::error::CompilerError& c) {if (c.code == (expected_error)) {TEST_PASS;} else {TEST_FAIL_MESSAGE(std::string(message) + NEWLINE(c.what()));}} catch (std::exception& e) {TEST_FAIL_MESSAGE(std::string(message) + NEWLINE(e.what()));}} while(0)
 
 #define TEST_SKIP_IF(X) do {if (X) TEST_SKIP;} while (0)
-#define TEST_SKIP_IF_MESSAGE(X,message) do {if (X) TEST_SKIP_MESSAGE(message);} while 0
+#define TEST_SKIP_IF_MESSAGE(X, message) do {if (X) TEST_SKIP_MESSAGE(message);} while 0
 
 
-#define TEST_SETUP_ERROR_OUTPUT configuration::error_output_handler = [__nesting](std::string msg) { test_output_message(__nesting,msg);}
+#define TEST_SETUP_ERROR_OUTPUT configuration::error_output_handler = [__nesting](const std::string& msg) { test_output_message(__nesting,msg);}
 
 
 #define TEST_END }

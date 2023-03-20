@@ -78,6 +78,10 @@ namespace cheese::lexer {
         RESERVED(dynamic, TokenType::Dynamic)
         RESERVED(with, TokenType::With)
         RESERVED(constrain,TokenType::Constrain)
+        RESERVED(loop,TokenType::Loop)
+        RESERVED(self,TokenType::Self)
+        RESERVED(Self,TokenType::TypeSelf)
+        RESERVED(operator,TokenType::Operator)
     };
 #undef  RESERVED
     const auto builtin_macros = std::vector<std::string_view>{
@@ -799,6 +803,21 @@ namespace cheese::lexer {
                 case '|':
                     SINGLE(TokenType::Pipe);
                     break;
+                case '~':
+                    {
+                        ADVANCE;
+                        auto ident = identifier();
+                        if (ident.ty == TokenType::Self) {
+                            ident.location = start_location;
+                            ident.ty = TokenType::ConstSelf;
+                            ident.value = "~self";
+                            tokens.push_back(ident);
+                        } else {
+                            error::raise_error("lexer", "expected self",start_location,error::ErrorCode::ExpectedSelf);
+                            ADVANCE;
+                        }
+                    }
+                    break;
                 default:
                     if (validIBeg(current)) {
                         tokens.push_back(identifier());
@@ -971,7 +990,12 @@ namespace cheese::lexer {
             MAP(Impl),
             MAP(Interface),
             MAP(Dynamic),
-            MAP(Constrain)
+            MAP(Constrain),
+            MAP(Loop),
+            MAP(Self),
+            MAP(TypeSelf),
+            MAP(ConstSelf),
+            MAP(Operator),
     };
 
 #undef MAP

@@ -23,7 +23,7 @@ namespace cheese::parser {
 
         [[nodiscard]] virtual nlohmann::json as_json() const = 0;
 
-        [[nodiscard]] virtual bool compare_json(const nlohmann::json&) const = 0;
+        [[nodiscard]] virtual bool compare_json(const nlohmann::json &) const = 0;
 
         virtual ~Node() = default;
 
@@ -42,7 +42,7 @@ namespace cheese::parser {
     };
     typedef std::shared_ptr<Node> NodePtr;
     typedef std::vector<NodePtr> NodeList;
-    typedef std::map<std::string,NodePtr> NodeDict;
+    typedef std::map<std::string, NodePtr> NodeDict;
 
 
     bool compare_helper(const nlohmann::json &object, std::string name, const NodePtr &value);
@@ -84,16 +84,16 @@ namespace cheese::parser {
 
     bool implicit_compare_value(const math::BigInteger &value);
 
-    bool compare_helper(const nlohmann::json &object, std::string name, const NodeDict& value);
+    bool compare_helper(const nlohmann::json &object, std::string name, const NodeDict &value);
 
-    bool implicit_compare_value(const NodeDict& value);
+    bool implicit_compare_value(const NodeDict &value);
 
     void implicit_compare_check(bool &success);
 
     template<typename T>
     bool compare_helper(const nlohmann::json &object, std::string name, const std::optional<T> &value) {
         if (value.has_value()) {
-            return compare_helper(object,name,value.value());
+            return compare_helper(object, name, value.value());
         } else {
             if (object.contains(name)) {
                 return object[name].is_null();
@@ -129,11 +129,11 @@ namespace cheese::parser {
     template<typename J>
     void build_json(nlohmann::json &object, std::string name, const std::optional<J> &value) {
         if (implicit_compare_value(value)) return;
-        return build_json(object,name,value.value());
+        return build_json(object, name, value.value());
     }
 
     template<>
-    void build_json<NodeDict>(nlohmann::json &object, std::string name, const NodeDict& value);
+    void build_json<NodeDict>(nlohmann::json &object, std::string name, const NodeDict &value);
 
     template<typename T, typename ...Ts>
     void implicit_compare_check(bool &success, T &arg, Ts &... args) {
@@ -151,7 +151,8 @@ namespace cheese::parser {
 
     template<size_t idx, typename T, typename ...Ts>
     void
-    compare_helper_check(const nlohmann::json &object, bool &success, std::vector<std::string> &names, T &arg, Ts &... args) {
+    compare_helper_check(const nlohmann::json &object, bool &success, std::vector<std::string> &names, T &arg,
+                         Ts &... args) {
         if (idx >= names.size()) {
             success = false;
             return;
@@ -165,7 +166,8 @@ namespace cheese::parser {
 
     template<typename ...T>
     bool
-    compare_helper(const nlohmann::json &object, std::string type, std::vector<std::string> arg_names, const T &... args) {
+    compare_helper(const nlohmann::json &object, std::string type, std::vector<std::string> arg_names,
+                   const T &... args) {
         //Check if everything is implicit if nothing else
         bool success = true;
 
@@ -245,7 +247,7 @@ namespace cheese::parser {
 #define POSSIBLY_CONST_TYPE_NODE(N, T) struct N final : public Node { \
     NodePtr child;                                              \
     bool constant;                                                            \
-    N(Coordinate location, NodePtr child, bool constant) : Node(location), child(std::move(child)), constant(constant) {} \
+    N(Coordinate location, NodePtr child, bool constant = false) : Node(location), child(std::move(child)), constant(constant) {} \
     void nested_display(std::uint32_t nesting) const override {     \
         NOT_IMPL                                              \
     }                                                         \

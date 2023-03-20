@@ -4,6 +4,7 @@
 
 #ifndef CHEESE_LEXER_H
 #define CHEESE_LEXER_H
+
 #include "../Coordinate.h"
 #include <map>
 
@@ -182,6 +183,11 @@ namespace cheese::lexer {
         Dynamic,
         With,
         Constrain,
+        Loop,
+        Self,
+        ConstSelf,
+        TypeSelf,
+        Operator,
         EoF, //End of File, ALWAYS KEEP THIS AT THE END OF THE PROGRAM
     };
     struct Token {
@@ -190,8 +196,11 @@ namespace cheese::lexer {
         std::string_view value;
     };
 
-    std::vector<Token> lex(std::string_view buffer, std::string filename="unknown", bool errorInvalid = true, bool outputComments = false, bool warnComments = true);
-    std::string to_stream(const std::vector<Token>&);
+    std::vector<Token> lex(std::string_view buffer, std::string filename = "unknown", bool errorInvalid = true,
+                           bool outputComments = false, bool warnComments = true);
+
+    std::string to_stream(const std::vector<Token> &);
+
     std::string_view name_of(TokenType);
 } //cheese::lexer
 #endif //CHEESE_LEXER_H

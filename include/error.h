@@ -22,6 +22,7 @@ namespace cheese::error {
         UnterminatedCharacterLiteral,
         UnterminatedMultilineComment,
         UnexpectedCharacter,
+        ExpectedSelf,
 
         //Then lexer warnings
         TodoFoundInComment = lexer_error_start+warning_modifier,
@@ -54,6 +55,8 @@ namespace cheese::error {
         AccidentalNamedBlock,
         MissingSemicolon,
         ExpectedMatchBodySpecifier,
+        ExpectedSliceClose,
+        UnknownOperator,
 
         //General error (thrown for example when multiple previous errors were printed)
         GeneralCompilerError = 9999,

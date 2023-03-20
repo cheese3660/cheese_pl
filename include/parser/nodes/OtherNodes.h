@@ -35,7 +35,8 @@ namespace cheese::parser::nodes {
     DOUBLE_MEMBER_NODE(MatchEnumStructure, "match_enum_structure", NodeDict, children, std::string, enum_identifier)
 
     DOUBLE_MEMBER_NODE(MatchEnumTuple, "match_enum_tuple", NodeList, children, std::string, enum_identifier)
-    DOUBLE_MEMBER_NODE(Enum,"enum",std::optional<NodePtr>, containing_type, NodeList, children)
+
+    DOUBLE_MEMBER_NODE(Enum, "enum", std::optional<NodePtr>, containing_type, NodeList, children)
 
 
     //All the binary operators
@@ -263,6 +264,32 @@ namespace cheese::parser::nodes {
 
         ~Function() override = default;
     };
+
+    struct Operator final : public Node {
+        std::string op;
+        NodeList arguments;
+        NodePtr return_type;
+        FlagSet flags;
+        NodePtr body;
+
+        Operator(Coordinate location, std::string op, NodeList arguments, NodePtr return_type, FlagSet flags,
+                 NodePtr body) :
+                Node(location),
+                op(std::move(op)),
+                arguments(std::move(arguments)),
+                return_type(std::move(return_type)),
+                flags(std::move(flags)),
+                body(std::move(body)) {}
+
+        void nested_display(std::uint32_t nesting) const override {}
+
+        JSON_FUNCS("operator", { "operator", "args", "return_type", "flags", "body" }, op, arguments, return_type,
+                   flags,
+                   body)
+
+        ~Operator() override = default;
+    };
+
 
     struct GeneratorPrototype final : public Node {
         std::string name;
@@ -590,6 +617,50 @@ namespace cheese::parser::nodes {
         ~If() override = default;
     };
 
+    struct While final : public Node {
+        NodePtr condition;
+        NodePtr body;
+        std::optional<NodePtr> els;
+
+        While(Coordinate location, NodePtr condition, NodePtr body, std::optional<NodePtr> els) :
+                Node(location),
+                condition(std::move(condition)),
+                body(std::move(body)),
+                els(std::move(els)) {}
+
+        void nested_display(std::uint32_t nesting) const override { NOT_IMPL }
+
+        JSON_FUNCS("while", { "condition", "body", "else" }, condition, body, els);
+
+        ~While() override = default;
+    };
+
+    struct For final : public Node {
+        NodePtr capture;
+        std::optional<NodePtr> index;
+        NodePtr iterable;
+        NodeList transformations;
+        NodePtr body;
+        std::optional<NodePtr> els;
+
+        For(Coordinate location, NodePtr capture, std::optional<NodePtr> index, NodePtr iterable,
+            NodeList transformations, NodePtr body, std::optional<NodePtr> els)
+                :
+                Node(location),
+                capture(std::move(capture)),
+                index(std::move(index)),
+                iterable(std::move(iterable)),
+                transformations(std::move(transformations)),
+                body(std::move(body)),
+                els(std::move(els)) {}
+
+        void nested_display(std::uint32_t nesting) const override { NOT_IMPL }
+
+        JSON_FUNCS("for", { "capture", "index", "iterable", "transformations", "body", "else" },
+                   capture, index, iterable, transformations, body, els);
+
+    };
+
     struct MatchArm final : public Node {
         NodeList matches;
         std::optional<NodePtr> store;
@@ -613,16 +684,37 @@ namespace cheese::parser::nodes {
         bool tuple;
         NodeList children;
         std::optional<NodePtr> value;
-        EnumMember(Coordinate location, std::string name, bool tuple, NodeList children, std::optional<NodePtr> value):
-            Node(location),
-            name(std::move(name)),
-            tuple(tuple),
-            children(std::move(children)),
-            value(std::move(value))
-        {}
+
+        EnumMember(Coordinate location, std::string name, bool tuple, NodeList children, std::optional<NodePtr> value) :
+                Node(location),
+                name(std::move(name)),
+                tuple(tuple),
+                children(std::move(children)),
+                value(std::move(value)) {}
+
         void nested_display(std::uint32_t nesting) const override { NOT_IMPL }
-        JSON_FUNCS("enum_constant",{"name","tuple","children","value"},name,tuple,children,value);
+
+        JSON_FUNCS("enum_constant", { "name", "tuple", "children", "value" }, name, tuple, children, value);
+
         ~EnumMember() override = default;
+    };
+
+    struct ArrayType final : public Node {
+        NodeList dimensions;
+        NodePtr child;
+        bool constant;
+
+        ArrayType(Coordinate location, NodeList dimensions, NodePtr child, bool constant) :
+                Node(location),
+                dimensions(std::move(dimensions)),
+                child(std::move(child)),
+                constant(constant) {}
+
+        void nested_display(std::uint32_t nesting) const override { NOT_IMPL }
+
+        JSON_FUNCS("array_type", { "dimensions", "child", "constant" }, dimensions, child, constant);
+
+        ~ArrayType() override = default;
     };
 }
 #endif //CHEESE_OTHERNODES_H

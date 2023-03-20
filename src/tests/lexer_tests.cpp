@@ -6,7 +6,6 @@
 #include "vterm.h"
 #include "error.h"
 #include "tests/tests.h"
-#include <iostream>
 namespace cheese::tests::lexer_tests {
     TEST_SECTION("lexer tests",0)
         TEST_SUBSECTION("token representations")

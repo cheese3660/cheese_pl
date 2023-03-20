@@ -4,20 +4,24 @@
 
 #ifndef CHEESE_COORDINATE_H
 #define CHEESE_COORDINATE_H
+
 #include <cstdint>
 #include <string>
 #include <vector>
+
 namespace cheese {
     extern std::vector<std::string> filenames;
 
-    std::size_t getFileIndex(std::string filename);
+    std::size_t getFileIndex(const std::string &filename);
 
     struct Coordinate {
         std::uint32_t line_number;
         std::uint32_t column_number;
         std::size_t file_index;
-        std::string toString();
-        bool operator !=(const Coordinate& other) const;
+
+        std::string toString() const;
+
+        bool operator!=(const Coordinate &other) const;
     };
 }
 

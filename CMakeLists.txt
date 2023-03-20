@@ -18,6 +18,10 @@ message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
 include_directories(${LLVM_INCLUDE_DIRS})
 separate_arguments(LLVM_DEFINITIONS_LIST NATIVE_COMMAND ${LLVM_DEFINITIONS})
 add_definitions(${LLVM_DEFINITIONS_LIST})
+if (CMAKE_BUILD_TYPE MATCHES Debug)
+    message("debug mode")
+    add_definitions(-DDEBUG)
+endif ()
 # Uncomment the following line out to remove self-tests from the compiler, self-tests add to the final size, and also add to the startup time marginally
 # add_compile_definitions(CHEESE_NO_SELF_TESTS)
 
@@ -63,6 +67,6 @@ add_executable(
 if (UNIX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++ -Wall")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++ -lc++abi")
-endif()
+endif ()
 llvm_map_components_to_libnames(llvm_libs support core irreader)
 target_link_libraries(cheese argparse ${llvm_libs})

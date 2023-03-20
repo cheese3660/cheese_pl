@@ -37,8 +37,7 @@ namespace cheese::tests::parser_tests {
             }
             TEST_SUBSECTION("parser validation")
                 TEST_GENERATOR {
-                    for (size_t i = 0; i < generated_tests_json.size(); i++) {
-                        auto test = generated_tests_json[i];
+                    for (auto test : generated_tests_json) {
                         TEST_GEN_BEGIN(test[0].get<std::string>())
 
                             configuration::error_output_handler = [__nesting](std::string msg) {

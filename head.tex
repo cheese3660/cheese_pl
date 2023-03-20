@@ -6,25 +6,25 @@
 \let\oldtexttt\texttt
 
 \renewcommand{\texttt}[1]{
-  \colorbox{bgcolor}{\oldtexttt{#1}}
-  }
+    \colorbox{bgcolor}{\oldtexttt{#1}}
+}
 
 \usepackage{fancyvrb,newverbs,fvextra}
 \newenvironment{lcverbatim}
- {\SaveVerbatim{cverb}}
- {\endSaveVerbatim
-  \flushleft\fboxrule=0pt\fboxsep=.5em
-  \colorbox{bgcolor}{%
+{\SaveVerbatim{cverb}}
+{\endSaveVerbatim
+\flushleft\fboxrule=0pt\fboxsep=.5em
+\colorbox{bgcolor}{%
     \makebox[\dimexpr\linewidth-2\fboxsep][l]{\BUseVerbatim{cverb}}%
-  }
-  \endflushleft
+}
+\endflushleft
 }
 
 \renewenvironment{verbatim}{%
-  \VerbatimEnvironment
-  \begin{lcverbatim}%
-}{%
-  \end{lcverbatim}%
+    \VerbatimEnvironment
+    \begin{lcverbatim}%
+    }{%
+    \end{lcverbatim}%
 }
 
 \definecolor{tablebgdark}{HTML}{E0E0E0}
@@ -35,3 +35,6 @@
 \let\endoldlongtable\endlongtable
 
 \renewenvironment{longtable}{\rowcolors{2}{tablebglight}{tablebgdark}\oldlongtable}{\endoldlongtable}
+\makeatletter
+\def\verbatim@nolig@list{}
+\makeatother
