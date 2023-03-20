@@ -473,14 +473,18 @@
               "type": "ref",
               "name": "p"
             },
-            "args": {
-              "a": {
-                "type": "false"
+            "args": [
+              {
+                "name": "a",
+                "type": "field_literal",
+                "value": "false"
               },
-              "b": {
-                "type": "false"
+              {
+                "name": "b",
+                "type": "field_literal",
+                "value": "false"
               }
-            }
+            ]
           }
         }
       ]
@@ -500,14 +504,18 @@
           },
           "value": {
             "type": "object_literal",
-            "children": {
-              "a": {
-                "type": "false"
+            "children": [
+              {
+                "name": "a",
+                "type": "field_literal",
+                "value": "false"
               },
-              "b": {
-                "type": "false"
+              {
+                "name": "b",
+                "type": "field_literal",
+                "value": "false"
               }
-            }
+            ]
           }
         }
       ]
@@ -2305,6 +2313,35 @@
     }
   ],
   [
+    "generic mixins",
+    "impl p :: A: type: X\n{}",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "mixin",
+          "structure": {
+            "type": "ref",
+            "name": "p"
+          },
+          "arguments": [
+            {
+              "type": "arg",
+              "name": "A",
+              "arg_type": "type_type"
+            }
+          ],
+          "interfaces": [
+            {
+              "type": "ref",
+              "name": "X"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  [
     "interfaces: static, no interfaces",
     "let X=interface {}",
     {
@@ -3837,7 +3874,7 @@
         {
           "type": "function",
           "name": "x",
-          "arguments": [
+          "args": [
             "self"
           ],
           "return_type": "bool",
@@ -3908,7 +3945,7 @@
           "args": [
             "self"
           ],
-          "return_type": "void",
+          "return_type": "void_type",
           "body": "block"
         }
       ]
@@ -3925,7 +3962,7 @@
           "operator": "tuple_call",
           "args": [
           ],
-          "return_type": "void",
+          "return_type": "void_type",
           "body": "block"
         }
       ]
@@ -3943,7 +3980,7 @@
           "args": [
             "self"
           ],
-          "return_type": "void",
+          "return_type": "void_type",
           "body": "block"
         }
       ]
@@ -3960,7 +3997,7 @@
           "operator": "array_call",
           "args": [
           ],
-          "return_type": "void",
+          "return_type": "void_type",
           "body": "block"
         }
       ]
@@ -3978,12 +4015,12 @@
           "args": [
             "self",
             {
-              "type": "fn_arg",
+              "type": "arg",
               "name": "x",
-              "arg_type": "any_type"
+              "arg_type": "any"
             }
           ],
-          "return_type": "void",
+          "return_type": "void_type",
           "body": "block"
         }
       ]
@@ -4000,12 +4037,12 @@
           "operator": "object_call",
           "args": [
             {
-              "type": "fn_arg",
+              "type": "arg",
               "name": "x",
-              "arg_type": "any_type"
+              "arg_type": "any"
             }
           ],
-          "return_type": "void",
+          "return_type": "void_type",
           "body": "block"
         }
       ]
@@ -4066,7 +4103,7 @@
   ],
   [
     "operators: +x overloading",
-    "operator +x self => void\n{}",
+    "operator +? self => void\n{}",
     {
       "type": "struct",
       "children": [
@@ -4076,7 +4113,7 @@
           "args": [
             "self"
           ],
-          "return_type": "void",
+          "return_type": "void_type",
           "body": "block"
         }
       ]
@@ -4084,7 +4121,7 @@
   ],
   [
     "operators: +x static overloading",
-    "operator +x => void\n{}",
+    "operator +? => void\n{}",
     {
       "type": "struct",
       "children": [
@@ -4093,7 +4130,7 @@
           "operator": "unary_plus",
           "args": [
           ],
-          "return_type": "void",
+          "return_type": "void_type",
           "body": "block"
         }
       ]
@@ -4124,7 +4161,7 @@
   ],
   [
     "operators: -x overloading",
-    "operator -x self => void\n{}",
+    "operator -? self => void\n{}",
     {
       "type": "struct",
       "children": [
@@ -4134,7 +4171,7 @@
           "args": [
             "self"
           ],
-          "return_type": "void",
+          "return_type": "void_type",
           "body": "block"
         }
       ]
@@ -4142,7 +4179,7 @@
   ],
   [
     "operators: -x static overloading",
-    "operator -x => void\n{}",
+    "operator -? => void\n{}",
     {
       "type": "struct",
       "children": [
@@ -4151,7 +4188,7 @@
           "operator": "unary_minus",
           "args": [
           ],
-          "return_type": "void",
+          "return_type": "void_type",
           "body": "block"
         }
       ]
@@ -4192,7 +4229,7 @@
           "args": [
             "self"
           ],
-          "return_type": "void",
+          "return_type": "void_type",
           "body": "block"
         }
       ]
@@ -4233,7 +4270,7 @@
           "args": [
             "self"
           ],
-          "return_type": "void",
+          "return_type": "void_type",
           "body": "block"
         }
       ]
@@ -4250,7 +4287,7 @@
           "operator": "not",
           "args": [
           ],
-          "return_type": "void",
+          "return_type": "void_type",
           "body": "block"
         }
       ]
@@ -4295,12 +4332,12 @@
           "args": [
             "self",
             {
-              "type": "fn_arg",
+              "type": "arg",
               "name": "other",
               "arg_type": "self_type"
             }
           ],
-          "return_type": "void",
+          "return_type": "void_type",
           "body": "block"
         }
       ]
@@ -4317,12 +4354,12 @@
           "operator": "multiply",
           "args": [
             {
-              "type": "fn_arg",
+              "type": "arg",
               "name": "other",
-              "arg_type": "type"
+              "arg_type": "type_type"
             }
           ],
-          "return_type": "void",
+          "return_type": "void_type",
           "body": "block"
         }
       ]
@@ -4367,12 +4404,12 @@
           "args": [
             "self",
             {
-              "type": "fn_arg",
+              "type": "arg",
               "name": "other",
               "arg_type": "self_type"
             }
           ],
-          "return_type": "void",
+          "return_type": "void_type",
           "body": "block"
         }
       ]
@@ -4389,12 +4426,12 @@
           "operator": "divide",
           "args": [
             {
-              "type": "fn_arg",
+              "type": "arg",
               "name": "other",
-              "arg_type": "type"
+              "arg_type": "type_type"
             }
           ],
-          "return_type": "void",
+          "return_type": "void_type",
           "body": "block"
         }
       ]
@@ -4439,12 +4476,12 @@
           "args": [
             "self",
             {
-              "type": "fn_arg",
+              "type": "arg",
               "name": "other",
               "arg_type": "self_type"
             }
           ],
-          "return_type": "void",
+          "return_type": "void_type",
           "body": "block"
         }
       ]
@@ -4461,12 +4498,12 @@
           "operator": "modulate",
           "args": [
             {
-              "type": "fn_arg",
+              "type": "arg",
               "name": "other",
-              "arg_type": "type"
+              "arg_type": "type_type"
             }
           ],
-          "return_type": "void",
+          "return_type": "void_type",
           "body": "block"
         }
       ]
@@ -4511,12 +4548,12 @@
           "args": [
             "self",
             {
-              "type": "fn_arg",
+              "type": "arg",
               "name": "other",
               "arg_type": "self_type"
             }
           ],
-          "return_type": "void",
+          "return_type": "void_type",
           "body": "block"
         }
       ]
@@ -4533,12 +4570,12 @@
           "operator": "add",
           "args": [
             {
-              "type": "fn_arg",
+              "type": "arg",
               "name": "other",
-              "arg_type": "type"
+              "arg_type": "type_type"
             }
           ],
-          "return_type": "void",
+          "return_type": "void_type",
           "body": "block"
         }
       ]
@@ -4583,12 +4620,12 @@
           "args": [
             "self",
             {
-              "type": "fn_arg",
+              "type": "arg",
               "name": "other",
               "arg_type": "self_type"
             }
           ],
-          "return_type": "void",
+          "return_type": "void_type",
           "body": "block"
         }
       ]
@@ -4605,12 +4642,12 @@
           "operator": "subtract",
           "args": [
             {
-              "type": "fn_arg",
+              "type": "arg",
               "name": "other",
-              "arg_type": "type"
+              "arg_type": "type_type"
             }
           ],
-          "return_type": "void",
+          "return_type": "void_type",
           "body": "block"
         }
       ]
@@ -4629,7 +4666,7 @@
             "name": "x"
           },
           "value": {
-            "type": "left_shift",
+            "type": "shift_left",
             "lhs": {
               "type": "ref",
               "name": "y"
@@ -4651,16 +4688,16 @@
       "children": [
         {
           "type": "operator",
-          "operator": "left_shift",
+          "operator": "shift_left",
           "args": [
             "self",
             {
-              "type": "fn_arg",
+              "type": "arg",
               "name": "other",
               "arg_type": "self_type"
             }
           ],
-          "return_type": "void",
+          "return_type": "void_type",
           "body": "block"
         }
       ]
@@ -4674,15 +4711,15 @@
       "children": [
         {
           "type": "operator",
-          "operator": "left_shift",
+          "operator": "shift_left",
           "args": [
             {
-              "type": "fn_arg",
+              "type": "arg",
               "name": "other",
-              "arg_type": "type"
+              "arg_type": "type_type"
             }
           ],
-          "return_type": "void",
+          "return_type": "void_type",
           "body": "block"
         }
       ]
@@ -4701,7 +4738,7 @@
             "name": "x"
           },
           "value": {
-            "type": "right_shift",
+            "type": "shift_right",
             "lhs": {
               "type": "ref",
               "name": "y"
@@ -4723,16 +4760,16 @@
       "children": [
         {
           "type": "operator",
-          "operator": "right_shift",
+          "operator": "shift_right",
           "args": [
             "self",
             {
-              "type": "fn_arg",
+              "type": "arg",
               "name": "other",
               "arg_type": "self_type"
             }
           ],
-          "return_type": "void",
+          "return_type": "void_type",
           "body": "block"
         }
       ]
@@ -4746,15 +4783,15 @@
       "children": [
         {
           "type": "operator",
-          "operator": "right_shift",
+          "operator": "shift_right",
           "args": [
             {
-              "type": "fn_arg",
+              "type": "arg",
               "name": "other",
-              "arg_type": "type"
+              "arg_type": "type_type"
             }
           ],
-          "return_type": "void",
+          "return_type": "void_type",
           "body": "block"
         }
       ]
@@ -4799,12 +4836,12 @@
           "args": [
             "self",
             {
-              "type": "fn_arg",
+              "type": "arg",
               "name": "other",
               "arg_type": "self_type"
             }
           ],
-          "return_type": "void",
+          "return_type": "void_type",
           "body": "block"
         }
       ]
@@ -4821,12 +4858,12 @@
           "operator": "lesser",
           "args": [
             {
-              "type": "fn_arg",
+              "type": "arg",
               "name": "other",
-              "arg_type": "type"
+              "arg_type": "type_type"
             }
           ],
-          "return_type": "void",
+          "return_type": "void_type",
           "body": "block"
         }
       ]
@@ -4871,12 +4908,12 @@
           "args": [
             "self",
             {
-              "type": "fn_arg",
+              "type": "arg",
               "name": "other",
               "arg_type": "self_type"
             }
           ],
-          "return_type": "void",
+          "return_type": "void_type",
           "body": "block"
         }
       ]
@@ -4893,12 +4930,12 @@
           "operator": "greater",
           "args": [
             {
-              "type": "fn_arg",
+              "type": "arg",
               "name": "other",
-              "arg_type": "type"
+              "arg_type": "type_type"
             }
           ],
-          "return_type": "void",
+          "return_type": "void_type",
           "body": "block"
         }
       ]
@@ -4943,12 +4980,12 @@
           "args": [
             "self",
             {
-              "type": "fn_arg",
+              "type": "arg",
               "name": "other",
               "arg_type": "self_type"
             }
           ],
-          "return_type": "void",
+          "return_type": "void_type",
           "body": "block"
         }
       ]
@@ -4965,12 +5002,12 @@
           "operator": "lesser_equal",
           "args": [
             {
-              "type": "fn_arg",
+              "type": "arg",
               "name": "other",
-              "arg_type": "type"
+              "arg_type": "type_type"
             }
           ],
-          "return_type": "void",
+          "return_type": "void_type",
           "body": "block"
         }
       ]
@@ -5015,12 +5052,12 @@
           "args": [
             "self",
             {
-              "type": "fn_arg",
+              "type": "arg",
               "name": "other",
               "arg_type": "self_type"
             }
           ],
-          "return_type": "void",
+          "return_type": "void_type",
           "body": "block"
         }
       ]
@@ -5037,12 +5074,12 @@
           "operator": "greater_equal",
           "args": [
             {
-              "type": "fn_arg",
+              "type": "arg",
               "name": "other",
-              "arg_type": "type"
+              "arg_type": "type_type"
             }
           ],
-          "return_type": "void",
+          "return_type": "void_type",
           "body": "block"
         }
       ]
@@ -5087,12 +5124,12 @@
           "args": [
             "self",
             {
-              "type": "fn_arg",
+              "type": "arg",
               "name": "other",
               "arg_type": "self_type"
             }
           ],
-          "return_type": "void",
+          "return_type": "void_type",
           "body": "block"
         }
       ]
@@ -5109,12 +5146,12 @@
           "operator": "equal",
           "args": [
             {
-              "type": "fn_arg",
+              "type": "arg",
               "name": "other",
-              "arg_type": "type"
+              "arg_type": "type_type"
             }
           ],
-          "return_type": "void",
+          "return_type": "void_type",
           "body": "block"
         }
       ]
@@ -5159,12 +5196,12 @@
           "args": [
             "self",
             {
-              "type": "fn_arg",
+              "type": "arg",
               "name": "other",
               "arg_type": "self_type"
             }
           ],
-          "return_type": "void",
+          "return_type": "void_type",
           "body": "block"
         }
       ]
@@ -5181,12 +5218,12 @@
           "operator": "not_equal",
           "args": [
             {
-              "type": "fn_arg",
+              "type": "arg",
               "name": "other",
-              "arg_type": "type"
+              "arg_type": "type_type"
             }
           ],
-          "return_type": "void",
+          "return_type": "void_type",
           "body": "block"
         }
       ]
@@ -5203,12 +5240,12 @@
           "operator": "not_equal",
           "args": [
             {
-              "type": "fn_arg",
+              "type": "arg",
               "name": "other",
-              "arg_type": "type"
+              "arg_type": "type_type"
             }
           ],
-          "return_type": "void",
+          "return_type": "void_type",
           "body": "block"
         }
       ]
@@ -5253,12 +5290,12 @@
           "args": [
             "self",
             {
-              "type": "fn_arg",
+              "type": "arg",
               "name": "other",
               "arg_type": "self_type"
             }
           ],
-          "return_type": "void",
+          "return_type": "void_type",
           "body": "block"
         }
       ]
@@ -5275,12 +5312,12 @@
           "operator": "and",
           "args": [
             {
-              "type": "fn_arg",
+              "type": "arg",
               "name": "other",
-              "arg_type": "type"
+              "arg_type": "type_type"
             }
           ],
-          "return_type": "void",
+          "return_type": "void_type",
           "body": "block"
         }
       ]
@@ -5325,12 +5362,12 @@
           "args": [
             "self",
             {
-              "type": "fn_arg",
+              "type": "arg",
               "name": "other",
               "arg_type": "self_type"
             }
           ],
-          "return_type": "void",
+          "return_type": "void_type",
           "body": "block"
         }
       ]
@@ -5347,12 +5384,12 @@
           "operator": "xor",
           "args": [
             {
-              "type": "fn_arg",
+              "type": "arg",
               "name": "other",
-              "arg_type": "type"
+              "arg_type": "type_type"
             }
           ],
-          "return_type": "void",
+          "return_type": "void_type",
           "body": "block"
         }
       ]
@@ -5397,12 +5434,12 @@
           "args": [
             "self",
             {
-              "type": "fn_arg",
+              "type": "arg",
               "name": "other",
               "arg_type": "self_type"
             }
           ],
-          "return_type": "void",
+          "return_type": "void_type",
           "body": "block"
         }
       ]
@@ -5419,12 +5456,12 @@
           "operator": "or",
           "args": [
             {
-              "type": "fn_arg",
+              "type": "arg",
               "name": "other",
-              "arg_type": "type"
+              "arg_type": "type_type"
             }
           ],
-          "return_type": "void",
+          "return_type": "void_type",
           "body": "block"
         }
       ]
@@ -5458,19 +5495,17 @@
     }
   ],
   [
-    "operators: =",
-    "fn x => void y=z",
+    "operators: :=",
+    "fn x => void y:=z",
     {
       "type": "struct",
       "children": [
         {
-          "type": "var_decl",
-          "def": {
-            "type": "var_def",
-            "name": "x"
-          },
-          "value": {
-            "type": "or",
+          "type": "function",
+          "name": "x",
+          "return_type": "void_type",
+          "body": {
+            "type": "reassign",
             "lhs": {
               "type": "ref",
               "name": "y"
@@ -5485,23 +5520,480 @@
     }
   ],
   [
-    "operators: or overloading",
-    "operator or self, other: Self => void\n{}",
+    "operators: =",
+    "fn x => void y=z",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "function",
+          "name": "x",
+          "return_type": "void_type",
+          "body": {
+            "type": "assign",
+            "lhs": {
+              "type": "ref",
+              "name": "y"
+            },
+            "rhs": {
+              "type": "ref",
+              "name": "z"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "operators: = overloading",
+    "operator = self, other: Self => void\n{}",
     {
       "type": "struct",
       "children": [
         {
           "type": "operator",
-          "operator": "or",
+          "operator": "assign",
           "args": [
             "self",
             {
-              "type": "fn_arg",
+              "type": "arg",
               "name": "other",
               "arg_type": "self_type"
             }
           ],
-          "return_type": "void",
+          "return_type": "void_type",
+          "body": "block"
+        }
+      ]
+    }
+  ],
+  [
+    "operators: +=",
+    "fn x => void y+=z",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "function",
+          "name": "x",
+          "return_type": "void_type",
+          "body": {
+            "type": "add_assign",
+            "lhs": {
+              "type": "ref",
+              "name": "y"
+            },
+            "rhs": {
+              "type": "ref",
+              "name": "z"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "operators: -= overloading",
+    "operator -= self, other: Self => void\n{}",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "operator",
+          "operator": "subtract_assign",
+          "args": [
+            "self",
+            {
+              "type": "arg",
+              "name": "other",
+              "arg_type": "self_type"
+            }
+          ],
+          "return_type": "void_type",
+          "body": "block"
+        }
+      ]
+    }
+  ],
+  [
+    "operators: *=",
+    "fn x => void y*=z",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "function",
+          "name": "x",
+          "return_type": "void_type",
+          "body": {
+            "type": "multiply_assign",
+            "lhs": {
+              "type": "ref",
+              "name": "y"
+            },
+            "rhs": {
+              "type": "ref",
+              "name": "z"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "operators: *= overloading",
+    "operator *= self, other: Self => void\n{}",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "operator",
+          "operator": "multiply_assign",
+          "args": [
+            "self",
+            {
+              "type": "arg",
+              "name": "other",
+              "arg_type": "self_type"
+            }
+          ],
+          "return_type": "void_type",
+          "body": "block"
+        }
+      ]
+    }
+  ],
+  [
+    "operators: /=",
+    "fn x => void y/=z",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "function",
+          "name": "x",
+          "return_type": "void_type",
+          "body": {
+            "type": "divide_assign",
+            "lhs": {
+              "type": "ref",
+              "name": "y"
+            },
+            "rhs": {
+              "type": "ref",
+              "name": "z"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "operators: /= overloading",
+    "operator /= self, other: Self => void\n{}",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "operator",
+          "operator": "divide_assign",
+          "args": [
+            "self",
+            {
+              "type": "arg",
+              "name": "other",
+              "arg_type": "self_type"
+            }
+          ],
+          "return_type": "void_type",
+          "body": "block"
+        }
+      ]
+    }
+  ],
+  [
+    "operators: %=",
+    "fn x => void y%=z",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "function",
+          "name": "x",
+          "return_type": "void_type",
+          "body": {
+            "type": "modulate_assign",
+            "lhs": {
+              "type": "ref",
+              "name": "y"
+            },
+            "rhs": {
+              "type": "ref",
+              "name": "z"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "operators: %= overloading",
+    "operator %= self, other: Self => void\n{}",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "operator",
+          "operator": "modulate_assign",
+          "args": [
+            "self",
+            {
+              "type": "arg",
+              "name": "other",
+              "arg_type": "self_type"
+            }
+          ],
+          "return_type": "void_type",
+          "body": "block"
+        }
+      ]
+    }
+  ],
+  [
+    "operators: <<=",
+    "fn x => void y<<=z",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "function",
+          "name": "x",
+          "return_type": "void_type",
+          "body": {
+            "type": "shift_left_assign",
+            "lhs": {
+              "type": "ref",
+              "name": "y"
+            },
+            "rhs": {
+              "type": "ref",
+              "name": "z"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "operators: <<= overloading",
+    "operator <<= self, other: Self => void\n{}",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "operator",
+          "operator": "shift_left_assign",
+          "args": [
+            "self",
+            {
+              "type": "arg",
+              "name": "other",
+              "arg_type": "self_type"
+            }
+          ],
+          "return_type": "void_type",
+          "body": "block"
+        }
+      ]
+    }
+  ],
+  [
+    "operators: >>=",
+    "fn x => void y>>=z",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "function",
+          "name": "x",
+          "return_type": "void_type",
+          "body": {
+            "type": "shift_right_assign",
+            "lhs": {
+              "type": "ref",
+              "name": "y"
+            },
+            "rhs": {
+              "type": "ref",
+              "name": "z"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "operators: >>= overloading",
+    "operator >>= self, other: Self => void\n{}",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "operator",
+          "operator": "shift_right_assign",
+          "args": [
+            "self",
+            {
+              "type": "arg",
+              "name": "other",
+              "arg_type": "self_type"
+            }
+          ],
+          "return_type": "void_type",
+          "body": "block"
+        }
+      ]
+    }
+  ],
+  [
+    "operators: and=",
+    "fn x => void y and= z",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "function",
+          "name": "x",
+          "return_type": "void_type",
+          "body": {
+            "type": "and_assign",
+            "lhs": {
+              "type": "ref",
+              "name": "y"
+            },
+            "rhs": {
+              "type": "ref",
+              "name": "z"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "operators: and= overloading",
+    "operator and= self, other: Self => void\n{}",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "operator",
+          "operator": "and_assign",
+          "args": [
+            "self",
+            {
+              "type": "arg",
+              "name": "other",
+              "arg_type": "self_type"
+            }
+          ],
+          "return_type": "void_type",
+          "body": "block"
+        }
+      ]
+    }
+  ],
+  [
+    "operators: or=",
+    "fn x => void y or= z",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "function",
+          "name": "x",
+          "return_type": "void_type",
+          "body": {
+            "type": "or_assign",
+            "lhs": {
+              "type": "ref",
+              "name": "y"
+            },
+            "rhs": {
+              "type": "ref",
+              "name": "z"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "operators: or= overloading",
+    "operator or= self, other: Self => void\n{}",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "operator",
+          "operator": "or_assign",
+          "args": [
+            "self",
+            {
+              "type": "arg",
+              "name": "other",
+              "arg_type": "self_type"
+            }
+          ],
+          "return_type": "void_type",
+          "body": "block"
+        }
+      ]
+    }
+  ],
+  [
+    "operators: xor=",
+    "fn x => void y xor= z",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "function",
+          "name": "x",
+          "return_type": "void_type",
+          "body": {
+            "type": "xor_assign",
+            "lhs": {
+              "type": "ref",
+              "name": "y"
+            },
+            "rhs": {
+              "type": "ref",
+              "name": "z"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  [
+    "operators: xor= overloading",
+    "operator xor= self, other: Self => void\n{}",
+    {
+      "type": "struct",
+      "children": [
+        {
+          "type": "operator",
+          "operator": "xor_assign",
+          "args": [
+            "self",
+            {
+              "type": "arg",
+              "name": "other",
+              "arg_type": "self_type"
+            }
+          ],
+          "return_type": "void_type",
           "body": "block"
         }
       ]
@@ -5509,8 +6001,642 @@
   ],
   [
     "example full program (always last!!!)",
-    "fn abs arg: f64 => f64\nif arg < 0\n-arg\nelse\narg\n\nlet HSL=struct{\nh:f64\ns:f64\nl:f64\nfn to_rgb ~self=>RGB public{\nlet c =(1-abs(2.0*self.l-1.0))*self.s\nlet x=c*(1-abs((self.h/60.0)%2.0-1.0))\nlet m=self.l-self.c/2.0\nlet h60=(self.h/60.0)@u8\nlet(rprime, gprime, bprime)=switch h60{\n0=>\n.(c,x,0.0)\n1=>\n.(x,c,0.0)\n2=>\n.(0.0,x,c)\n3=>\n.(x,0.0,c)\n4=>\n.(c,0.0,x)\n_=>\n.(0.0,0.0,0.0)\n}\n==>.(\nr:((rprime+m)*255)@u8\ng:((gprime+m)*255)@u8\nb:((bprime+m)*255)@u8\n)\n}\n}\n\nlet RGB=struct{\nr:u8\ng:u8\nb:u8\n}\n\nfn main=>u8 entry{\nlet hsl=HSL{\nh:130.0\ns:0.5\nl:0.5\n}\n\nhsl.to_rgb()\n\n==>0\n}",
+    "fn abs arg: f64 => f64\nif arg < 0\n-arg\nelse\narg\n\nlet HSL=struct{\nh:f64\ns:f64\nl:f64\nfn to_rgb ~self=>RGB public{\nlet c =(1-abs(2.0*self.l-1.0))*self.s\nlet x=c*(1-abs((self.h/60.0)%2.0-1.0))\nlet m=self.l-self.c/2.0\nlet h60=(self.h/60.0)@u8\nlet(rprime, gprime, bprime)=match h60\n{\n0=>\n.(c,x,0.0)\n1=>\n.(x,c,0.0)\n2=>\n.(0.0,x,c)\n3=>\n.(x,0.0,c)\n4=>\n.(c,0.0,x)\n_=>\n.(0.0,0.0,0.0)\n}\n==>.{\nr: ((rprime+m)*255)@u8\ng: ((gprime+m)*255)@u8\nb: ((bprime+m)*255)@u8\n}\n}\n}\n\nlet RGB=struct{\nr:u8\ng:u8\nb:u8\n}\n\nfn main=>u8 entry{\nlet hsl=HSL{\nh:130.0\ns:0.5\nl:0.5\n}\n\nhsl.to_rgb()\n\n==>0\n}",
     {
+      "children": [
+        {
+          "args": [
+            {
+              "arg_type": "f64_type",
+              "name": "arg",
+              "type": "arg"
+            }
+          ],
+          "body": {
+            "body": {
+              "child": {
+                "name": "arg",
+                "type": "ref"
+              },
+              "type": "unary_minus"
+            },
+            "condition": {
+              "lhs": {
+                "name": "arg",
+                "type": "ref"
+              },
+              "rhs": "int",
+              "type": "lesser"
+            },
+            "else": {
+              "name": "arg",
+              "type": "ref"
+            },
+            "type": "if"
+          },
+          "name": "abs",
+          "return_type": "f64_type",
+          "type": "function"
+        },
+        {
+          "def": {
+            "name": "HSL",
+            "type": "var_def"
+          },
+          "type": "var_decl",
+          "value": {
+            "children": [
+              {
+                "field_type": "f64_type",
+                "name": "h",
+                "type": "field"
+              },
+              {
+                "field_type": "f64_type",
+                "name": "s",
+                "type": "field"
+              },
+              {
+                "field_type": "f64_type",
+                "name": "l",
+                "type": "field"
+              },
+              {
+                "args": [
+                  "const_self"
+                ],
+                "body": {
+                  "children": [
+                    {
+                      "def": {
+                        "name": "c",
+                        "type": "var_def"
+                      },
+                      "type": "var_decl",
+                      "value": {
+                        "lhs": {
+                          "lhs": {
+                            "type": "int",
+                            "value": 1
+                          },
+                          "rhs": {
+                            "args": [
+                              {
+                                "lhs": {
+                                  "type": "float",
+                                  "value": 2.0
+                                },
+                                "rhs": {
+                                  "lhs": {
+                                    "lhs": "self",
+                                    "rhs": {
+                                      "name": "l",
+                                      "type": "ref"
+                                    },
+                                    "type": "subscript"
+                                  },
+                                  "rhs": {
+                                    "type": "float",
+                                    "value": 1.0
+                                  },
+                                  "type": "subtract"
+                                },
+                                "type": "multiply"
+                              }
+                            ],
+                            "object": {
+                              "name": "abs",
+                              "type": "ref"
+                            },
+                            "type": "tuple_call"
+                          },
+                          "type": "subtract"
+                        },
+                        "rhs": {
+                          "lhs": "self",
+                          "rhs": {
+                            "name": "s",
+                            "type": "ref"
+                          },
+                          "type": "subscript"
+                        },
+                        "type": "multiply"
+                      }
+                    },
+                    {
+                      "def": {
+                        "name": "x",
+                        "type": "var_def"
+                      },
+                      "type": "var_decl",
+                      "value": {
+                        "lhs": {
+                          "name": "c",
+                          "type": "ref"
+                        },
+                        "rhs": {
+                          "lhs": {
+                            "type": "int",
+                            "value": 1
+                          },
+                          "rhs": {
+                            "args": [
+                              {
+                                "lhs": {
+                                  "lhs": {
+                                    "lhs": {
+                                      "lhs": "self",
+                                      "rhs": {
+                                        "name": "h",
+                                        "type": "ref"
+                                      },
+                                      "type": "subscript"
+                                    },
+                                    "rhs": {
+                                      "type": "float",
+                                      "value": 60.0
+                                    },
+                                    "type": "divide"
+                                  },
+                                  "rhs": {
+                                    "type": "float",
+                                    "value": 2.0
+                                  },
+                                  "type": "modulate"
+                                },
+                                "rhs": {
+                                  "type": "float",
+                                  "value": 1.0
+                                },
+                                "type": "subtract"
+                              }
+                            ],
+                            "object": {
+                              "name": "abs",
+                              "type": "ref"
+                            },
+                            "type": "tuple_call"
+                          },
+                          "type": "subtract"
+                        },
+                        "type": "multiply"
+                      }
+                    },
+                    {
+                      "def": {
+                        "name": "m",
+                        "type": "var_def"
+                      },
+                      "type": "var_decl",
+                      "value": {
+                        "lhs": {
+                          "lhs": "self",
+                          "rhs": {
+                            "name": "l",
+                            "type": "ref"
+                          },
+                          "type": "subscript"
+                        },
+                        "rhs": {
+                          "lhs": {
+                            "lhs": "self",
+                            "rhs": {
+                              "name": "c",
+                              "type": "ref"
+                            },
+                            "type": "subscript"
+                          },
+                          "rhs": {
+                            "type": "float",
+                            "value": 2.0
+                          },
+                          "type": "divide"
+                        },
+                        "type": "subtract"
+                      }
+                    },
+                    {
+                      "def": {
+                        "name": "h60",
+                        "type": "var_def"
+                      },
+                      "type": "var_decl",
+                      "value": {
+                        "lhs": {
+                          "lhs": {
+                            "lhs": "self",
+                            "rhs": {
+                              "name": "h",
+                              "type": "ref"
+                            },
+                            "type": "subscript"
+                          },
+                          "rhs": {
+                            "type": "float",
+                            "value": 60.0
+                          },
+                          "type": "divide"
+                        },
+                        "rhs": {
+                          "size": 8,
+                          "type": "uint_type"
+                        },
+                        "type": "cast"
+                      }
+                    },
+                    {
+                      "structure": {
+                        "children": [
+                          {
+                            "name": "rprime",
+                            "type": "var_def"
+                          },
+                          {
+                            "name": "gprime",
+                            "type": "var_def"
+                          },
+                          {
+                            "name": "bprime",
+                            "type": "var_def"
+                          }
+                        ],
+                        "type": "tuple_destructure"
+                      },
+                      "type": "destructure",
+                      "value": {
+                        "arms": [
+                          {
+                            "body": {
+                              "children": [
+                                {
+                                  "name": "c",
+                                  "type": "ref"
+                                },
+                                {
+                                  "name": "x",
+                                  "type": "ref"
+                                },
+                                "float"
+                              ],
+                              "type": "tuple_literal"
+                            },
+                            "matches": [
+                              {
+                                "type": "match_value",
+                                "value": "int"
+                              }
+                            ],
+                            "type": "match_arm"
+                          },
+                          {
+                            "body": {
+                              "children": [
+                                {
+                                  "name": "x",
+                                  "type": "ref"
+                                },
+                                {
+                                  "name": "c",
+                                  "type": "ref"
+                                },
+                                "float"
+                              ],
+                              "type": "tuple_literal"
+                            },
+                            "matches": [
+                              {
+                                "type": "match_value",
+                                "value": {
+                                  "type": "int",
+                                  "value": 1
+                                }
+                              }
+                            ],
+                            "type": "match_arm"
+                          },
+                          {
+                            "body": {
+                              "children": [
+                                "float",
+                                {
+                                  "name": "x",
+                                  "type": "ref"
+                                },
+                                {
+                                  "name": "c",
+                                  "type": "ref"
+                                }
+                              ],
+                              "type": "tuple_literal"
+                            },
+                            "matches": [
+                              {
+                                "type": "match_value",
+                                "value": {
+                                  "type": "int",
+                                  "value": 2
+                                }
+                              }
+                            ],
+                            "type": "match_arm"
+                          },
+                          {
+                            "body": {
+                              "children": [
+                                {
+                                  "name": "x",
+                                  "type": "ref"
+                                },
+                                "float",
+                                {
+                                  "name": "c",
+                                  "type": "ref"
+                                }
+                              ],
+                              "type": "tuple_literal"
+                            },
+                            "matches": [
+                              {
+                                "type": "match_value",
+                                "value": {
+                                  "type": "int",
+                                  "value": 3
+                                }
+                              }
+                            ],
+                            "type": "match_arm"
+                          },
+                          {
+                            "body": {
+                              "children": [
+                                {
+                                  "name": "c",
+                                  "type": "ref"
+                                },
+                                "float",
+                                {
+                                  "name": "x",
+                                  "type": "ref"
+                                }
+                              ],
+                              "type": "tuple_literal"
+                            },
+                            "matches": [
+                              {
+                                "type": "match_value",
+                                "value": {
+                                  "type": "int",
+                                  "value": 4
+                                }
+                              }
+                            ],
+                            "type": "match_arm"
+                          },
+                          {
+                            "body": {
+                              "children": [
+                                "float",
+                                "float",
+                                "float"
+                              ],
+                              "type": "tuple_literal"
+                            },
+                            "matches": [
+                              "match_all"
+                            ],
+                            "type": "match_arm"
+                          }
+                        ],
+                        "type": "match",
+                        "value": {
+                          "name": "h60",
+                          "type": "ref"
+                        }
+                      }
+                    },
+                    {
+                      "child": {
+                        "children": [
+                          {
+                            "name": "r",
+                            "type": "field_literal",
+                            "value": {
+                              "lhs": {
+                                "lhs": {
+                                  "lhs": {
+                                    "name": "rprime",
+                                    "type": "ref"
+                                  },
+                                  "rhs": {
+                                    "name": "m",
+                                    "type": "ref"
+                                  },
+                                  "type": "add"
+                                },
+                                "rhs": {
+                                  "type": "int",
+                                  "value": 255
+                                },
+                                "type": "multiply"
+                              },
+                              "rhs": {
+                                "size": 8,
+                                "type": "uint_type"
+                              },
+                              "type": "cast"
+                            }
+                          },
+                          {
+                            "name": "g",
+                            "type": "field_literal",
+                            "value": {
+                              "lhs": {
+                                "lhs": {
+                                  "lhs": {
+                                    "name": "gprime",
+                                    "type": "ref"
+                                  },
+                                  "rhs": {
+                                    "name": "m",
+                                    "type": "ref"
+                                  },
+                                  "type": "add"
+                                },
+                                "rhs": {
+                                  "type": "int",
+                                  "value": 255
+                                },
+                                "type": "multiply"
+                              },
+                              "rhs": {
+                                "size": 8,
+                                "type": "uint_type"
+                              },
+                              "type": "cast"
+                            }
+                          },
+                          {
+                            "name": "b",
+                            "type": "field_literal",
+                            "value": {
+                              "lhs": {
+                                "lhs": {
+                                  "lhs": {
+                                    "name": "bprime",
+                                    "type": "ref"
+                                  },
+                                  "rhs": {
+                                    "name": "m",
+                                    "type": "ref"
+                                  },
+                                  "type": "add"
+                                },
+                                "rhs": {
+                                  "type": "int",
+                                  "value": 255
+                                },
+                                "type": "multiply"
+                              },
+                              "rhs": {
+                                "size": 8,
+                                "type": "uint_type"
+                              },
+                              "type": "cast"
+                            }
+                          }
+                        ],
+                        "type": "object_literal"
+                      },
+                      "type": "return"
+                    }
+                  ],
+                  "type": "block"
+                },
+                "flags": [
+                  "public"
+                ],
+                "name": "to_rgb",
+                "return_type": {
+                  "name": "RGB",
+                  "type": "ref"
+                },
+                "type": "function"
+              }
+            ],
+            "type": "struct"
+          }
+        },
+        {
+          "def": {
+            "name": "RGB",
+            "type": "var_def"
+          },
+          "type": "var_decl",
+          "value": {
+            "children": [
+              {
+                "field_type": {
+                  "size": 8,
+                  "type": "uint_type"
+                },
+                "name": "r",
+                "type": "field"
+              },
+              {
+                "field_type": {
+                  "size": 8,
+                  "type": "uint_type"
+                },
+                "name": "g",
+                "type": "field"
+              },
+              {
+                "field_type": {
+                  "size": 8,
+                  "type": "uint_type"
+                },
+                "name": "b",
+                "type": "field"
+              }
+            ],
+            "type": "struct"
+          }
+        },
+        {
+          "body": {
+            "children": [
+              {
+                "def": {
+                  "name": "hsl",
+                  "type": "var_def"
+                },
+                "type": "var_decl",
+                "value": {
+                  "args": [
+                    {
+                      "name": "h",
+                      "type": "field_literal",
+                      "value": {
+                        "type": "float",
+                        "value": 130.0
+                      }
+                    },
+                    {
+                      "name": "s",
+                      "type": "field_literal",
+                      "value": {
+                        "type": "float",
+                        "value": 0.5
+                      }
+                    },
+                    {
+                      "name": "l",
+                      "type": "field_literal",
+                      "value": {
+                        "type": "float",
+                        "value": 0.5
+                      }
+                    }
+                  ],
+                  "object": {
+                    "name": "HSL",
+                    "type": "ref"
+                  },
+                  "type": "object_call"
+                }
+              },
+              {
+                "lhs": {
+                  "name": "hsl",
+                  "type": "ref"
+                },
+                "rhs": {
+                  "object": {
+                    "name": "to_rgb",
+                    "type": "ref"
+                  },
+                  "type": "tuple_call"
+                },
+                "type": "subscript"
+              },
+              {
+                "child": "int",
+                "type": "return"
+              }
+            ],
+            "type": "block"
+          },
+          "flags": [
+            "entry"
+          ],
+          "name": "main",
+          "return_type": {
+            "size": 8,
+            "type": "uint_type"
+          },
+          "type": "function"
+        }
+      ],
       "type": "struct"
     }
   ]

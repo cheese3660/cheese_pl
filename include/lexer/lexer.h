@@ -188,6 +188,7 @@ namespace cheese::lexer {
         ConstSelf,
         TypeSelf,
         Operator,
+        DoubleColon, //:: (used to define generic mixins
         EoF, //End of File, ALWAYS KEEP THIS AT THE END OF THE PROGRAM
     };
     struct Token {

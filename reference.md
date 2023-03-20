@@ -723,10 +723,10 @@ impl SomeType: interfaces... {
 
 The body of the implementation is the same as a structure, it is just unable to contain any fields
 
-Interfaces finally can be implemented for a generic type using a function call kind of syntax
+Interfaces finally can be implemented for a generic type using a function declaration kind of syntax
 
 ```cheese
-impl SomeType(A: type, B: type): interfaces... {
+impl SomeType :: A: type, B: type: interfaces... {
     ...
 }
 ```
@@ -1223,10 +1223,10 @@ let x = +1
 
 #### Overloading
 
-`+x`  can be overloaded with the `operator +x` keyword, this cannot take any arguments other than the self argument.
+`+x`  can be overloaded with the `operator +?` keyword, this cannot take any arguments other than the self argument.
 
 ```cheese
-operator +x self => Self
+operator +? self => Self
 ```
 
 ### `-x`
@@ -1242,10 +1242,10 @@ let x = -1
 
 #### Overloading
 
-`-x`  can be overloaded with the `operator -x` keyword, this cannot take any arguments other than the self argument.
+`-x`  can be overloaded with the `operator -?` keyword, this cannot take any arguments other than the self argument.
 
 ```cheese
-operator -x self => Self
+operator -? self => Self
 ```
 
 ### `[]x`

@@ -44,7 +44,8 @@ namespace cheese::parser::nodes {
 
     SINGLE_MEMBER_NODE(ConstRefCapture, "const_ref_capture", std::string, name)
 
-    SINGLE_MEMBER_NODE(ObjectLiteral, "object_literal", NodeDict, children)
+    SINGLE_MEMBER_NODE(ObjectLiteral, "object_literal", NodeList, children)
+
 
     SINGLE_MEMBER_NODE(Block, "block", NodeList, children)
 

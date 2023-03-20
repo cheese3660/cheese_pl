@@ -21,7 +21,7 @@ namespace cheese::parser::nodes {
 
     DOUBLE_MEMBER_NODE(NamedBreak, "named_break", std::string, name, NodePtr, value)
 
-    DOUBLE_MEMBER_NODE(ObjectCall, "object_call", NodePtr, object, NodeDict, args)
+    DOUBLE_MEMBER_NODE(ObjectCall, "object_call", NodePtr, object, NodeList, args)
 
     DOUBLE_MEMBER_NODE(ErrorNode, "error", std::uint64_t, error_code, std::string, message)
 
@@ -38,6 +38,7 @@ namespace cheese::parser::nodes {
 
     DOUBLE_MEMBER_NODE(Enum, "enum", std::optional<NodePtr>, containing_type, NodeList, children)
 
+    DOUBLE_MEMBER_NODE(FieldLiteral, "field_literal", std::string, name, NodePtr, value)
 
     //All the binary operators
     BINARY_NODE(Subscription, "subscript")
@@ -92,7 +93,7 @@ namespace cheese::parser::nodes {
 
     BINARY_NODE(LeftShiftAssignment, "shift_left_assign")
 
-    BINARY_NODE(RightShiftAssignment, "right_shift_assign")
+    BINARY_NODE(RightShiftAssignment, "shift_right_assign")
 
     BINARY_NODE(AndAssignment, "and_assign")
 
@@ -562,18 +563,21 @@ namespace cheese::parser::nodes {
 
     struct Mixin final : public Node {
         NodePtr structure;
+        NodeList arguments; // Used for templated mixins, if this is empty, then its a concrete mixin
         NodeList interfaces;
         NodeList children;
 
-        Mixin(Coordinate location, NodePtr structure, NodeList interfaces, NodeList children) :
+        Mixin(Coordinate location, NodePtr structure, NodeList arguments, NodeList interfaces, NodeList children) :
                 Node(location),
                 structure(std::move(structure)),
+                arguments(std::move(arguments)),
                 interfaces(std::move(interfaces)),
                 children(std::move(children)) {}
 
         void nested_display(std::uint32_t nesting) const override { NOT_IMPL }
 
-        JSON_FUNCS("mixin", { "structure", "interfaces", "children" }, structure, interfaces, children);
+        JSON_FUNCS("mixin", { "structure", "arguments", "interfaces", "children" }, structure, arguments, interfaces,
+                   children);
 
         ~Mixin() override = default;
     };

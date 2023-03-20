@@ -800,9 +800,32 @@ namespace cheese::parser {
         state.eatAny();
         auto structure = parse_expression(state);
         NodeList interfaces{};
+        NodeList arguments{};
         NodeList children{};
         std::optional<NodePtr> err;
         auto front = state.peek_skip_nl();
+        if (front.ty == DoubleColon) {
+            state.eatAny();
+            while (front.ty != Colon && front.ty != EoF) {
+                if (front.ty == Comma) {
+                    state.eatAny();
+                } else {
+                    auto argument = parse_argument(state);
+                    if (instanceof<nodes::ErrorNode>(argument)) {
+                        //Continue until the next argument begins
+                        front = state.peek_skip_nl();
+                        while (front.ty != ThickArrow && front.ty != Identifier && front.ty != Underscore &&
+                               front.ty != EoF) {
+                            state.eatAny();
+                            front = state.peek_skip_nl();
+                        }
+                    }
+                    arguments.push_back(argument);
+                }
+                front = state.peek_skip_nl();
+            }
+        }
+
         if (front.ty == Block) {
             err = state.raise("parser",
                               "':(' is lexed as the beginning to a name block rather than ':' and '(' separately, to fix this add whitespace between ':' and '(' ",
@@ -832,7 +855,7 @@ namespace cheese::parser {
         if (err.has_value()) {
             children.push_back(err.value());
             //Return an empty mixin
-            return (new nodes::Mixin(location, structure, interfaces, children))->get();
+            return (new nodes::Mixin(location, structure, arguments, interfaces, children))->get();
         }
 
         front = state.peek_skip_nl();
@@ -865,7 +888,7 @@ namespace cheese::parser {
         if (err.has_value()) {
             children.push_back(err.value());
         }
-        return (new nodes::Mixin(location, structure, interfaces, children))->get();
+        return (new nodes::Mixin(location, structure, arguments, interfaces, children))->get();
     }
 
     NodePtr parse_primary(parser_state &state, std::optional<NodePtr> lookbehind_base = std::optional<NodePtr>{});
@@ -1071,8 +1094,8 @@ namespace cheese::parser {
         return list;
     }
 
-    NodeDict parse_object_list(parser_state &state) {
-        NodeDict dict;
+    NodeList parse_object_list(parser_state &state) {
+        NodeList object_list;
         std::uint64_t err_num{0};
         while (state.peek_skip_nl().ty != RightBrace && state.peek_skip_nl().ty != EoF) {
             if (state.peek_skip_nl().ty == Comma) {
@@ -1082,7 +1105,7 @@ namespace cheese::parser {
             std::string name = static_cast<std::string>(state.peek_skip_nl().value);
             auto err = state.eat(Identifier, "a field name for an object", error::ErrorCode::ExpectedName);
             if (err.has_value()) {
-                dict["$e" + std::to_string(err_num++)] = err.value();
+                object_list.push_back((new nodes::FieldLiteral(state.peek_skip_nl().location,"$e" + std::to_string(err_num++),err.value()))->get());
             }
             auto front = state.peek_skip_nl();
             if (front.ty == Block) {
@@ -1093,17 +1116,17 @@ namespace cheese::parser {
                 err = state.eat(Colon, "a ':' for an object", error::ErrorCode::ExpectedColon);
             }
             if (err.has_value()) {
-                dict["$e" + std::to_string(err_num++)] = err.value();
+                object_list.push_back((new nodes::FieldLiteral(state.peek_skip_nl().location,"$e" + std::to_string(err_num++),err.value()))->get());
             }
             NodePtr value = parse_expression(state);
-            dict[name] = value;
+            object_list.push_back((new nodes::FieldLiteral(front.location,name,value))->get());
         }
         auto err = state.eat(RightBrace, "a '}' to close off an object literal",
                              error::ErrorCode::ExpectedClosingBrace);
         if (err.has_value()) {
-            dict["$e" + std::to_string(err_num)] = err.value();
+            object_list.push_back((new nodes::FieldLiteral(state.peek_skip_nl().location,"$e" + std::to_string(err_num++),err.value()))->get());
         }
-        return dict;
+        return object_list;
     }
 
     NodePtr parse_primary(parser_state &state, std::optional<NodePtr> lookbehind) {
@@ -2758,7 +2781,109 @@ namespace cheese::parser {
         case Dot:
             state.eatAny();
             return "subscript";
-
+        case Plus:
+            state.eatAny();
+            {
+                front = state.peek_skip_nl();
+                if (front.ty == Question) {
+                    state.eatAny();
+                    return "unary_plus";
+                } else {
+                    return "add";
+                }
+            }
+        case Dash:
+            state.eatAny();
+            {
+                front = state.peek_skip_nl();
+                if (front.ty == Question) {
+                    state.eatAny();
+                    return "unary_minus";
+                } else {
+                    return "subtract";
+                }
+            }
+        case Dereference:
+            state.eatAny();
+            return "dereference";
+        case Not:
+            state.eatAny();
+            return "not";
+        case Star:
+            state.eatAny();
+            return "multiply";
+        case Slash:
+            state.eatAny();
+            return "divide";
+        case Percent:
+            state.eatAny();
+            return "modulate";
+        case LeftShift:
+            state.eatAny();
+            return "shift_left";
+        case RightShift:
+            state.eatAny();
+            return "shift_right";
+        case LessThan:
+            state.eatAny();
+            return "lesser";
+        case GreaterThan:
+            state.eatAny();
+            return "greater";
+        case LessThanEqual:
+            state.eatAny();
+            return "lesser_equal";
+        case GreaterThanEqual:
+            state.eatAny();
+            return "greater_equal";
+        case EqualTo:
+            state.eatAny();
+            return "equal";
+        case NotEqualTo:
+            state.eatAny();
+            return "not_equal";
+        case And:
+            state.eatAny();
+            return "and";
+        case Or:
+            state.eatAny();
+            return "or";
+        case Xor:
+            state.eatAny();
+            return "xor";
+        case Assign:
+            state.eatAny();
+            return "assign";
+        case AddAssign:
+            state.eatAny();
+            return "add_assign";
+        case SubAssign:
+            state.eatAny();
+            return "subtract_assign";
+        case MulAssign:
+            state.eatAny();
+            return "multiply_assign";
+        case DivAssign:
+            state.eatAny();
+            return "divide_assign";
+        case ModAssign:
+            state.eatAny();
+            return "modulate_assign";
+        case LeftShiftAssign:
+            state.eatAny();
+            return "shift_left_assign";
+        case RightShiftAssign:
+            state.eatAny();
+            return "shift_right_assign";
+        case AndAssign:
+            state.eatAny();
+            return "and_assign";
+        case OrAssign:
+            state.eatAny();
+            return "or_assign";
+        case XorAssign:
+            state.eatAny();
+            return "xor_assign";
         default:
             return "unknown_operator";
         }

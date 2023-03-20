@@ -626,6 +626,8 @@ namespace cheese::lexer {
                         SINGLE(TokenType::Redefine);
                     } else if (PEEK == '(') {
                         SINGLE(TokenType::Block);
+                    } else if (PEEK == ':') {
+                        SINGLE(TokenType::DoubleColon);
                     }
                     else
                     {
@@ -996,6 +998,7 @@ namespace cheese::lexer {
             MAP(TypeSelf),
             MAP(ConstSelf),
             MAP(Operator),
+            MAP(DoubleColon)
     };
 
 #undef MAP
