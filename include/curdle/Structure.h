@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include "parser/Node.h"
 #include "variables.h"
 
 namespace cheese::curdle {
@@ -16,6 +17,11 @@ namespace cheese::curdle {
         std::string name;
         Type *type;
         bool pub; //Whether or not this is a public field
+    };
+
+    struct LazyValue {
+        std::string name; // The name of the lazy value
+        parser::NodePtr node; // The parser node that this corresponds to
     };
 
     struct Structure : Type {
@@ -29,9 +35,8 @@ namespace cheese::curdle {
         // It does not have its interfaces attached to it as that is part of the main type
         std::vector<StructureField> fields;
         std::map<std::string, TopLevelVariableInfo> top_level_variables;
-
+        std::vector<LazyValue> lazies;
     };
-
 }
 
 #endif //CHEESE_STRUCTURE_H

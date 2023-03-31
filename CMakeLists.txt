@@ -79,7 +79,7 @@ add_executable(
         include/curdle/Type.h
         include/curdle/WeakPointer.h
         include/curdle/Mixin.h
-        include/curdle/WeakPointer.h include/curdle/GlobalContext.h include/curdle/variables.h include/curdle/comptime.h include/memory/garbage_collection.h src/memory/garbage_collection.cpp src/curdle/Structure.cpp)
+        include/curdle/WeakPointer.h include/curdle/GlobalContext.h include/curdle/variables.h include/curdle/comptime.h include/memory/garbage_collection.h src/memory/garbage_collection.cpp src/curdle/Structure.cpp src/curdle/comptime.cpp)
 if (UNIX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++ -Wall")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++ -lc++abi")

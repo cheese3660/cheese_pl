@@ -7,12 +7,14 @@
 
 #include "Project.h"
 #include "Structure.h"
+#include "memory/garbage_collection.h"
+
 
 namespace cheese::curdle {
     struct GlobalContext {
         const Project &project;
-        std::shared_ptr<Structure> root_structure;
-
+        Structure *root_structure;
+        memory::garbage_collection::garbage_collector gc;
     };
 }
 #endif //CHEESE_GLOBALCONTEXT_H

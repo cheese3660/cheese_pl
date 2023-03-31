@@ -7,7 +7,6 @@
 
 #include <vector>
 #include <concepts>
-#include <stdint.h>
 
 namespace cheese::memory::garbage_collection {
 
@@ -34,6 +33,13 @@ namespace cheese::memory::garbage_collection {
         std::vector<managed_object *> in_scope_objects{};
         size_t frequency; // After how many allocations do we run garbage collection
         size_t allocations_since_last_sweep{0};
+
+        void mark_and_sweep();
+
+        void mark();
+
+        void sweep();
+
     public:
 
         explicit garbage_collector(size_t frequency) : frequency(frequency) {}
@@ -42,42 +48,43 @@ namespace cheese::memory::garbage_collection {
         template<class T, typename ...Args>
         requires std::is_base_of_v<managed_object, T> gcref<T> gcnew(Args &&... args);
 
+        template<class T>
+        requires std::is_base_of_v<managed_object, T> gcref<T> get_scoped_ref(T *ptr);
+
         void add_in_scope_object(managed_object *object);
 
         void remove_in_scope_object(managed_object *object);
 
-        void mark_and_sweep();
-
         void add_root_object(managed_object *object);
 
         void remove_root_object(managed_object *object);
+
+        ~garbage_collector();
     };
 
-    // Maybe want to do a shared ptr thing, so that when this goes out of scope, y'know
+    // Make this a unique ptr, such that it doesn't get copied to a field and such accidentally.
     template<typename T> requires std::is_base_of_v<managed_object, T>
     struct gcref {
         garbage_collector &gc;
-        size_t *ref_count;
         T *value;
 
         gcref(garbage_collector &gc, T *value) : gc(gc), value(value) {
-            ref_count = new size_t{1};
             gc.add_in_scope_object(value);
-
         }
 
-        gcref(const gcref<T> &other) : gc(other.gc) {
-            ref_count = other.ref_count;
-            *ref_count += 1;
+        gcref(const gcref<T> &other) = delete;
+
+        gcref(gcref<T> &&other) noexcept: gc(other.gc) {
             value = other.value;
         }
 
-        gcref(gcref<T> &&other) : gc(other.gc) {
-            ref_count = other.ref_count;
-            value = other.value;
+        gcref<T> &operator=(gcref<T> &&other) noexcept {
+            if (this == other) return *this;
+            gc.remove_in_scope_object(value);
+            value = std::move(other.value);
+            other.value = nullptr;
+            return *this;
         }
-
-        gcref<T> &operator=(gcref<T> &&other) = delete;
 
         gcref<T> &operator=(gcref<T> &other) = delete;
 
@@ -89,16 +96,21 @@ namespace cheese::memory::garbage_collection {
             return value;
         }
 
-        T *unwrap() {
+        T *get() const {
             return value;
         }
 
-    private:
+        explicit operator bool() const {
+            return value;
+        }
+
         ~gcref() {
-            *ref_count -= 1;
-            if (*ref_count == 0) {
-                gc.remove_in_scope_object(value);
-            }
+            if (value == nullptr) return;
+            gc.remove_in_scope_object(value);
+        }
+
+        operator T *() const { // NOLINT(google-explicit-constructor)
+            return value;
         }
 
     };
@@ -111,6 +123,7 @@ namespace cheese::memory::garbage_collection {
         auto ref = gcref{*this, obj};
         if (++allocations_since_last_sweep >= frequency) {
             mark_and_sweep();
+            allocations_since_last_sweep = 0;
         }
         return ref;
     }
