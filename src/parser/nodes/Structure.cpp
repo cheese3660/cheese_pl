@@ -3,6 +3,7 @@
 //
 #include "parser/nodes/OtherNodes.h"
 #include "NotImplementedException.h"
+#include "curdle/Structure.h"
 
 namespace cheese::parser::nodes {
 
@@ -44,3 +45,4 @@ namespace cheese::parser::nodes {
 
     }
 }
+

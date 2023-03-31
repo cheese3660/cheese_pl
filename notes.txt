@@ -8,23 +8,25 @@ TODO:
 [X] Have tuple literals that are different from struct literals, .{} vs .(), and also array literals .[]
 [S] Do the same .{:TYPE} or .[:TYPE] if the type cant be inferred for the literal
     - Skipped cuz tuple type information has been changed
-[ ] - Syntax error recovery...
+[X] - Syntax error recovery...
 [ ] Have '...' function params that can get globbed into a tuple with the name ... basically (internally these parameters are passed as a tuple)
 [X] figure out how to link LLVM
 [X] internally tuples and structures are basically the same still
 [ ] still units
 [X] interfaces
 [X] concepts
-
+[ ] refactor using modules
 
 
 
 ROADMAP:
 [X] Lexer
-[ ] AST
+[X] AST
     [X] Use better representation with virtual classes and std::shared_ptr
 [ ] Translator
 [ ] Lowerer
     [ ] Redeveloping Representation
 [ ] LLVM Shit
     [X] Linking LLVM
+
+
