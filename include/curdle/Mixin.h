@@ -5,9 +5,13 @@
 #ifndef CHEESE_MIXIN_H
 #define CHEESE_MIXIN_H
 
+#include "memory/garbage_collection.h"
+
 namespace cheese::curdle {
-    struct Mixin {
+    struct Mixin : cheese::memory::garbage_collection::managed_object {
+        void mark_references() override;
         
+        ~Mixin() override = default;
     };
 }
 

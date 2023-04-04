@@ -7,10 +7,16 @@
 
 #include "bacteria/BacteriaNode.h"
 #include "curdle/Project.h"
+#include "parser/nodes/other_nodes.h"
+#include "parser/nodes/single_member_nodes.h"
+#include "parser/nodes/terminal_nodes.h"
+#include "curdle/Structure.h"
 // This
 
 namespace cheese::curdle {
-    bacteria::BacteriaPtr curdle(Project project);
+    std::unique_ptr<bacteria::BacteriaNode> curdle(const Project &project);
 
+    gcref<Structure>
+    translate_structure(ComptimeContext *ctx, parser::nodes::Structure *structure_node);
 }
 #endif //CHEESE_CURDLE_H

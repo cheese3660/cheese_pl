@@ -79,6 +79,8 @@ namespace cheese::memory::garbage_collection {
     }
 
 
+
+
     // This just gets a scoped reference to an object that exists in the garbage collector, hella useful when working with functions
 
     template<class T>

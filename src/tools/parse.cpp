@@ -2,19 +2,13 @@
 // Created by Lexi Allen on 3/20/2023.
 //
 
-#include "tools/test.h"
+#include "tools/parse.h"
 #include "configuration.h"
 #include <iostream>
 #include "lexer/lexer.h"
-#include "NotImplementedException.h"
-#include "vterm.h"
-#include "argparse/argparse.hpp"
-#include "configuration.h"
-#include "tests/tests.h"
 #include <fstream>
 #include <sstream>
 #include <string_view>
-#include "lexer/lexer.h"
 #include "parser/parser.h"
 
 namespace cheese::tools {
@@ -41,7 +35,7 @@ namespace cheese::tools {
             std::ofstream t2(out);
             t2 << dumped;
             t2.close();
-
+            return 0;
         } catch (std::exception &e) {
             std::cout << e.what() << '\n';
             return 1;

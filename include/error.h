@@ -31,7 +31,7 @@ namespace cheese::error {
         FixmeFoundInComment,
         XXXFoundInComment,
 
-        //Parsing errors next
+        // Parsing errors next
         ExpectedPrimary = parser_error_start,
         ExpectedStructureStatement,
         ExpectedFieldDeclaration,
@@ -57,6 +57,12 @@ namespace cheese::error {
         ExpectedMatchBodySpecifier,
         ExpectedSliceClose,
         UnknownOperator,
+
+        // Lowering errors next
+        ExpectedType = lowering_error_start,
+        ExpectedInterface,
+        UnresolvedImport,
+        NoEntryPoint,
 
         //General error (thrown for example when multiple previous errors were printed)
         GeneralCompilerError = 9999,

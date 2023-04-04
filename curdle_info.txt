@@ -1,7 +1,7 @@
 Information about curdle, and what it shall do for all parts
 A) Read in the start file
 B) Traverse the import tree to find a file that has an "entry" function
-    Note this does not "import" the files fully, it imports them as lazy references, except the one that has the entry function
+    Note this does in fact import the files fully
     Meaning that it will discard the parse tree if it does not find one
     The entry function must also be at the top level of the file
 C) Start compilation from that entry function

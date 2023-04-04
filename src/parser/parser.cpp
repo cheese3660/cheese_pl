@@ -3,9 +3,9 @@
 //
 #include "parser/parser.h"
 #include "error.h"
-#include "parser/nodes/TerminalNodes.h"
-#include "parser/nodes/SingleMemberNodes.h"
-#include "parser/nodes/OtherNodes.h"
+#include "parser/nodes/terminal_nodes.h"
+#include "parser/nodes/single_member_nodes.h"
+#include "parser/nodes/other_nodes.h"
 #include "NotImplementedException.h"
 #include <sstream>
 #include <utility>

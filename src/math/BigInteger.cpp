@@ -95,7 +95,7 @@ namespace cheese::math {
     }
 
 
-    BigInteger BigInteger::twos_complement(const std::size_t normalized_size,bool negate) const {
+    BigInteger BigInteger::twos_complement(const std::size_t normalized_size, bool negate) const {
         BigInteger b{};
         b.words.resize(normalized_size);
         bool true_sign = negate ? !sign : sign;
@@ -119,7 +119,7 @@ namespace cheese::math {
 
 
     void BigInteger::reverse_complement() {
-        sign = (words[words.size()-1] >> 31 != 0);
+        sign = (words[words.size() - 1] >> 31 != 0);
         if (sign) {
             uint64_t carry = 1;
             for (std::size_t i = 0; i < words.size(); i++) {
@@ -151,14 +151,13 @@ namespace cheese::math {
     }
 
 
-
     BigInteger BigInteger::operator+(const BigInteger &other) const {
-        std::size_t max_size = std::max(words.size(),other.words.size())+1;
+        std::size_t max_size = std::max(words.size(), other.words.size()) + 1;
         BigInteger a = this->twos_complement(max_size);
         BigInteger b = other.twos_complement(max_size);
         uint64_t carry = 0;
         for (std::size_t i = 0; i < max_size; i++) {
-            std::uint64_t n = static_cast<uint64_t>(a.words[i]) + static_cast<uint64_t>(b.words[i])+carry;
+            std::uint64_t n = static_cast<uint64_t>(a.words[i]) + static_cast<uint64_t>(b.words[i]) + carry;
             a.words[i] = n & 0xfffffffful;
             carry = n >> 32;
         }
@@ -167,12 +166,12 @@ namespace cheese::math {
     }
 
     BigInteger BigInteger::operator-(const BigInteger &other) const {
-        std::size_t max_size = std::max(words.size(),other.words.size())+1;
+        std::size_t max_size = std::max(words.size(), other.words.size()) + 1;
         BigInteger a = this->twos_complement(max_size);
-        BigInteger b = other.twos_complement(max_size,true);
+        BigInteger b = other.twos_complement(max_size, true);
         uint64_t carry = 0;
         for (std::size_t i = 0; i < max_size; i++) {
-            std::uint64_t n = static_cast<uint64_t>(a.words[i]) + static_cast<uint64_t>(b.words[i])+carry;
+            std::uint64_t n = static_cast<uint64_t>(a.words[i]) + static_cast<uint64_t>(b.words[i]) + carry;
             a.words[i] = n & 0xfffffffful;
             carry = n >> 32;
         }
@@ -184,9 +183,9 @@ namespace cheese::math {
         BigInteger result = 0;
         for (size_t i = 0; i < words.size(); i++) {
             for (size_t j = 0; j < other.words.size(); j++) {
-                size_t full_shift = i+j;
+                size_t full_shift = i + j;
                 std::uint64_t multiple = static_cast<uint64_t>(words[i]) * static_cast<uint64_t>(other.words[j]);
-                BigInteger b{multiple,full_shift};
+                BigInteger b{multiple, full_shift};
                 result += b;
             }
         }
@@ -205,17 +204,17 @@ namespace cheese::math {
         if (*this == other) {
             return 1;
         }
-        size_t n = (words.size()*32)-1;
+        size_t n = (words.size() * 32) - 1;
         while (true) {
             bool should_break = n == 0;
             rem <<= 1;
-            rem.set(0,get(n));
+            rem.set(0, get(n));
             if (rem >= other) {
                 rem -= other;
-                quo.set(n,true);
+                quo.set(n, true);
             }
             if (should_break) break;
-            n-=1;
+            n -= 1;
         }
         quo.sign = sign != other.sign;
         quo.normalize_size();
@@ -232,17 +231,17 @@ namespace cheese::math {
         if (*this == other) {
             return 1;
         }
-        size_t n = (words.size()*32)-1;
+        size_t n = (words.size() * 32) - 1;
         while (true) {
             bool should_break = n == 0;
             rem <<= 1;
-            rem.set(0,get(n));
+            rem.set(0, get(n));
             if (rem >= other) {
                 rem -= other;
-                quo.set(n,true);
+                quo.set(n, true);
             }
             if (should_break) break;
-            n-=1;
+            n -= 1;
         }
         rem.sign = sign != other.sign;
         rem.normalize_size();
@@ -250,7 +249,7 @@ namespace cheese::math {
     }
 
     BigInteger BigInteger::operator|(const BigInteger &other) const {
-        size_t max_size = std::max(words.size(),other.words.size());
+        size_t max_size = std::max(words.size(), other.words.size());
         BigInteger a = twos_complement(max_size);
         BigInteger b = other.twos_complement(max_size);
         for (size_t i = 0; i < max_size; i++) {
@@ -260,8 +259,9 @@ namespace cheese::math {
         a.normalize_size();
         return a;
     }
+
     BigInteger BigInteger::operator^(const BigInteger &other) const {
-        size_t max_size = std::max(words.size(),other.words.size());
+        size_t max_size = std::max(words.size(), other.words.size());
         BigInteger a = twos_complement(max_size);
         BigInteger b = other.twos_complement(max_size);
         for (size_t i = 0; i < max_size; i++) {
@@ -271,8 +271,9 @@ namespace cheese::math {
         a.normalize_size();
         return a;
     }
+
     BigInteger BigInteger::operator&(const BigInteger &other) const {
-        size_t max_size = std::max(words.size(),other.words.size());
+        size_t max_size = std::max(words.size(), other.words.size());
         BigInteger a = twos_complement(max_size);
         BigInteger b = other.twos_complement(max_size);
         for (size_t i = 0; i < max_size; i++) {
@@ -284,8 +285,8 @@ namespace cheese::math {
     }
 
     BigInteger BigInteger::operator~() const {
-        BigInteger complement = twos_complement(words.size()+1);
-        for (size_t i =0; i < words.size()+1; i++){
+        BigInteger complement = twos_complement(words.size() + 1);
+        for (size_t i = 0; i < words.size() + 1; i++) {
             complement.words[i] = ~words[i];
         }
         complement.reverse_complement();
@@ -301,7 +302,7 @@ namespace cheese::math {
         return *this / BigInteger(1, other);
     }
 
-    BigInteger BigInteger::operator++(int) {
+    const BigInteger BigInteger::operator++(int) {
         BigInteger copy = *this;
         ++*this;
         return copy;
@@ -311,7 +312,7 @@ namespace cheese::math {
         return *this += 1;
     }
 
-    BigInteger BigInteger::operator--(int) {
+    const BigInteger BigInteger::operator--(int) {
         BigInteger copy = *this;
         --*this;
         return copy;
@@ -371,13 +372,13 @@ namespace cheese::math {
         return *this;
     }
 
-    std::strong_ordering BigInteger::operator<=>(const BigInteger& other) const {
+    std::strong_ordering BigInteger::operator<=>(const BigInteger &other) const {
         BigInteger sub = *this - other;
         if (sub.sign) {
             return std::strong_ordering::less;
         } else {
             bool zero = true;
-            for (auto x : sub.words) {
+            for (auto x: sub.words) {
                 if (x != 0) {
                     zero = false;
                     break;
@@ -392,8 +393,8 @@ namespace cheese::math {
     }
 
     void BigInteger::set(std::size_t bit, bool value) {
-        auto word = bit/32;
-        auto sub = bit%32;
+        auto word = bit / 32;
+        auto sub = bit % 32;
         while (word >= words.size()) {
             words.push_back(0);
         }
@@ -401,8 +402,8 @@ namespace cheese::math {
     }
 
     bool BigInteger::get(std::size_t bit) const {
-        auto word = bit/32;
-        auto sub = bit%32;
+        auto word = bit / 32;
+        auto sub = bit % 32;
         if (word >= words.size()) return false;
         return ((words[word] >> sub) & 1) == 1;
     }
@@ -413,15 +414,15 @@ namespace cheese::math {
         while (!copy.zero()) {
             char mod = copy % 10;
             copy /= 10;
-            result += mod+'0';
+            result += mod + '0';
         }
         if (sign) result += '-';
-        std::reverse(result.begin(),result.end());
+        std::reverse(result.begin(), result.end());
         return result;
     }
 
     bool BigInteger::zero() const {
-        for (auto word : words) {
+        for (auto word: words) {
             if (word != 0) {
                 return false;
             }

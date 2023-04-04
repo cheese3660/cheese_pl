@@ -1,7 +1,7 @@
 //
 // Created by Lexi Allen on 9/21/2022.
 //
-#include "parser/nodes/OtherNodes.h"
+#include "parser/nodes/other_nodes.h"
 #include "NotImplementedException.h"
 #include "curdle/Structure.h"
 

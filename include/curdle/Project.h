@@ -17,8 +17,8 @@ namespace cheese::curdle {
     };
     struct Project {
         fs::path folder;
-        fs::path library_folder;
-        fs::path standard_library_folder;
+        std::vector<fs::path> library_folders;
+        fs::path root_path;
         parser::NodePtr root_file; //folder + "/" + main.chs
         ProjectType type;
     };

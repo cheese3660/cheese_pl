@@ -13,6 +13,8 @@ std::string usage =
         "   cheese tool suite\n"
         "possible tools:\n"
         "   test        -   tests parts of the compiler\n"
+        "   parse       -   parse a source file into an AST representation\n"
+        "   translate   -   translate a program to bacteria\n"
         "options:\n"
         "   --version   -   print the version and exit\n"
         "   --help      -   print a help string dependant on the tool and exit\n";

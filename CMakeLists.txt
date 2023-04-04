@@ -60,11 +60,11 @@ add_executable(
         external/inflatecpp/decompressor.cc
         external/inflatecpp/huffman_decoder.cc
         src/parser/nodes/Import.cpp
-        include/parser/nodes/TerminalNodes.h
-        include/parser/nodes/SingleMemberNodes.h
+        include/parser/nodes/terminal_nodes.h
+        include/parser/nodes/single_member_nodes.h
         include/math/BigInteger.h
         src/math/BigInteger.cpp
-        include/parser/nodes/OtherNodes.h
+        include/parser/nodes/other_nodes.h
         include/tools/parse.h
         src/tools/parse.cpp
         include/curdle/curdle.h
@@ -77,9 +77,22 @@ add_executable(
         include/curdle/Structure.h
         include/curdle/FunctionTemplate.h
         include/curdle/Type.h
-        include/curdle/WeakPointer.h
         include/curdle/Mixin.h
-        include/curdle/WeakPointer.h include/curdle/GlobalContext.h include/curdle/variables.h include/curdle/comptime.h include/memory/garbage_collection.h src/memory/garbage_collection.cpp src/curdle/Structure.cpp src/curdle/comptime.cpp)
+        include/curdle/GlobalContext.h
+        include/curdle/variables.h
+        include/curdle/comptime.h
+        include/memory/garbage_collection.h
+        src/memory/garbage_collection.cpp
+        src/curdle/Structure.cpp
+        src/curdle/comptime.cpp
+        src/curdle/Type.cpp
+        src/curdle/Mixin.cpp
+        include/curdle/Interface.h
+        src/curdle/Interface.cpp
+        include/curdle/functions.h
+        src/curdle/functions.cpp
+        src/tools/translate.cpp
+        include/tools/translate.h src/curdle/GlobalContext.cpp include/bacteria/BacteriaReciever.h include/bacteria/nodes/reciever_nodes.h include/curdle/runtime.h)
 if (UNIX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++ -Wall")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++ -lc++abi")

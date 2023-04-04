@@ -20,11 +20,13 @@ namespace cheese::math {
         bool sign{false};
 
         BigInteger() = default;
-        BigInteger(const BigInteger& other) = default;
+
+        BigInteger(const BigInteger &other) = default;
 
 
         explicit BigInteger(std::string_view initializer);
-        template <std::unsigned_integral T>
+
+        template<std::unsigned_integral T>
         BigInteger(T other) {
             if constexpr (sizeof(other) <= sizeof(std::uint32_t)) {
                 words.push_back(other);
@@ -36,7 +38,8 @@ namespace cheese::math {
             }
             sign = false;
         }
-        template <std::signed_integral T>
+
+        template<std::signed_integral T>
         BigInteger(T other) {
             if (other < 0) {
                 sign = true;
@@ -51,13 +54,12 @@ namespace cheese::math {
                     us >>= other;
                 }
             }
-            if (bits_to_flip == words.size() * 32)
-            {
+            if (bits_to_flip == words.size() * 32) {
                 reverse_complement();
             } else {
                 if (sign) {
                     for (size_t i = 0; i < words.size() * 32; i++) {
-                        set(i,!get(i));
+                        set(i, !get(i));
                     }
                     *this += 1;
                 }
@@ -65,9 +67,7 @@ namespace cheese::math {
         }
 
 
-
-
-        template <std::floating_point T>
+        template<std::floating_point T>
         explicit BigInteger(const T other) {
             if (std::isnan(other) || std::isinf(other)) return;
 
@@ -76,7 +76,7 @@ namespace cheese::math {
             while (rounded >= 1) {
                 int mod = rounded % 10;
                 rounded /= 10;
-                *this += (multiplication*mod);
+                *this += (multiplication * mod);
                 multiplication *= 10;
             }
             if (other < 0) {
@@ -95,81 +95,114 @@ namespace cheese::math {
             normalize_size();
         }
 
-        BigInteger twos_complement(const std::size_t normalized_size, bool negate=false) const;
+        BigInteger twos_complement(const std::size_t normalized_size, bool negate = false) const;
+
         void reverse_complement();
+
         void normalize_size();
 
 
         //Time to do all the math operators for each type of value
         BigInteger operator+() const;
+
         BigInteger operator-() const;
+
         BigInteger operator~() const;
-        BigInteger operator+(const BigInteger& other) const;
-        BigInteger operator-(const BigInteger& other) const;
-        BigInteger operator*(const BigInteger& other) const;
-        BigInteger operator/(const BigInteger& other) const;
-        BigInteger operator%(const BigInteger& other) const;
-        BigInteger operator|(const BigInteger& other) const;
-        BigInteger operator^(const BigInteger& other) const;
-        BigInteger operator&(const BigInteger& other) const;
+
+        BigInteger operator+(const BigInteger &other) const;
+
+        BigInteger operator-(const BigInteger &other) const;
+
+        BigInteger operator*(const BigInteger &other) const;
+
+        BigInteger operator/(const BigInteger &other) const;
+
+        BigInteger operator%(const BigInteger &other) const;
+
+        BigInteger operator|(const BigInteger &other) const;
+
+        BigInteger operator^(const BigInteger &other) const;
+
+        BigInteger operator&(const BigInteger &other) const;
+
         BigInteger operator<<(size_t other) const;
+
         BigInteger operator>>(size_t other) const;
 
-        BigInteger operator++(int);
-        BigInteger& operator++();
-        BigInteger operator--(int);
-        BigInteger& operator--();
+        const BigInteger operator++(int);
 
-        BigInteger& operator+=(const BigInteger& other);
-        BigInteger& operator-=(const BigInteger& other);
-        BigInteger& operator*=(const BigInteger& other);
-        BigInteger& operator/=(const BigInteger& other);
-        BigInteger& operator%=(const BigInteger& other);
-        BigInteger& operator|=(const BigInteger& other);
-        BigInteger& operator^=(const BigInteger& other);
-        BigInteger& operator&=(const BigInteger& other);
-        BigInteger& operator<<=(std::size_t other);
-        BigInteger& operator>>=(std::size_t other);
+        BigInteger &operator++();
 
-        template <typename T>
-        BigInteger operator+(const T& other) const {
+        const BigInteger operator--(int);
+
+        BigInteger &operator--();
+
+        BigInteger &operator+=(const BigInteger &other);
+
+        BigInteger &operator-=(const BigInteger &other);
+
+        BigInteger &operator*=(const BigInteger &other);
+
+        BigInteger &operator/=(const BigInteger &other);
+
+        BigInteger &operator%=(const BigInteger &other);
+
+        BigInteger &operator|=(const BigInteger &other);
+
+        BigInteger &operator^=(const BigInteger &other);
+
+        BigInteger &operator&=(const BigInteger &other);
+
+        BigInteger &operator<<=(std::size_t other);
+
+        BigInteger &operator>>=(std::size_t other);
+
+        template<typename T>
+        BigInteger operator+(const T &other) const {
             return *this + BigInteger{other};
         }
-        template <typename T>
-        BigInteger operator-(const T& other) const {
+
+        template<typename T>
+        BigInteger operator-(const T &other) const {
             return *this - BigInteger{other};
         }
-        template <typename T>
-        BigInteger operator*(const T& other) const {
+
+        template<typename T>
+        BigInteger operator*(const T &other) const {
             return *this * BigInteger{other};
         }
-        template <typename T>
-        BigInteger operator%(const T& other) const {
+
+        template<typename T>
+        BigInteger operator%(const T &other) const {
             return *this % BigInteger{other};
         }
-        template <typename T>
-        BigInteger operator/(const T& other) const {
+
+        template<typename T>
+        BigInteger operator/(const T &other) const {
             return *this / BigInteger{other};
         }
-        template <typename T>
-        BigInteger operator^(const T& other) const {
+
+        template<typename T>
+        BigInteger operator^(const T &other) const {
             return *this ^ BigInteger{other};
         }
-        template <typename T>
-        BigInteger operator&(const T& other) const {
+
+        template<typename T>
+        BigInteger operator&(const T &other) const {
             return *this & BigInteger{other};
         }
 
 
-        std::strong_ordering operator<=>(const BigInteger& other) const;
+        std::strong_ordering operator<=>(const BigInteger &other) const;
+
         template<typename T>
-        std::strong_ordering operator<=>(const T& other) const {
+        std::strong_ordering operator<=>(const T &other) const {
             BigInteger sub = *this - BigInteger{other};
             if (sub.sign) {
                 return std::strong_ordering::less;
             } else {
                 bool zero = true;
-                for (auto x : sub.words) {
+                for (auto x: sub.words) {
                     if (x != 0) {
                         zero = false;
                         break;
@@ -184,37 +217,38 @@ namespace cheese::math {
         }
 
         template<typename T>
-        friend bool operator==(const BigInteger& a, const T& other) {
+        friend bool operator==(const BigInteger &a, const T &other) {
             return (a <=> other) == std::strong_ordering::equivalent;
         }
+
         template<typename T>
-        friend bool operator!=(const BigInteger& a, const T& other) {
+        friend bool operator!=(const BigInteger &a, const T &other) {
             return (a <=> other) != std::strong_ordering::equivalent;
         }
 
 
-        template <std::unsigned_integral T>
-        BigInteger& operator=(const T other) {
+        template<std::unsigned_integral T>
+        BigInteger &operator=(const T other) {
             return *this = BigInteger{other};
         }
 
-        template <std::signed_integral T>
-        BigInteger& operator=(const T other) {
+        template<std::signed_integral T>
+        BigInteger &operator=(const T other) {
             return *this = BigInteger{other};
         }
 
-        template <std::floating_point T>
-        BigInteger& operator=(const T other) {
+        template<std::floating_point T>
+        BigInteger &operator=(const T other) {
             return *this = BigInteger{other};
         }
 
-        BigInteger& operator=(const BigInteger& other) {
+        BigInteger &operator=(const BigInteger &other) {
             if (this == &other) return *this;
             words = other.words;
             return *this;
         }
 
-        template <std::unsigned_integral T>
+        template<std::unsigned_integral T>
         operator T() {
             T res = 0;
             for (uintmax_t i = 0; i < words.size(); i++) {
@@ -227,9 +261,9 @@ namespace cheese::math {
             return res;
         }
 
-        template <std::integral T>
-        operator T() const{
-            auto twos = twos_complement(words.size()+1);
+        template<std::integral T>
+        operator T() const {
+            auto twos = twos_complement(words.size() + 1);
             std::make_unsigned_t<T> us = 0;
             for (size_t i = 0; i < twos.words.size(); i++) {
                 us |= static_cast<std::make_unsigned_t<T>>(twos.words[i]) << (i * 32);
@@ -237,13 +271,13 @@ namespace cheese::math {
             return static_cast<T>(us);
         }
 
-        template <std::floating_point T>
-        operator T() const{
+        template<std::floating_point T>
+        operator T() const {
             long double shift = 4294967295;
             long double shift_mod = 1;
             T res = 0.0;
-            for (uintmax_t i = 0; i < words.size(); i++) {
-                res += words[i] * shift_mod;
+            for (unsigned int word: words) {
+                res += word * shift_mod;
                 shift_mod *= shift;
             }
             if (sign) {
@@ -256,10 +290,11 @@ namespace cheese::math {
 
 
         void set(std::size_t bit, bool value);
-        bool get(std::size_t bit) const;
+
+        [[nodiscard]] bool get(std::size_t bit) const;
 
 
-        bool zero() const;
+        [[nodiscard]] bool zero() const;
 
     };
 

@@ -11,13 +11,16 @@
 #include "vterm.h"
 #include "argparse/argparse.hpp"
 #include "configuration.h"
+#include "tools/translate.h"
 #include <fstream>
+
 
 namespace cheese::tools {
     const char *version = "0.0.1";
     std::unordered_map<std::string, CheeseTool> tools{
-            {"test", test},
-            {"parse", parse},
+            {"test",      test},
+            {"parse",     parse},
+            {"translate", translate}
     };
 
     argparse::ArgumentParser get_parser(std::string name) {

@@ -2,7 +2,7 @@
 // Created by Lexi Allen on 11/7/2022.
 //
 
-#include "parser/nodes/OtherNodes.h"
+#include "parser/nodes/other_nodes.h"
 #include "NotImplementedException.h"
 
 namespace cheese::parser::nodes {

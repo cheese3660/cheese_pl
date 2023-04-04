@@ -2,8 +2,8 @@
 // Created by Lexi Allen on 11/11/2022.
 //
 
-#ifndef CHEESE_OTHERNODES_H
-#define CHEESE_OTHERNODES_H
+#ifndef CHEESE_OTHER_NODES_H
+#define CHEESE_OTHER_NODES_H
 
 #include <utility>
 
@@ -121,7 +121,7 @@ namespace cheese::parser::nodes {
                 type(std::move(type)),
                 flags(std::move(flags)) {
         }
-        
+
         [[nodiscard]] nlohmann::json as_json() const override {
             return build_json("field", {"name", "field_type", "flags"}, name, type, flags);
         }
@@ -662,4 +662,4 @@ namespace cheese::parser::nodes {
         ~ArrayType() override = default;
     };
 }
-#endif //CHEESE_OTHERNODES_H
+#endif //CHEESE_OTHER_NODES_H

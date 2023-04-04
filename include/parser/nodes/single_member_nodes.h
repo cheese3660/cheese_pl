@@ -2,8 +2,8 @@
 // Created by Lexi Allen on 11/8/2022.
 //
 
-#ifndef CHEESE_SINGLEMEMBERNODES_H
-#define CHEESE_SINGLEMEMBERNODES_H
+#ifndef CHEESE_SINGLE_MEMBER_NODES_H
+#define CHEESE_SINGLE_MEMBER_NODES_H
 
 #include "../Node.h"
 #include "NotImplementedException.h"
@@ -100,4 +100,4 @@ namespace cheese::parser::nodes {
 }
 
 
-#endif //CHEESE_SINGLEMEMBERNODES_H
+#endif //CHEESE_SINGLE_MEMBER_NODES_H

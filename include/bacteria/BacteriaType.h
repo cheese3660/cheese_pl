@@ -6,6 +6,9 @@
 #define CHEESE_BACTERIATYPE_H
 
 #include <memory>
+#include <map>
+#include <string>
+#include <vector>
 
 namespace cheese::bacteria {
     struct BacteriaType {

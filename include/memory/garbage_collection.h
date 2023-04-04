@@ -17,14 +17,26 @@ namespace cheese::memory::garbage_collection {
 
         void mark();
 
-        virtual ~managed_object() = 0;
+        virtual ~managed_object() = default;
     };
 
     class garbage_collector;
 
 
-    template<typename T> requires std::is_base_of_v<managed_object, T>
+    template<typename T>
     struct gcref;
+
+//    template<typename T> requires std::is_base_of_v<managed_object, T>
+//    struct gcvec : managed_object, std::vector<T *> {
+//
+//        ~gcvec() override = default;
+//
+//        void mark_references() override {
+//            for (auto it = this->begin(); it != this->end(); ++it) {
+//                *it->mark();
+//            }
+//        }
+//    };
 
     // Simple linear GC for now :)
     class garbage_collector {
@@ -51,6 +63,9 @@ namespace cheese::memory::garbage_collection {
         template<class T>
         requires std::is_base_of_v<managed_object, T> gcref<T> get_scoped_ref(T *ptr);
 
+        template<class T>
+        requires std::is_base_of_v<managed_object, T> gcref<T> manage(T *ptr);
+
         void add_in_scope_object(managed_object *object);
 
         void remove_in_scope_object(managed_object *object);
@@ -63,14 +78,17 @@ namespace cheese::memory::garbage_collection {
     };
 
     // Make this a unique ptr, such that it doesn't get copied to a field and such accidentally.
-    template<typename T> requires std::is_base_of_v<managed_object, T>
+    template<typename T>
     struct gcref {
+        static_assert(std::is_base_of_v<managed_object, T>, "Class must be of type managed_object");
         garbage_collector &gc;
         T *value;
 
         gcref(garbage_collector &gc, T *value) : gc(gc), value(value) {
+            if (value == nullptr) return;
             gc.add_in_scope_object(value);
         }
+
 
         gcref(const gcref<T> &other) = delete;
 
@@ -79,7 +97,7 @@ namespace cheese::memory::garbage_collection {
         }
 
         gcref<T> &operator=(gcref<T> &&other) noexcept {
-            if (this == other) return *this;
+            if (this == &other) return *this;
             gc.remove_in_scope_object(value);
             value = std::move(other.value);
             other.value = nullptr;
@@ -127,6 +145,14 @@ namespace cheese::memory::garbage_collection {
         }
         return ref;
     }
+
+    template<class T>
+    requires std::is_base_of_v<managed_object, T>
+    gcref<T> garbage_collector::manage(T *ptr) {
+        managed_objects.push_back(reinterpret_cast<managed_object *>(ptr));
+        return gcref<T>(*this, ptr);
+    }
+
 };
 
 

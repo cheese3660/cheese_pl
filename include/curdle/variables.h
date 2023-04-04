@@ -11,8 +11,9 @@
 #include "Type.h"
 
 namespace cheese::curdle {
+    struct ComptimeValue;
     struct TopLevelVariableInfo {
-        bool exported;
+        bool constant;
         bool pub; //Vi
         std::string mangled_name;
         Type *type;
@@ -20,6 +21,7 @@ namespace cheese::curdle {
 
     struct ComptimeVariableInfo {
         bool pub;
+        bool constant;
         Type *type;
         ComptimeValue *value;
     };

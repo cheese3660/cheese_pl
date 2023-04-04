@@ -10,9 +10,14 @@
 #include <vector>
 #include <map>
 #include "parser/Node.h"
+#include "Interface.h"
 #include "variables.h"
+#include "functions.h"
+#include "comptime.h"
 
 namespace cheese::curdle {
+    struct FunctionSet;
+    struct ComptimeContext;
     struct StructureField {
         std::string name;
         Type *type;
@@ -25,17 +30,30 @@ namespace cheese::curdle {
     };
 
     struct Structure : Type {
+        ComptimeContext *containedContext;
+
         bacteria::TypePtr get_bacteria_type() override;
 
-        void mark_references() override;
+        void mark_type_references() override;
 
         ~Structure() override;
 
         // This contains all the information of a structure. which is a type
         // It does not have its interfaces attached to it as that is part of the main type
+        // If the type of the structure is a tuple, then the names of the fields will be _0, _1, _2, _3, _4, _5, etc...
+        bool is_tuple{false};
         std::vector<StructureField> fields;
         std::map<std::string, TopLevelVariableInfo> top_level_variables;
-        std::vector<LazyValue> lazies;
+        std::map<std::string, ComptimeVariableInfo> comptime_variables;
+        std::vector<LazyValue *> lazies;
+        std::vector<Interface *> interfaces; // Separate from mixins as it isn't defining functions outside the function
+        std::map<std::string, FunctionSet *> function_sets;
+
+        void resolve_lazy(LazyValue *&lazy);
+
+        void search_entry();
+
+        Comptimeness get_comptimeness() override;
     };
 }
 
