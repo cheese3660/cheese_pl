@@ -9,6 +9,7 @@
 #include "curdle/GlobalContext.h"
 #include "curdle/runtime.h"
 #include <typeinfo>
+#include "curdle/names.h"
 
 namespace cheese::curdle {
 //    void FunctionTemplate::define() {
@@ -307,19 +308,33 @@ namespace cheese::curdle {
         }
         auto &ret_type = info.return_type;
         bool force_comptime;
+        bool external;
+        std::string name;
         auto true_ptr = ptr.get();
         if (auto as_fn = dynamic_cast<parser::nodes::Function *>(true_ptr); as_fn) {
             force_comptime = as_fn->flags.comptime;
+            external = as_fn->flags.exter || as_fn->flags.entry;
+            name = as_fn->name;
         } else if (auto as_gen = dynamic_cast<parser::nodes::Generator *>(true_ptr); as_gen) {
             force_comptime = as_gen->flags.comptime;
+            external = as_gen->flags.exter || as_gen->flags.entry;
+            name = as_gen->name;
         } else if (auto as_op = dynamic_cast<parser::nodes::Operator *>(true_ptr); as_op) {
             force_comptime = as_op->flags.comptime;
+            external = false;
+            name = "operator " + as_op->op;
+        }
+        if (!external) {
+            name = combine_names(ctx->currentStructure->name, name);
         }
         bool comptime_only = force_comptime;
         if (ret_type->get_comptimeness() == Comptimeness::Comptime) {
             comptime_only = true;
         }
-        
+        auto new_function = gc.gcnew<ConcreteFunction>(name, true_arguments, ret_type, comptime_only, fctx, rctx,
+                                                       external);
+        concrete_functions.push_back(new_function);
+        return new_function;
     }
 
     FunctionInfo FunctionTemplate::get_info_for_arguments(const std::vector<PassedFunctionArgument> &arguments,
@@ -369,5 +384,12 @@ namespace cheese::curdle {
         if (returned_value != nullptr) {
             returned_value->mark();
         }
+    }
+
+    ConcreteFunction::ConcreteFunction(std::string path, const std::vector<PassedFunctionArgument> &arguments,
+                                       Type *returnType, bool comptimeOnly, ComptimeContext *cctx,
+                                       RuntimeContext *rctx, bool external) {
+        // Comptime argument typenames to the name mangler get passed like such
+        // TYPENAME$VALUE
     }
 }

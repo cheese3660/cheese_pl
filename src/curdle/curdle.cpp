@@ -37,6 +37,7 @@ namespace cheese::curdle {
         auto ref = structure_ref.get();
         auto localCtx = gc.gcnew<ComptimeContext>(ctx, ref);
         structure_ref->containedContext = localCtx;
+        structure_ref->name = "";
         if (structure_node->is_tuple) {
             structure_ref->is_tuple = true;
             size_t field_index = 0;

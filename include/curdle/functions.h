@@ -52,11 +52,13 @@ namespace cheese::curdle {
         bool is_comptime_only;
         ComptimeValue *returned_value; // If this is void then fun
 
+        ConcreteFunction(std::string path, const std::vector<PassedFunctionArgument> &arguments, Type *returnType,
+                         bool comptimeOnly, ComptimeContext *cctx, RuntimeContext *rctx, bool external);
     };
 
     struct FunctionTemplate : managed_object {
         FunctionTemplate(ComptimeContext *pContext, std::shared_ptr<parser::Node> sharedPtr);
-
+        
         ComptimeContext *ctx;
         parser::NodePtr ptr;
 

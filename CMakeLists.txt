@@ -97,7 +97,7 @@ add_executable(
         include/bacteria/BacteriaReciever.h
         include/bacteria/nodes/reciever_nodes.h
         include/curdle/runtime.h
-        src/curdle/runtime.cpp src/curdle/runtime.cpp include/curdle/name_mangler.h)
+        src/curdle/runtime.cpp src/curdle/runtime.cpp include/curdle/names.h src/curdle/names.cpp)
 if (UNIX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++ -Wall")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++ -lc++abi")

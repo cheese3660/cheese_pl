@@ -46,8 +46,9 @@ namespace cheese::curdle {
         std::map<std::string, TopLevelVariableInfo> top_level_variables;
         std::map<std::string, ComptimeVariableInfo> comptime_variables;
         std::vector<LazyValue *> lazies;
-        std::vector<Interface *> interfaces; // Separate from mixins as it isn't defining functions outside the function
+        std::vector<Interface *> interfaces; // Separate from mixins as it isn't defining functions outside the structure
         std::map<std::string, FunctionSet *> function_sets;
+        std::string name; // Structures must have names bound to them
 
         void resolve_lazy(LazyValue *&lazy);
 
