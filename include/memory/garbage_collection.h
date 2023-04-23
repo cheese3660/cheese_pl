@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <concepts>
+#include <iostream>
 
 namespace cheese::memory::garbage_collection {
 
@@ -96,6 +97,12 @@ namespace cheese::memory::garbage_collection {
             value = other.value;
         }
 
+        template<typename V>
+        gcref(gcref<V> &&other) noexcept: gc(other.gc) {
+            static_assert(std::is_base_of_v<T, V>, "V must derive from T");
+            value = other.value;
+        }
+
         gcref<T> &operator=(gcref<T> &&other) noexcept {
             if (this == &other) return *this;
             gc.remove_in_scope_object(value);
@@ -137,6 +144,7 @@ namespace cheese::memory::garbage_collection {
     requires std::is_base_of_v<managed_object, T>
     gcref<T> garbage_collector::gcnew(Args &&... args) {
         auto obj = new T(std::forward<Args>(args)...);
+        std::cout << "Creating a: " << typeid(*obj).name() << "\n";
         managed_objects.push_back(obj);
         auto ref = gcref{*this, obj};
         if (++allocations_since_last_sweep >= frequency) {

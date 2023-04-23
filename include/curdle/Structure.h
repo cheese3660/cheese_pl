@@ -54,6 +54,8 @@ namespace cheese::curdle {
         void search_entry();
 
         Comptimeness get_comptimeness() override;
+
+        int32_t compare(Type *other) override;
     };
 }
 

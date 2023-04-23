@@ -24,6 +24,8 @@ namespace cheese::curdle {
 
         virtual Comptimeness get_comptimeness() = 0;
 
+        // This should be done in a way that the other type is *always* concrete and not an "any"
+        virtual std::int32_t compare(Type *other) = 0;
 
         // This is where we add mixins and such
 
@@ -48,6 +50,8 @@ namespace cheese::curdle {
 
         Comptimeness get_comptimeness() override;
 
+        int32_t compare(Type *other) override;
+
     private:
 
         TypeType() = default;
@@ -70,6 +74,8 @@ namespace cheese::curdle {
 
         Comptimeness get_comptimeness() override;
 
+        int32_t compare(Type *other) override;
+
     private:
 
         IntegerType(memory::garbage_collection::garbage_collector &gc, bool sn, std::uint16_t sz);
@@ -85,6 +91,8 @@ namespace cheese::curdle {
         ~ReferenceType() override = default;
 
         Comptimeness get_comptimeness() override;
+
+        int32_t compare(Type *other) override;
 
         Type *child;
         bool constant; //Whether this is a constant reference type
@@ -104,9 +112,31 @@ namespace cheese::curdle {
 
         Comptimeness get_comptimeness() override;
 
+        int32_t compare(Type *other) override;
+
     private:
 
         VoidType() = default;
+    };
+
+    struct AnyType : Type {
+        friend class cheese::memory::garbage_collection::garbage_collector;
+
+        bacteria::TypePtr get_bacteria_type() override;
+
+        void mark_type_references() override;
+
+        ~AnyType() override = default;
+
+        static AnyType *get(memory::garbage_collection::garbage_collector &gc);
+
+        Comptimeness get_comptimeness() override;
+
+        int32_t compare(Type *other) override;
+
+    private:
+
+        AnyType() = default;
     };
 }
 #endif //CHEESE_TYPE_H

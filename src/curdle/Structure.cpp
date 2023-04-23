@@ -97,4 +97,16 @@ namespace cheese::curdle {
         }
         return Comptimeness::Runtime;
     }
+
+    int32_t Structure::compare(Type *other) {
+        if (other == this) return 0;
+        if (auto s = dynamic_cast<Structure *>(other); s && is_tuple && s->is_tuple &&
+                                                       fields.size() == s->fields.size()) {
+            for (int i = 0; i < fields.size(); i++) {
+                if (fields[i].type->compare(s->fields[i].type) != 0) return -1;
+            }
+            return 0;
+        }
+        return -1;
+    }
 }

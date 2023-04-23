@@ -181,8 +181,8 @@ namespace cheese::curdle {
                 error::raise_exiting_error("curdle", "no entrypoint found", project.root_file->location,
                                            error::ErrorCode::NoEntryPoint);
             }
-            ctx->entry_function->define();
+            ctx->entry_function->get({}, project.root_file->location);
         }
-        return bacteria::BacteriaPtr{};
+        return ctx->global_reciever.release()->get();
     }
 }

@@ -63,6 +63,8 @@ namespace cheese::error {
         ExpectedInterface,
         UnresolvedImport,
         NoEntryPoint,
+        MismatchedFunctionCall,
+        AmbiguousFunctionCall,
 
         //General error (thrown for example when multiple previous errors were printed)
         GeneralCompilerError = 9999,

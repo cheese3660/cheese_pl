@@ -25,5 +25,11 @@ namespace cheese::curdle {
         Type *type;
         ComptimeValue *value;
     };
+
+    struct RuntimeVariableInfo {
+        bool constant;
+        Type *type;
+    };
+
 }
 #endif //CHEESE_VARIABLES_H
