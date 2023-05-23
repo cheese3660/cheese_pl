@@ -11,6 +11,8 @@
 #include "parser/nodes/single_member_nodes.h"
 #include "parser/nodes/terminal_nodes.h"
 #include "curdle/Structure.h"
+#include "curdle/comptime.h"
+#include "curdle/runtime.h"
 // This
 
 namespace cheese::curdle {
@@ -18,5 +20,7 @@ namespace cheese::curdle {
 
     gcref<Structure>
     translate_structure(ComptimeContext *ctx, parser::nodes::Structure *structure_node);
+
+    void translate_function_body(RuntimeContext *rctx, parser::NodePtr functionBody);
 }
 #endif //CHEESE_CURDLE_H

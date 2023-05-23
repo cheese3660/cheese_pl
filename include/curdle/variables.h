@@ -28,6 +28,7 @@ namespace cheese::curdle {
 
     struct RuntimeVariableInfo {
         bool constant;
+        std::string runtime_name;
         Type *type;
     };
 

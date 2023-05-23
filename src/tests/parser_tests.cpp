@@ -5,7 +5,7 @@
 #include "tests/tests.h"
 #include "parser/parser.h"
 #include "lexer/lexer.h"
-#include "thirdparty/json.hpp"
+#include "../../external/json.hpp"
 #include "../../external/inflatecpp/decompressor.h"
 #include "compression/base64.h"
 #include "iostream"

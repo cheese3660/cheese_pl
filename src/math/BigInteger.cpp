@@ -3,6 +3,7 @@
 //
 #include "math/BigInteger.h"
 #include <string_view>
+#include <iostream>
 
 const std::array<std::uint32_t, 256> number_values{
         {
@@ -226,10 +227,10 @@ namespace cheese::math {
         BigInteger rem = 0;
         BigInteger quo = 0;
         if (other > *this) {
-            return 0;
+            return *this;
         }
         if (*this == other) {
-            return 1;
+            return 0;
         }
         size_t n = (words.size() * 32) - 1;
         while (true) {
@@ -243,6 +244,7 @@ namespace cheese::math {
             if (should_break) break;
             n -= 1;
         }
+        std::cout << "remainder: " << static_cast<int32_t>(rem) << '\n';
         rem.sign = sign != other.sign;
         rem.normalize_size();
         return rem;
@@ -409,6 +411,7 @@ namespace cheese::math {
     }
 
     BigInteger::operator std::string() const {
+        if (zero()) return "0";
         std::string result = "";
         BigInteger copy = *this;
         while (!copy.zero()) {

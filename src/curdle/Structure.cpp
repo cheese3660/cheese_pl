@@ -5,11 +5,19 @@
 #include "curdle/Structure.h"
 #include "curdle/GlobalContext.h"
 #include "curdle/Type.h"
+#include "sstream"
 
 namespace cheese::curdle {
 
     bacteria::TypePtr Structure::get_bacteria_type() {
-        return cheese::bacteria::TypePtr{};
+        std::vector<bacteria::TypePtr> child_types;
+        for (auto &child: fields) {
+            child_types.push_back(child.type->get_cached_type());
+        }
+        return std::make_shared<bacteria::BacteriaType>(bacteria::BacteriaType::Type::Object, 0,
+                                                        std::shared_ptr<bacteria::BacteriaType>{},
+                                                        std::vector<std::size_t>{},
+                                                        std::move(child_types));
     }
 
     void Structure::mark_type_references() {
@@ -108,5 +116,36 @@ namespace cheese::curdle {
             return 0;
         }
         return -1;
+    }
+
+    std::string Structure::to_string() {
+        if (is_tuple) {
+            std::stringstream ss{};
+            ss << "struct(";
+            for (int i = 0; i < fields.size(); i++) {
+                ss << fields[i].type->to_string();
+                if (i < fields.size() - 1) {
+                    ss << " ";
+                }
+            }
+            ss << ")";
+            return ss.str();
+        } else {
+            return name;
+        }
+    }
+
+    void Structure::resolve_by_name(const std::string &name) {
+        for (auto &lazy: lazies) {
+            if (lazy != nullptr && lazy->name == name) {
+                resolve_lazy(lazy);
+            }
+        }
+    }
+
+    Type *Structure::peer(Type *other, garbage_collector &gc) {
+        if (compare(other) == 0) return this;
+        if (dynamic_cast<AnyType *>(other)) return this;
+        return nullptr;
     }
 }

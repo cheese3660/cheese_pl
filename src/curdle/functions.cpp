@@ -10,6 +10,8 @@
 #include "curdle/runtime.h"
 #include <typeinfo>
 #include "curdle/names.h"
+#include "curdle/curdle.h"
+#include "bacteria/nodes/reciever_nodes.h"
 
 namespace cheese::curdle {
 //    void FunctionTemplate::define() {
@@ -136,6 +138,7 @@ namespace cheese::curdle {
                 } else {
                     rctx->variables["self"] = RuntimeVariableInfo{
                             true,
+                            "self",
                             ref_type,
                     };
                 }
@@ -160,6 +163,7 @@ namespace cheese::curdle {
                 } else {
                     rctx->variables["self"] = RuntimeVariableInfo{
                             true,
+                            "self",
                             ref_type,
                     };
                 }
@@ -196,6 +200,7 @@ namespace cheese::curdle {
                         } else {
                             rctx->variables[name] = RuntimeVariableInfo{
                                     true,
+                                    name,
                                     arguments[i].type
                             };
                             args.push_back({
@@ -206,7 +211,7 @@ namespace cheese::curdle {
                         }
                     } else {
                         auto tv = t->typeValue;
-                        auto cv = tv->compare(arguments[i].type);
+                        auto cv = tv->compare(t1);
                         if (cv == -1) {
                             return no_match;
                         }
@@ -225,6 +230,7 @@ namespace cheese::curdle {
                         } else {
                             rctx->variables[name] = RuntimeVariableInfo{
                                     true,
+                                    name,
                                     tv
                             };
                         }
@@ -259,6 +265,7 @@ namespace cheese::curdle {
         } else {
             ctx->globalContext->raise("Expected a type value for return type", ret_type->location,
                                       error::ErrorCode::ExpectedType);
+            return no_match;
         }
     }
 
@@ -302,27 +309,34 @@ namespace cheese::curdle {
                     true_arguments.push_back(arguments[i]);
                 }
             } else {
-                rctx->variables[info.arguments[i].name] = RuntimeVariableInfo{true, info.arguments[i].type};
+                rctx->variables[info.arguments[i].name] = RuntimeVariableInfo{true, info.arguments[i].name,
+                                                                              info.arguments[i].type};
                 true_arguments.push_back(PassedFunctionArgument{true, nullptr, info.arguments[i].type});
             }
         }
         auto &ret_type = info.return_type;
+        parser::NodePtr body_ptr;
         bool force_comptime;
         bool external;
+        bool generator{false};
         std::string name;
         auto true_ptr = ptr.get();
         if (auto as_fn = dynamic_cast<parser::nodes::Function *>(true_ptr); as_fn) {
             force_comptime = as_fn->flags.comptime;
             external = as_fn->flags.exter || as_fn->flags.entry;
             name = as_fn->name;
+            body_ptr = as_fn->body;
         } else if (auto as_gen = dynamic_cast<parser::nodes::Generator *>(true_ptr); as_gen) {
             force_comptime = as_gen->flags.comptime;
             external = as_gen->flags.exter || as_gen->flags.entry;
             name = as_gen->name;
+            body_ptr = as_gen->body;
+            generator = true;
         } else if (auto as_op = dynamic_cast<parser::nodes::Operator *>(true_ptr); as_op) {
             force_comptime = as_op->flags.comptime;
             external = false;
-            name = "operator " + as_op->op;
+            name = "operator" + as_op->op;
+            body_ptr = as_op->body;
         }
         if (!external) {
             name = combine_names(ctx->currentStructure->name, name);
@@ -331,15 +345,25 @@ namespace cheese::curdle {
         if (ret_type->get_comptimeness() == Comptimeness::Comptime) {
             comptime_only = true;
         }
-        auto new_function = gc.gcnew<ConcreteFunction>(name, true_arguments, ret_type, comptime_only, fctx, rctx,
-                                                       external);
+        rctx->functionReturnType = nullptr;
+        std::vector<std::string> rtime_names;
+        for (auto &argument: info.arguments) {
+            if (argument.comptimeness == Comptimeness::Runtime) {
+                rtime_names.push_back(argument.name);
+            }
+        }
+
+        auto new_function = gc.gcnew<ConcreteFunction>(name, true_arguments, ret_type, comptime_only, external);
         concrete_functions.push_back(new_function);
+        new_function->generate_code(fctx, rctx,
+                                    external, std::move(body_ptr), generator, rtime_names);
+
         return new_function;
     }
 
     FunctionInfo FunctionTemplate::get_info_for_arguments(const std::vector<PassedFunctionArgument> &arguments,
                                                           bool any_zero) const {
-        get_info_for_arguments(std::move(arguments), any_zero);
+        return get_info_for_arguments(std::move(arguments), any_zero);
     }
 
     void FunctionSet::mark_references() {
@@ -348,7 +372,26 @@ namespace cheese::curdle {
         }
     }
 
-    IncorrectCallException::IncorrectCallException() : exception("Invalid function call") {}
+    ConcreteFunction *FunctionSet::get(const std::vector<PassedFunctionArgument> &&arguments, Coordinate call_loc) {
+        int closest_closeness = std::numeric_limits<int>::max();
+        FunctionTemplate *closest_function = nullptr;
+        for (auto templ: templates) {
+            auto info = templ->get_info_for_arguments(arguments);
+            if (info.closeness >= 0 && info.closeness < closest_closeness) {
+                closest_function = templ;
+            }
+        }
+        if (closest_function == nullptr) {
+            throw IncorrectCallException();
+        }
+        return closest_function->get(std::move(arguments), call_loc);
+    }
+
+    IncorrectCallException::IncorrectCallException() = default;
+
+    const char *IncorrectCallException::what() const noexcept {
+        return "Invalid function call";
+    }
 
     int ConcreteFunction::closeness(const std::vector<PassedFunctionArgument> &args) {
         if (args.size() != arguments.size()) {
@@ -386,10 +429,58 @@ namespace cheese::curdle {
         }
     }
 
+    void ConcreteFunction::generate_code(ComptimeContext *cctx, RuntimeContext *rctx, bool external,
+                                         parser::NodePtr body_ptr, bool is_generator,
+                                         const std::vector<std::string> &rtime_names) {
+
+        if (is_comptime_only) {
+            NOT_IMPL_FOR("compile time");
+        } else {
+            // Now we translate the function body
+            if (is_generator) {
+                NOT_IMPL_FOR("generators");
+            } else {
+                std::vector<bacteria::nodes::FunctionArgument> bacteria_args{};
+                size_t rtime_index = 0;
+                for (auto &argument: arguments) {
+                    if (argument.is_type) {
+                        bacteria_args.push_back(bacteria::nodes::FunctionArgument{
+                                argument.type->get_cached_type(),
+                                rtime_names[rtime_index++],
+                        });
+                    }
+                }
+                auto node = (new bacteria::nodes::Function{body_ptr->location, mangled_name, bacteria_args,
+                                                           returnType->get_cached_type()})->get();
+                rctx->local_reciever = dynamic_cast<bacteria::BacteriaReciever *>(node.get());
+                cctx->globalContext->global_reciever->recieve(std::move(node));
+            }
+            translate_function_body(rctx, std::move(body_ptr));
+        }
+    }
+
     ConcreteFunction::ConcreteFunction(std::string path, const std::vector<PassedFunctionArgument> &arguments,
-                                       Type *returnType, bool comptimeOnly, ComptimeContext *cctx,
-                                       RuntimeContext *rctx, bool external) {
+                                       Type *returnType, bool comptimeOnly, bool external) {
         // Comptime argument typenames to the name mangler get passed like such
         // TYPENAME$VALUE
+        is_comptime_only = comptimeOnly;
+        this->returnType = returnType;
+        returned_value = nullptr;
+        if (comptimeOnly) {
+            mangled_name = "";
+            NOT_IMPL_FOR("compile time");
+        } else {
+            // Time to do a lot of stuff just to mangle the name
+            std::vector<std::string> args;
+            for (auto &argument: arguments) {
+                if (argument.is_type) {
+                    args.push_back(argument.type->to_string());
+                } else {
+                    args.push_back(argument.type->to_string() + '$' + argument.value->to_string());
+                }
+            }
+            mangled_name = mangle(std::move(path), args, returnType->to_string(), external);
+        }
+        this->arguments = std::move(arguments);
     }
 }

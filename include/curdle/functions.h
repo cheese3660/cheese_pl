@@ -9,6 +9,7 @@
 #include "memory/garbage_collection.h"
 
 #include "comptime.h"
+#include "runtime.h"
 #include "parser/parser.h"
 
 #include <string>
@@ -18,6 +19,7 @@
 namespace cheese::curdle {
     using namespace cheese::memory::garbage_collection;
     struct ComptimeContext;
+    struct RuntimeContext;
 
     struct FunctionTemplateArgument {
         gcref<Type> type;
@@ -51,14 +53,16 @@ namespace cheese::curdle {
 
         bool is_comptime_only;
         ComptimeValue *returned_value; // If this is void then fun
-
         ConcreteFunction(std::string path, const std::vector<PassedFunctionArgument> &arguments, Type *returnType,
-                         bool comptimeOnly, ComptimeContext *cctx, RuntimeContext *rctx, bool external);
+                         bool comptimeOnly, bool external);
+
+        void generate_code(ComptimeContext *cctx, RuntimeContext *rctx, bool external,
+                           parser::NodePtr body_ptr, bool is_generator, const std::vector<std::string> &rtime_names);
     };
 
     struct FunctionTemplate : managed_object {
         FunctionTemplate(ComptimeContext *pContext, std::shared_ptr<parser::Node> sharedPtr);
-        
+
         ComptimeContext *ctx;
         parser::NodePtr ptr;
 
@@ -87,6 +91,8 @@ namespace cheese::curdle {
     public:
         explicit IncorrectCallException();
 
+    private:
+        [[nodiscard]] const char *what() const noexcept override;
     };
 
 
@@ -97,6 +103,8 @@ namespace cheese::curdle {
         ~FunctionSet() override = default;
 
         std::vector<FunctionTemplate *> templates;
+
+        ConcreteFunction *get(const std::vector<PassedFunctionArgument> &&arguments, Coordinate call_loc);
     };
 }
 #endif //CHEESE_FUNCTIONS_H

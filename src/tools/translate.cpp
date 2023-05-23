@@ -43,7 +43,8 @@ namespace cheese::tools {
                     parsed,
                     curdle::ProjectType::Application
             };
-            curdle::curdle(project);
+            auto node = curdle::curdle(project);
+            std::cout << node->get_textual_representation();
             return 0;
         } catch (std::exception &e) {
             std::cout << e.what() << '\n';

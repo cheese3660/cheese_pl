@@ -22,7 +22,7 @@
 
 
 namespace cheese::curdle {
-
+    struct FunctionSet;
     using namespace memory::garbage_collection;
     namespace fs = std::filesystem;
     // Have to forward declare these for some reason?
@@ -35,6 +35,8 @@ namespace cheese::curdle {
 
         virtual bool is_same_as(ComptimeValue *other) = 0;
 
+        virtual std::string to_string() = 0;
+
         void mark_references() override;
 
         // A comptime value can have many types
@@ -44,11 +46,15 @@ namespace cheese::curdle {
 
     // An integer of any integral type
     struct ComptimeInteger : ComptimeValue {
+        explicit ComptimeInteger(const math::BigInteger &value, Type *ty);
+
         void mark_value() override;
 
         ~ComptimeInteger() override = default;
 
         bool is_same_as(ComptimeValue *other) override;
+
+        std::string to_string() override;
 
         math::BigInteger value;
     };
@@ -61,6 +67,8 @@ namespace cheese::curdle {
         ~ComptimeFloat() override = default;
 
         bool is_same_as(ComptimeValue *other) override;
+
+        std::string to_string() override;
     };
 
     struct ComptimeString : ComptimeValue {
@@ -71,6 +79,8 @@ namespace cheese::curdle {
         ~ComptimeString() override = default;
 
         bool is_same_as(ComptimeValue *other) override;
+
+        std::string to_string() override;
     };
 
     struct ComptimeVoid : ComptimeValue {
@@ -79,6 +89,8 @@ namespace cheese::curdle {
         ~ComptimeVoid() override = default;
 
         bool is_same_as(ComptimeValue *other) override;
+
+        std::string to_string() override;
     };
 
     struct ComptimeComplex : ComptimeValue {
@@ -90,6 +102,8 @@ namespace cheese::curdle {
         ~ComptimeComplex() override = default;
 
         bool is_same_as(ComptimeValue *other) override;
+
+        std::string to_string() override;
     };
 
     struct ComptimeType : ComptimeValue {
@@ -102,6 +116,8 @@ namespace cheese::curdle {
         ~ComptimeType() override = default;
 
         bool is_same_as(ComptimeValue *other) override;
+
+        std::string to_string() override;
     };
 
     //Array/Tuple/Slice
@@ -123,6 +139,21 @@ namespace cheese::curdle {
         ~ComptimeObject() override = default;
 
         bool is_same_as(ComptimeValue *other) override;
+    };
+
+    struct ComptimeFunctionSet : ComptimeValue {
+        FunctionSet *set;
+
+        explicit ComptimeFunctionSet(FunctionSet *set);
+
+        void mark_value() override;
+
+        bool is_same_as(ComptimeValue *other) override;
+
+        std::string to_string() override;
+
+        ~ComptimeFunctionSet() override = default;
+
     };
 
     struct ComptimeVariable : managed_object {
@@ -166,6 +197,13 @@ namespace cheese::curdle {
                                                             project_dir(p->project_dir) {
 
         }
+
+
+        std::optional<gcref<ComptimeValue>> try_exec(parser::Node *node, RuntimeContext *rtime = nullptr);
+
+        std::optional<gcref<ComptimeValue>> get(const std::string &name);
+
+        gcref<ComptimeValue> exec(parser::Node *node, RuntimeContext *rtime = nullptr);
 
         gcref<ComptimeValue> exec(parser::NodePtr node, RuntimeContext *rtime = nullptr);
 

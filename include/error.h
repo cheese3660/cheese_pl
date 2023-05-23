@@ -65,6 +65,9 @@ namespace cheese::error {
         NoEntryPoint,
         MismatchedFunctionCall,
         AmbiguousFunctionCall,
+        InvalidVariableReference,
+        InvalidCondition,
+        InvalidCast,
 
         //General error (thrown for example when multiple previous errors were printed)
         GeneralCompilerError = 9999,

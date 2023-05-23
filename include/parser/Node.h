@@ -7,7 +7,7 @@
 
 #include <cstdint>
 #include <memory>
-#include "thirdparty/json.hpp"
+#include "../../external/json.hpp"
 #include "Coordinate.h"
 #include "math/BigInteger.h"
 #include <optional>

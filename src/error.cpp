@@ -141,6 +141,7 @@ namespace cheese::error {
             write_location(location);
             configuration::error_output_handler(message + "\n");
             point_to(location);
+            io::reset();
         }
         throw CompilerError(location, code, message);
     }
@@ -148,6 +149,7 @@ namespace cheese::error {
     void raise_error(const char* module, std::string message, Coordinate location, ErrorCode code) {
         if (configuration::die_on_first_error) {
             raise_exiting_error(module,message,location,code);
+            return;
         }
         if (configuration::log_errors) {
             write_module(module);
@@ -162,6 +164,7 @@ namespace cheese::error {
     void raise_warning(const char* module, std::string message, Coordinate location, ErrorCode code) {
         if (configuration::warnings_are_errors) {
             raise_error(module, message, location, code);
+            return;
         }
         if (configuration::log_errors) {
             write_module(module);
@@ -170,6 +173,7 @@ namespace cheese::error {
             write_location(location);
             configuration::error_output_handler(message + "\n");
             point_to(location);
+            io::reset();
         }
     }
 
@@ -180,6 +184,7 @@ namespace cheese::error {
             write_location(location);
             configuration::error_output_handler(message + "\n");
             point_to(location);
+            io::reset();
         }
     }
 }

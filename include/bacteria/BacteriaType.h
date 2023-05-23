@@ -17,7 +17,9 @@ namespace cheese::bacteria {
             Void,
             Noreturn,
             UnsignedInteger,
+            UnsignedSize,
             SignedInteger,
+            SignedSize,
             Float32,
             Float64,
             Complex32,
@@ -27,12 +29,15 @@ namespace cheese::bacteria {
             Reference,
             Pointer,
             Object
-        } type;
-        std::uint16_t integer_size;
-        std::shared_ptr<BacteriaType> subtype;
-        std::vector<std::size_t> array_dimensions;
-        std::vector<std::shared_ptr<BacteriaType>> child_types; //Used for structures, all pointers to objects are replaced with opaque pointers
+        } type = Type::Void;
+        std::uint16_t integer_size = 0;
+        std::shared_ptr<BacteriaType> subtype = {};
+        std::vector<std::size_t> array_dimensions = {};
+        std::vector<std::shared_ptr<BacteriaType>> child_types = {}; //Used for structures, all pointers to objects are replaced with opaque pointers
+        std::string to_string();
+
     };
+
     typedef std::shared_ptr<BacteriaType> TypePtr;
     typedef std::vector<TypePtr> TypeList;
     typedef std::map<std::string, TypePtr> TypeDict;

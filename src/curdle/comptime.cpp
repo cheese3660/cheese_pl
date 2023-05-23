@@ -6,6 +6,8 @@
 #include "NotImplementedException.h"
 #include "curdle/Type.h"
 #include "typeinfo"
+#include "stringutil.h"
+#include <iostream>
 
 
 namespace cheese::curdle {
@@ -44,6 +46,14 @@ namespace cheese::curdle {
         }
     }
 
+    std::string ComptimeInteger::to_string() {
+        return static_cast<std::string>(value);
+    }
+
+    ComptimeInteger::ComptimeInteger(const math::BigInteger &value, Type *ty) : value(value) {
+        type = ty;
+    }
+
 
     void ComptimeString::mark_value() {
 
@@ -56,6 +66,10 @@ namespace cheese::curdle {
         } else {
             return false;
         }
+    }
+
+    std::string ComptimeString::to_string() {
+        return '"' + stringutil::escape(value) + '"';
     }
 
     void ComptimeVoid::mark_value() {
@@ -71,6 +85,10 @@ namespace cheese::curdle {
         }
     }
 
+    std::string ComptimeVoid::to_string() {
+        return "void";
+    }
+
     void ComptimeFloat::mark_value() {
 
     }
@@ -84,6 +102,10 @@ namespace cheese::curdle {
         }
     }
 
+    std::string ComptimeFloat::to_string() {
+        return std::to_string(value);
+    }
+
     void ComptimeComplex::mark_value() {
 
     }
@@ -95,6 +117,10 @@ namespace cheese::curdle {
         } else {
             return false;
         }
+    }
+
+    std::string ComptimeComplex::to_string() {
+        return std::to_string(a) + "+" + std::to_string(b) + "i";
     }
 
     void ComptimeType::mark_value() {
@@ -112,6 +138,10 @@ namespace cheese::curdle {
         } else {
             return false;
         }
+    }
+
+    std::string ComptimeType::to_string() {
+        return typeValue->to_string();
     }
 
     void ComptimeArray::mark_value() {
@@ -150,7 +180,27 @@ namespace cheese::curdle {
         } else {
             return false;
         }
+        return false;
     }
+
+
+    void ComptimeFunctionSet::mark_value() {
+        set->mark();
+    }
+
+    bool ComptimeFunctionSet::is_same_as(ComptimeValue *other) {
+        if (auto as_set = dynamic_cast<ComptimeFunctionSet *>(other); as_set) {
+            return as_set->set == set;
+        } else {
+            return false;
+        }
+    }
+
+    std::string ComptimeFunctionSet::to_string() {
+        return std::to_string((size_t) set);
+    }
+
+    ComptimeFunctionSet::ComptimeFunctionSet(FunctionSet *set) : set(set) {}
 
     template<typename T>
     requires std::is_base_of_v<Type, T>
@@ -160,8 +210,15 @@ namespace cheese::curdle {
     }
 
     gcref<ComptimeValue> ComptimeContext::exec(parser::NodePtr node, RuntimeContext *rtime) {
-#define WHEN_NODE_IS(type, name) if (auto name = dynamic_cast<type*>(ptr); name)
-        auto ptr = node.get();
+        return exec(node.get(), rtime);
+    }
+
+    gcref<ComptimeValue> ComptimeContext::exec(parser::nodes::Comptime *ctime, RuntimeContext *rtime) {
+        NOT_IMPL;
+    }
+
+    gcref<ComptimeValue> ComptimeContext::exec(parser::Node *node, RuntimeContext *rtime) {
+#define WHEN_NODE_IS(type, name) if (auto name = dynamic_cast<type*>(node); name)
         auto &gc = globalContext->gc;
         WHEN_NODE_IS(parser::nodes::SignedIntType, pSignedIntType) {
             return create_from_type(gc, IntegerType::get(gc, true, pSignedIntType->size));
@@ -172,11 +229,81 @@ namespace cheese::curdle {
         WHEN_NODE_IS(parser::nodes::Void, pVoid) {
             return create_from_type(gc, VoidType::get(gc));
         }
-        NOT_IMPL_FOR(typeid(*ptr).name());
+        WHEN_NODE_IS(parser::nodes::ValueReference, pValueReference) {
+            // Do the same as below but throw errors on an invalid value reference
+            auto gotten = get(pValueReference->name);
+            if (gotten.has_value()) {
+                return std::move(gotten.value());
+            } else {
+                globalContext->raise("referencing a non-extant variable", node->location,
+                                     error::ErrorCode::InvalidVariableReference);
+            }
+        }
+        NOT_IMPL_FOR(typeid(*node).name());
 #undef WHEN_NODE_IS
     }
 
-    gcref<ComptimeValue> ComptimeContext::exec(parser::nodes::Comptime *ctime, RuntimeContext *rtime) {
-        NOT_IMPL;
+    std::optional<gcref<ComptimeValue>> ComptimeContext::try_exec(parser::Node *node, RuntimeContext *rtime) {
+#define WHEN_NODE_IS(type, name) if (auto name = dynamic_cast<type*>(node); name)
+        auto &gc = globalContext->gc;
+        WHEN_NODE_IS(parser::nodes::SignedIntType, pSignedIntType) {
+            return create_from_type(gc, IntegerType::get(gc, true, pSignedIntType->size));
+        }
+        WHEN_NODE_IS(parser::nodes::UnsignedIntType, pUnsignedIntType) {
+            return create_from_type(gc, IntegerType::get(gc, false, pUnsignedIntType->size));
+        }
+        WHEN_NODE_IS(parser::nodes::Void, pVoid) {
+            return create_from_type(gc, VoidType::get(gc));
+        }
+        WHEN_NODE_IS(parser::nodes::ValueReference, pValueReference) {
+            return get(pValueReference->name);
+        }
+        WHEN_NODE_IS(parser::nodes::IntegerLiteral, pIntegerLiteral) {
+            return gc.gcnew<ComptimeInteger>(pIntegerLiteral->value, ComptimeIntegerType::get(gc));
+        }
+        WHEN_NODE_IS(parser::nodes::EqualTo, pEqualTo) {
+            auto lhs = try_exec(pEqualTo->lhs.get(), rtime);
+            if (!lhs.has_value()) return std::optional<gcref<ComptimeValue>>{};
+            auto rhs = try_exec(pEqualTo->rhs.get(), rtime);
+            if (!rhs.has_value()) return std::optional<gcref<ComptimeValue>>{};
+            auto lhsv = std::move(lhs.value());
+            auto rhsv = std::move(rhs.value());
+            // Now we must define a few functions
+            NOT_IMPL_FOR(
+                    "Equality comparisons"); // This will be "fun" to mandate all these functions in the comptime value structure
+        }
+        WHEN_NODE_IS(parser::nodes::Subtraction, pSubtraction) {
+            auto lhs = try_exec(pSubtraction->lhs.get(), rtime);
+            if (!lhs.has_value()) return std::optional<gcref<ComptimeValue>>{};
+            auto rhs = try_exec(pSubtraction->rhs.get(), rtime);
+            if (!rhs.has_value()) return std::optional<gcref<ComptimeValue>>{};
+            auto lhsv = std::move(lhs.value());
+            auto rhsv = std::move(rhs.value());
+            // Now we must define a few functions
+            NOT_IMPL_FOR(
+                    "Subtraction"); // This will be "fun" to mandate all these functions in the comptime value structure
+        }
+        NOT_IMPL_FOR(typeid(*node).name());
+#undef WHEN_NODE_IS
+    }
+
+    std::optional<gcref<ComptimeValue>> ComptimeContext::get(const std::string &name) {
+        if (comptimeVariables.contains(name)) {
+            return gcref<ComptimeValue>(globalContext->gc, comptimeVariables[name]->value);
+        }
+        if (currentStructure) {
+            currentStructure->resolve_by_name(name);
+            if (currentStructure->comptime_variables.contains(name)) {
+                return gcref<ComptimeValue>(globalContext->gc, currentStructure->comptime_variables[name].value);
+            }
+            if (currentStructure->function_sets.contains(name)) {
+                // At some point we have to combine function sets...
+                return globalContext->gc.gcnew<ComptimeFunctionSet>(currentStructure->function_sets[name]);
+            }
+        }
+        if (parent) {
+            return parent->get(name);
+        }
+        return {};
     }
 }

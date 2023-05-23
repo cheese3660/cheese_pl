@@ -52,11 +52,18 @@ namespace cheese::curdle {
 
         void resolve_lazy(LazyValue *&lazy);
 
+        void resolve_by_name(const std::string &name);
+
+
         void search_entry();
 
         Comptimeness get_comptimeness() override;
 
         int32_t compare(Type *other) override;
+
+        std::string to_string() override;
+
+        Type *peer(Type *other, memory::garbage_collection::garbage_collector &gc) override;
     };
 }
 

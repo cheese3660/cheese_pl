@@ -8,7 +8,7 @@
 #include <functional>
 #include <string>
 #include <optional>
-#include "thirdparty/json.hpp"
+#include "../../external/json.hpp"
 
 namespace cheese::tests {
 
