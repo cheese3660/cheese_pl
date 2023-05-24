@@ -8,6 +8,7 @@
 #include <optional>
 #include <utility>
 #include "bacteria/BacteriaNode.h"
+#include <sstream>
 
 namespace cheese::bacteria::nodes {
     struct Return : BacteriaNode {

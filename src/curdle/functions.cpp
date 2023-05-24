@@ -184,8 +184,8 @@ namespace cheese::curdle {
                 if (auto t = dynamic_cast<ComptimeType *>(value.value); t) {
                     auto name = as_argument->name.value_or("$" + std::to_string(unnamed_arg_index++));
                     if (auto as_any = dynamic_cast<AnyType *>(t->typeValue); as_any) {
-                        if (any_zero) {
-                            closeness += 65537;
+                        if (!any_zero) {
+                            closeness += 131072;
                         }
                         if ((force_comptime || as_argument->comptime) && arguments[i].is_type) {
                             return no_match;
@@ -345,7 +345,7 @@ namespace cheese::curdle {
         if (ret_type->get_comptimeness() == Comptimeness::Comptime) {
             comptime_only = true;
         }
-        rctx->functionReturnType = nullptr;
+        rctx->functionReturnType = ret_type;
         std::vector<std::string> rtime_names;
         for (auto &argument: info.arguments) {
             if (argument.comptimeness == Comptimeness::Runtime) {
@@ -479,7 +479,7 @@ namespace cheese::curdle {
                     args.push_back(argument.type->to_string() + '$' + argument.value->to_string());
                 }
             }
-            mangled_name = mangle(std::move(path), args, returnType->to_string(), external);
+            mangled_name = mangle(std::move(path), args, external);
         }
         this->arguments = std::move(arguments);
     }

@@ -62,4 +62,10 @@ namespace cheese::bacteria {
                 return "isize";
         }
     }
+
+    BacteriaType::BacteriaType(BacteriaType::Type type, uint16_t integerSize,
+                               const std::shared_ptr<BacteriaType> &subtype,
+                               const std::vector<std::size_t> &arrayDimensions,
+                               const std::vector<std::shared_ptr<BacteriaType>> &childTypes) : type(type), integer_size(
+            integerSize), subtype(subtype), array_dimensions(arrayDimensions), child_types(childTypes) {}
 }

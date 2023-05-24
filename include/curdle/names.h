@@ -10,7 +10,7 @@
 
 namespace cheese::curdle {
     std::string
-    mangle(std::string path, const std::vector<std::string> &typenames, std::string returnTypeName, bool isExtern);
+    mangle(std::string path, const std::vector<std::string> &typenames, bool isExtern);
 
     std::string mangle(std::string variable_name, bool isExtern);
 

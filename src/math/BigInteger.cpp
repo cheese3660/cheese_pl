@@ -244,7 +244,6 @@ namespace cheese::math {
             if (should_break) break;
             n -= 1;
         }
-        std::cout << "remainder: " << static_cast<int32_t>(rem) << '\n';
         rem.sign = sign != other.sign;
         rem.normalize_size();
         return rem;
@@ -400,7 +399,11 @@ namespace cheese::math {
         while (word >= words.size()) {
             words.push_back(0);
         }
-        words[word] &= ~((value ? 0 : 1) << sub);
+        if (value) {
+            words[word] |= 1 << sub;
+        } else {
+            words[word] &= ~(1 << sub);
+        }
     }
 
     bool BigInteger::get(std::size_t bit) const {
@@ -414,6 +417,7 @@ namespace cheese::math {
         if (zero()) return "0";
         std::string result = "";
         BigInteger copy = *this;
+        copy.sign = false;
         while (!copy.zero()) {
             char mod = copy % 10;
             copy /= 10;

@@ -11,6 +11,7 @@
 #include <string>
 #include <array>
 #include <cmath>
+#include <iostream>
 
 namespace cheese::math {
     //Define a concept for the cast operator and math operators
@@ -87,12 +88,20 @@ namespace cheese::math {
 
         // Used in the multiplication algorithm
         BigInteger(const uint64_t base, const size_t shift) {
-            for (size_t i = 0; i < shift; i++) {
+            for (size_t i = 0; i < shift >> 5; i++) {
                 words.push_back(0);
             }
-            words.push_back(base & 0xfffffffful);
-            words.push_back(base >> 32);
+            auto remainder = shift & 0x1f;
+            uint32_t low = (base << remainder) & 0xfffffffful;
+            uint32_t med = (base << remainder) >> 32;
+            uint32_t high = ((base >> 32) << remainder) >> 32;
+            words.push_back(low);
+            words.push_back(med);
+            words.push_back(high);
             normalize_size();
+//            words.push_back((base << remainder) & 0xfffffffful);
+//            words.push_back(((static_cast<uint64_t>(base)) << remainder) >> 32);
+//            normalize_size();
         }
 
         BigInteger twos_complement(const std::size_t normalized_size, bool negate = false) const;
@@ -245,6 +254,7 @@ namespace cheese::math {
         BigInteger &operator=(const BigInteger &other) {
             if (this == &other) return *this;
             words = other.words;
+            sign = other.sign;
             return *this;
         }
 

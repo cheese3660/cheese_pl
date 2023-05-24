@@ -34,6 +34,11 @@ namespace cheese::bacteria {
         std::shared_ptr<BacteriaType> subtype = {};
         std::vector<std::size_t> array_dimensions = {};
         std::vector<std::shared_ptr<BacteriaType>> child_types = {}; //Used for structures, all pointers to objects are replaced with opaque pointers
+        BacteriaType(Type type = Type::Void, uint16_t integerSize = 0,
+                     const std::shared_ptr<BacteriaType> &subtype = {},
+                     const std::vector<std::size_t> &arrayDimensions = {},
+                     const std::vector<std::shared_ptr<BacteriaType>> &childTypes = {});
+
         std::string to_string();
 
     };

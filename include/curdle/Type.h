@@ -168,6 +168,29 @@ namespace cheese::curdle {
         VoidType() = default;
     };
 
+    struct NoReturnType : Type {
+        friend class cheese::memory::garbage_collection::garbage_collector;
+
+        bacteria::TypePtr get_bacteria_type() override;
+
+        void mark_type_references() override;
+
+        ~NoReturnType() override = default;
+
+        Comptimeness get_comptimeness() override;
+
+        int32_t compare(Type *other) override;
+
+        std::string to_string() override;
+
+        Type *peer(Type *other, memory::garbage_collection::garbage_collector &gc) override;
+
+        static NoReturnType *get(memory::garbage_collection::garbage_collector &gc);
+
+    private:
+        NoReturnType() = default;
+    };
+
     struct AnyType : Type {
         friend class cheese::memory::garbage_collection::garbage_collector;
 
@@ -239,11 +262,34 @@ namespace cheese::curdle {
         FunctionTemplateType() = default;
     };
 
+    struct BuiltinReferenceType : Type {
+        friend class cheese::memory::garbage_collection::garbage_collector;
+
+        bacteria::TypePtr get_bacteria_type() override;
+
+        void mark_type_references() override;
+
+        ~BuiltinReferenceType() override = default;
+
+        static BuiltinReferenceType *get(memory::garbage_collection::garbage_collector &gc);
+
+        Comptimeness get_comptimeness() override;
+
+        int32_t compare(Type *other) override;
+
+        std::string to_string() override;
+
+        Type *peer(Type *other, memory::garbage_collection::garbage_collector &gc) override;
+
+    private:
+        BuiltinReferenceType() = default;
+    };
+
     class InvalidPeerTypeException : std::exception {
     public:
         ~InvalidPeerTypeException() noexcept override = default;
 
-        const char *what() const override;
+        const char *what() const noexcept override;
 
     };
 

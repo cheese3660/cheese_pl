@@ -95,6 +95,7 @@ namespace cheese::memory::garbage_collection {
 
         gcref(gcref<T> &&other) noexcept: gc(other.gc) {
             value = other.value;
+            other.value = nullptr;
         }
 
         template<typename V>
@@ -144,7 +145,7 @@ namespace cheese::memory::garbage_collection {
     requires std::is_base_of_v<managed_object, T>
     gcref<T> garbage_collector::gcnew(Args &&... args) {
         auto obj = new T(std::forward<Args>(args)...);
-        std::cout << "Creating a: " << typeid(*obj).name() << "\n";
+//        std::cout << "Creating a: " << typeid(*obj).name() << "\n";
         managed_objects.push_back(obj);
         auto ref = gcref{*this, obj};
         if (++allocations_since_last_sweep >= frequency) {

@@ -97,7 +97,7 @@ add_executable(
         include/bacteria/BacteriaReciever.h
         include/bacteria/nodes/reciever_nodes.h
         include/curdle/runtime.h
-        src/curdle/runtime.cpp src/curdle/runtime.cpp include/curdle/names.h src/curdle/names.cpp include/stringutil.h src/stringutil.cpp src/bacteria/BacteriaType.cpp include/bacteria/nodes/expression_nodes.h)
+        src/curdle/runtime.cpp src/curdle/runtime.cpp include/curdle/names.h src/curdle/names.cpp include/stringutil.h src/stringutil.cpp src/bacteria/BacteriaType.cpp include/bacteria/nodes/expression_nodes.h include/curdle/builtin.h src/curdle/builtin.cpp src/tests/math_tests.cpp)
 if (UNIX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++ -Wall")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++ -lc++abi")

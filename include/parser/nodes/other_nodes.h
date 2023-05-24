@@ -79,7 +79,7 @@ namespace cheese::parser::nodes {
 
     BINARY_NODE(Reassignment, "reassign")
 
-    BINARY_NODE(Assingment, "assign")
+    BINARY_NODE(Assignment, "assign")
 
     BINARY_NODE(SumAssignment, "add_assign")
 

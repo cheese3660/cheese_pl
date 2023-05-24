@@ -68,6 +68,9 @@ namespace cheese::error {
         InvalidVariableReference,
         InvalidCondition,
         InvalidCast,
+        BadBuiltinCall,
+        UnusedValue,
+        UnexpectedReturn,
 
         //General error (thrown for example when multiple previous errors were printed)
         GeneralCompilerError = 9999,

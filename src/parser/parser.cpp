@@ -1012,7 +1012,7 @@ namespace cheese::parser {
             case Redefine:
                 RETURN_NODE(Reassignment)
             case Assign:
-                RETURN_NODE(Assingment)
+                RETURN_NODE(Assignment)
             case AddAssign:
                 RETURN_NODE(SumAssignment)
             case SubAssign:

@@ -39,7 +39,9 @@ namespace cheese::curdle {
 
     // This gets a type in the purest way, without the tainting of "Local" context
     Type *RuntimeContext::get_type(parser::Node *node) {
-        NOT_IMPL;
+        auto &gc = comptime->globalContext->gc;
+        auto empty_ctx = gc.gcnew<LocalContext>(this);
+        return empty_ctx->get_type(node);
     }
 
     void LocalContext::mark_references() {
@@ -135,6 +137,21 @@ namespace cheese::curdle {
         WHEN_NODE_IS(parser::nodes::TupleCall, pTupleCall) {
             // Now time to do a bunch of work to get the type of *one* function call
             return get_function_call_type(this, pTupleCall);
+        }
+        WHEN_NODE_IS(parser::nodes::Cast, pCast) {
+            try {
+                auto ctimeValue = runtime->comptime->exec(pCast->rhs, runtime);
+                if (auto as_type = dynamic_cast<ComptimeType *>(ctimeValue.get()); as_type) {
+                    return as_type->typeValue;
+                } else {
+                    throw InvalidCastError("Must cast to a type");
+                }
+            } catch (const NotComptimeError &) {
+                throw InvalidCastError("Must cast to a comptime known type");
+            }
+        }
+        WHEN_NODE_IS(parser::nodes::Return, pReturn) {
+            return NoReturnType::get(gc);
         }
         NOT_IMPL_FOR(typeid(*node).name());
 #undef WHEN_NODE_IS

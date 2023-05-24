@@ -117,7 +117,7 @@ namespace cheese::curdle {
             return (size - other_i->size);
         }
         if (auto other_c = dynamic_cast<ComptimeIntegerType *>(other); other_c) {
-            return 131071 - size; // Essentially the biggest integer form of a function will always match comptime_int
+            return 131071 - ((size * 2) + (sign ? 1 : 0));
         }
         return -1;
     }
@@ -363,6 +363,81 @@ namespace cheese::curdle {
         return nullptr;
     }
 
+    BuiltinReferenceType *brt_instance;
+
+    bacteria::TypePtr BuiltinReferenceType::get_bacteria_type() {
+        return cheese::bacteria::TypePtr();
+    }
+
+    void BuiltinReferenceType::mark_type_references() {
+
+    }
+
+    BuiltinReferenceType *BuiltinReferenceType::get(garbage_collector &gc) {
+        if (brt_instance == nullptr) {
+            auto ref = gc.gcnew<BuiltinReferenceType>();
+            gc.add_root_object(ref);
+            brt_instance = ref;
+        }
+        return brt_instance;
+    }
+
+
+    Comptimeness BuiltinReferenceType::get_comptimeness() {
+        return Comptimeness::Comptime;
+    }
+
+    int32_t BuiltinReferenceType::compare(Type *other) {
+        if (other == this) return 0;
+        return -1;
+    }
+
+    std::string BuiltinReferenceType::to_string() {
+        return "$BuiltinReference";
+    }
+
+    Type *BuiltinReferenceType::peer(Type *other, garbage_collector &gc) {
+        if (other == this) return this;
+        PEER_TYPE_CATCH_ANY();
+        return nullptr;
+    }
+
+    NoReturnType *nrt_instance;
+
+    NoReturnType *NoReturnType::get(garbage_collector &gc) {
+        if (nrt_instance == nullptr) {
+            auto ref = gc.gcnew<NoReturnType>();
+            gc.add_root_object(ref);
+            nrt_instance = ref;
+        }
+        return nrt_instance;
+    }
+
+    bacteria::TypePtr NoReturnType::get_bacteria_type() {
+        return cheese::bacteria::TypePtr();
+    }
+
+    void NoReturnType::mark_type_references() {
+
+    }
+
+    Comptimeness NoReturnType::get_comptimeness() {
+        return Comptimeness::Comptime;
+    }
+
+    int32_t NoReturnType::compare(Type *other) {
+        return 0; // No return can "cast" to anything
+    }
+
+    std::string NoReturnType::to_string() {
+        return "noreturn";
+    }
+
+    Type *NoReturnType::peer(Type *other, garbage_collector &gc) {
+        if (other == this) return this;
+        PEER_TYPE_CATCH_ANY();
+        return nullptr;
+    }
 
     Type *peer_type(std::vector<Type *> types, garbage_collector &gc) {
         auto base_type = types[0];
@@ -384,7 +459,7 @@ namespace cheese::curdle {
         return false;
     }
 
-    const char *InvalidPeerTypeException::what() const {
+    const char *InvalidPeerTypeException::what() const noexcept {
         return "Invalid peer type!";
     }
 

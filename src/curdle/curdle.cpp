@@ -382,6 +382,7 @@ namespace cheese::curdle {
 
     bacteria::BacteriaPtr translate_expression(LocalContext *lctx, parser::NodePtr expr) {
 #define WHEN_EXPR_IS(type, name) if (auto name = dynamic_cast<type*>(true_expr); name)
+#define NOP() return std::make_unique<bacteria::nodes::Nop>(expr->location)
         auto rctx = lctx->runtime;
         auto cctx = rctx->comptime;
         auto gctx = cctx->globalContext;
@@ -440,6 +441,72 @@ namespace cheese::curdle {
             return std::make_unique<bacteria::nodes::SubtractNode>(pSubtraction->location, std::move(lhs_expr),
                                                                    std::move(rhs_expr));
         }
+        WHEN_EXPR_IS(parser::nodes::Cast, pCast) {
+            try {
+                auto rhs = cctx->exec(pCast->rhs, rctx);
+                // We aren't going to make sure things are semantically correct *just* yet
+                if (auto as_type = dynamic_cast<ComptimeType *>(rhs.get()); as_type) {
+                    auto cast_context = gc.gcnew<LocalContext>(lctx, as_type->typeValue);
+                    auto lhs_type = cast_context->get_type(pCast->lhs.get());
+                    auto compare = as_type->typeValue->compare(lhs_type);
+                    if (compare == 0) {
+                        return translate_expression(cast_context, pCast->lhs);
+                    } else if (compare > 0) {
+                        return std::make_unique<bacteria::nodes::CastNode>(pCast->location,
+                                                                           translate_expression(cast_context,
+                                                                                                pCast->lhs),
+                                                                           as_type->typeValue->get_cached_type());
+                    } else {
+                        gctx->raise("Invalid Cast: Cannot cast " + lhs_type->to_string() + " to " +
+                                    as_type->typeValue->to_string(), pCast->location, error::ErrorCode::InvalidCast);
+                        NOP();
+                    }
+                } else {
+                    gctx->raise("Invalid Cast: Casts must be to types, not: " + rhs->type->to_string(),
+                                pCast->rhs->location, error::ErrorCode::InvalidCast);
+                    NOP();
+                }
+            } catch (const NotComptimeError &e) {
+                gctx->raise("Invalid Cast: Attempting to cast to a non comptime known type", pCast->rhs->location,
+                            error::ErrorCode::InvalidCast);
+                NOP();
+            }
+        }
+        WHEN_EXPR_IS(parser::nodes::Return, pReturn) {
+            auto target_type = lctx->runtime->functionReturnType;
+            if (dynamic_cast<NoReturnType *>(target_type)) {
+                gctx->raise("Unexpected Return: Return expression found in function marked noreturn", pReturn->location,
+                            error::ErrorCode::UnexpectedReturn);
+                NOP();
+            }
+            if (dynamic_cast<VoidType *>(target_type)) {
+                gctx->raise(
+                        "Unexpected Return: Found value returning return expression in function marked with the return type 'void'",
+                        pReturn->location, error::ErrorCode::UnexpectedReturn);
+                NOP();
+            }
+            auto tctx = gc.gcnew<LocalContext>(rctx, target_type);
+            auto child_type = tctx->get_type(pReturn->child.get());
+            auto compare = target_type->compare(child_type);
+            std::cout << compare << '\n';
+            if (compare == 0) {
+                return std::make_unique<bacteria::nodes::Return>(pReturn->location,
+                                                                 translate_expression(tctx, pReturn->child));
+            } else if (compare > 0) {
+                return std::make_unique<bacteria::nodes::Return>(pReturn->location,
+                                                                 std::make_unique<bacteria::nodes::CastNode>(
+                                                                         pReturn->location,
+                                                                         translate_expression(tctx, pReturn->child),
+                                                                         target_type->get_cached_type()
+                                                                 ));
+            } else {
+                gctx->raise("Invalid Cast: Attempting to cast value of type " + child_type->to_string() +
+                            " to a value of type " + target_type->to_string() + " implicitly in return statement",
+                            pReturn->child->location, error::ErrorCode::InvalidCast);
+                NOP();
+            }
+        }
+#undef NOP
 #undef WHEN_EXPR_IS
         NOT_IMPL_FOR(typeid(*true_expr).name());
     }
@@ -447,8 +514,32 @@ namespace cheese::curdle {
     // Translate statement needs only a runtime context as there is no "expected type"
     void translate_statement(RuntimeContext *rctx, parser::NodePtr stmnt) {
         auto true_statement = stmnt.get();
+#define WHEN_STATEMENT_IS(type, name) if (auto name = dynamic_cast<type*>(true_statement); name)
 
-        NOT_IMPL_FOR(typeid(*true_statement).name());
+        WHEN_STATEMENT_IS(parser::nodes::Assignment, pAssignment) {
+            auto assignee = pAssignment->lhs;
+            // Now we check if this is a discard statement as that is the most important at the moment.
+            if (dynamic_cast<parser::nodes::Underscore *>(assignee.get())) {
+                rctx->local_reciever->recieve(
+                        translate_expression(rctx->comptime->globalContext->gc.gcnew<LocalContext>(rctx).get(),
+                                             pAssignment->rhs));
+                return;
+            }
+        }
+
+#undef WHEN_STATEMENT_IS
+
+        // Default implementation of a translate_statement for when its an expression
+        auto ret_ty = rctx->get_type(stmnt.get());
+        if (!(dynamic_cast<VoidType *>(ret_ty) || dynamic_cast<NoReturnType *>(ret_ty))) {
+            rctx->comptime->globalContext->raise("Unused Value: Discarding value of type " + ret_ty->to_string() +
+                                                 ", use '_ = ...' to explicitly disregard a value", stmnt->location,
+                                                 error::ErrorCode::UnusedValue);
+            return;
+        }
+        rctx->local_reciever->recieve(
+                translate_expression(rctx->comptime->globalContext->gc.gcnew<LocalContext>(rctx).get(), stmnt));
+//        NOT_IMPL_FOR(typeid(*true_statement).name());
     }
 
     void translate_block(RuntimeContext *rctx, parser::nodes::Block *block) {
@@ -465,9 +556,15 @@ namespace cheese::curdle {
         } else {
             // We translate this as a return instruction + what ever is on the other side!
             auto lctx = rctx->comptime->globalContext->gc.gcnew<LocalContext>(rctx, rctx->functionReturnType);
-            rctx->local_reciever->recieve((new bacteria::nodes::Return(functionBody->location,
-                                                                       translate_expression(lctx,
-                                                                                            functionBody)))->get());
+            if (auto as_return = dynamic_cast<parser::nodes::Return *>(true_body); as_return) {
+                rctx->local_reciever->recieve((new bacteria::nodes::Return(functionBody->location,
+                                                                           translate_expression(lctx,
+                                                                                                as_return->child)))->get());
+            } else {
+                rctx->local_reciever->recieve((new bacteria::nodes::Return(functionBody->location,
+                                                                           translate_expression(lctx,
+                                                                                                functionBody)))->get());
+            }
         }
     }
 

@@ -4,7 +4,6 @@
 #include "curdle/names.h"
 #include <map>
 #include <sstream>
-#include <iostream>
 
 namespace cheese::curdle {
     static std::map<char, char> translations{};
@@ -60,8 +59,7 @@ namespace cheese::curdle {
     }
 
     std::string
-    mangle(std::string path, const std::vector<std::string> &typenames, std::string returnTypeName, bool isExtern) {
-        std::cout << "Mangling: " << path << '\n';
+    mangle(std::string path, const std::vector<std::string> &typenames, bool isExtern) {
         define();
         if (isExtern) {
             return path;
@@ -75,10 +73,6 @@ namespace cheese::curdle {
                 for (char c: tn) {
                     ss << translate(c);
                 }
-            }
-            ss << "_r";
-            for (char c: returnTypeName) {
-                ss << translate(c);
             }
             return ss.str();
         }

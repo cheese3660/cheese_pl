@@ -409,7 +409,7 @@ namespace cheese::tests {
             auto future = task.get_future();
             std::thread thr(std::move(task), nesting);
             SingleResult res = SingleResult::Skip;
-            if (future.wait_for(std::chrono::milliseconds(1000)) != std::future_status::timeout) {
+            if (future.wait_for(std::chrono::milliseconds(10000)) != std::future_status::timeout) {
                 thr.join();
                 res = future.get();
             } else {

@@ -32,7 +32,7 @@ namespace cheese::memory::garbage_collection {
                 continue;
             }
             if (!object->marked) {
-                std::cout << "Destroying a: " << typeid(*object).name() << '\n';
+//                std::cout << "Destroying a: " << typeid(*object).name() << '\n';
                 num_deleted++;
                 delete object;
                 object = nullptr;
@@ -78,14 +78,14 @@ namespace cheese::memory::garbage_collection {
     garbage_collector::~garbage_collector() {
         // Let's do a quick dump on what everything is
         int i = 0;
-        std::cout << "Clearing garbage collector, dumping all remaining objects\n";
+//        std::cout << "Clearing garbage collector, dumping all remaining objects\n";
         for (auto ptr: managed_objects) {
 
             if (ptr != nullptr) {
-                std::cout << i << ": " << typeid(*ptr).name() << '\n';
+//                std::cout << i << ": " << typeid(*ptr).name() << '\n';
                 delete ptr;
             } else {
-                std::cout << i << ": empty\n";
+//                std::cout << i << ": empty\n";
             }
             i++;
         }

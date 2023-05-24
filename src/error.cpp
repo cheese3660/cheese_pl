@@ -158,6 +158,7 @@ namespace cheese::error {
             write_location(location);
             configuration::error_output_handler(message + "\n");
             point_to(location);
+            io::setForegroundColor(io::Color::White);
         }
     }
 
@@ -173,7 +174,7 @@ namespace cheese::error {
             write_location(location);
             configuration::error_output_handler(message + "\n");
             point_to(location);
-            io::reset();
+        io::setForegroundColor(io::Color::White);
         }
     }
 
@@ -184,7 +185,7 @@ namespace cheese::error {
             write_location(location);
             configuration::error_output_handler(message + "\n");
             point_to(location);
-            io::reset();
+            io::setForegroundColor(io::Color::White);
         }
     }
 }

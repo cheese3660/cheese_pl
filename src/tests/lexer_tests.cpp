@@ -7,7 +7,7 @@
 #include "error.h"
 #include "tests/tests.h"
 namespace cheese::tests::lexer_tests {
-    TEST_SECTION("lexer tests",0)
+    TEST_SECTION("lexer tests",1)
         TEST_SUBSECTION("token representations")
             TEST_GENERATOR {
                 std::uint32_t tBegin = 0;

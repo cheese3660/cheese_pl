@@ -19,21 +19,37 @@
 
 #include "parser/nodes/terminal_nodes.h"
 #include "curdle/runtime.h"
+//#include "builtin.h"
 
 
 namespace cheese::curdle {
     struct FunctionSet;
+    struct Builtin;
     using namespace memory::garbage_collection;
     namespace fs = std::filesystem;
     // Have to forward declare these for some reason?
     struct GlobalContext;
     struct Structure;
 
+    struct BadComptimeCastError : std::runtime_error {
+        BadComptimeCastError(const std::string &message);
+    };
+
+    struct InvalidCastError : std::runtime_error {
+        InvalidCastError(const std::string &message) : std::runtime_error(message) {};
+    };
+
+    struct NotComptimeError : std::runtime_error {
+        NotComptimeError(const std::string &message) : std::runtime_error(message) {};
+    };
+
     struct ComptimeValue : managed_object {
 
         virtual void mark_value() = 0;
 
         virtual bool is_same_as(ComptimeValue *other) = 0;
+
+        virtual gcref<ComptimeValue> cast(Type *target_type, garbage_collector &garbageCollector) = 0;
 
         virtual std::string to_string() = 0;
 
@@ -56,6 +72,8 @@ namespace cheese::curdle {
 
         std::string to_string() override;
 
+        gcref<ComptimeValue> cast(Type *target_type, garbage_collector &garbageCollector) override;
+
         math::BigInteger value;
     };
 
@@ -69,6 +87,8 @@ namespace cheese::curdle {
         bool is_same_as(ComptimeValue *other) override;
 
         std::string to_string() override;
+
+        gcref<ComptimeValue> cast(Type *target_type, garbage_collector &garbageCollector) override;
     };
 
     struct ComptimeString : ComptimeValue {
@@ -81,6 +101,8 @@ namespace cheese::curdle {
         bool is_same_as(ComptimeValue *other) override;
 
         std::string to_string() override;
+
+        gcref<ComptimeValue> cast(Type *target_type, garbage_collector &garbageCollector) override;
     };
 
     struct ComptimeVoid : ComptimeValue {
@@ -91,6 +113,8 @@ namespace cheese::curdle {
         bool is_same_as(ComptimeValue *other) override;
 
         std::string to_string() override;
+
+        gcref<ComptimeValue> cast(Type *target_type, garbage_collector &garbageCollector) override;
     };
 
     struct ComptimeComplex : ComptimeValue {
@@ -104,6 +128,8 @@ namespace cheese::curdle {
         bool is_same_as(ComptimeValue *other) override;
 
         std::string to_string() override;
+
+        gcref<ComptimeValue> cast(Type *target_type, garbage_collector &garbageCollector) override;
     };
 
     struct ComptimeType : ComptimeValue {
@@ -118,6 +144,8 @@ namespace cheese::curdle {
         bool is_same_as(ComptimeValue *other) override;
 
         std::string to_string() override;
+
+        gcref<ComptimeValue> cast(Type *target_type, garbage_collector &garbageCollector) override;
     };
 
     //Array/Tuple/Slice
@@ -129,6 +157,8 @@ namespace cheese::curdle {
         ~ComptimeArray() override = default;
 
         bool is_same_as(ComptimeValue *other) override;
+
+        gcref<ComptimeValue> cast(Type *target_type, garbage_collector &garbageCollector) override;
     };
 
     struct ComptimeObject : ComptimeValue {
@@ -139,12 +169,14 @@ namespace cheese::curdle {
         ~ComptimeObject() override = default;
 
         bool is_same_as(ComptimeValue *other) override;
+
+        gcref<ComptimeValue> cast(Type *target_type, garbage_collector &garbageCollector) override;
     };
 
     struct ComptimeFunctionSet : ComptimeValue {
-        FunctionSet *set;
+        ComptimeFunctionSet(FunctionSet *set, garbage_collector &gc);
 
-        explicit ComptimeFunctionSet(FunctionSet *set);
+        FunctionSet *set;
 
         void mark_value() override;
 
@@ -153,6 +185,37 @@ namespace cheese::curdle {
         std::string to_string() override;
 
         ~ComptimeFunctionSet() override = default;
+
+        gcref<ComptimeValue> cast(Type *target_type, garbage_collector &garbageCollector) override;
+
+    };
+
+    struct BuiltinFunctionReference : ComptimeValue {
+        std::string name;
+        Builtin *builtin;
+
+        explicit BuiltinFunctionReference(std::string name, Builtin *builtin, garbage_collector &gc) : name(name),
+                                                                                                       builtin(builtin) {
+            type = BuiltinReferenceType::get(gc);
+        }
+
+        void mark_value() override {
+
+        }
+
+        bool is_same_as(ComptimeValue *other) override {
+            return false;
+        }
+
+        gcref<ComptimeValue> cast(Type *target_type, garbage_collector &garbageCollector) override {
+            throw InvalidCastError("Invalid Cast: cannot cast a builtin type");
+        }
+
+        std::string to_string() override {
+            return "<builtin reference>";
+        }
+
+        ~BuiltinFunctionReference() override = default;
 
     };
 
@@ -211,6 +274,9 @@ namespace cheese::curdle {
 
         ~ComptimeContext() override = default;
 
+        gcref<ComptimeValue> exec_tuple_call(parser::nodes::TupleCall *node, RuntimeContext *rtime);
+
+        std::optional<gcref<ComptimeValue>> try_exec_tuple_call(parser::nodes::TupleCall *node, RuntimeContext *rtime);
     };
 }
 #endif //CHEESE_COMPTIME_H

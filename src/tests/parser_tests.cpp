@@ -25,7 +25,7 @@ namespace cheese::tests::parser_tests {
         }
     };
 
-    TEST_SECTION("parser", 1)
+    TEST_SECTION("parser", 2)
         TEST_SUBSECTION("generated tests")
             //This should contain the minimized and deflated json in the parser_tests.json file in this same directory.
             nlohmann::json generated_tests_json;
