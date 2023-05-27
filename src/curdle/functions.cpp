@@ -461,11 +461,11 @@ namespace cheese::curdle {
             if (is_generator) {
                 NOT_IMPL_FOR("generators");
             } else {
-                std::vector<bacteria::nodes::FunctionArgument> bacteria_args{};
+                std::vector<bacteria::FunctionArgument> bacteria_args{};
                 size_t rtime_index = 0;
                 for (auto &argument: arguments) {
                     if (argument.is_type) {
-                        bacteria_args.push_back(bacteria::nodes::FunctionArgument{
+                        bacteria_args.push_back(bacteria::FunctionArgument{
                                 argument.type->get_cached_type(),
                                 rtime_names[rtime_index++],
                         });

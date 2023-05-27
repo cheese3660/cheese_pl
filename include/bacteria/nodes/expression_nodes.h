@@ -33,6 +33,7 @@ namespace cheese::bacteria::nodes {
             return ss.str();
         }
 
+        JSON_FUNCS("return", { "value" }, retVal)
     };
 
     struct If : BacteriaNode {
@@ -71,6 +72,8 @@ namespace cheese::bacteria::nodes {
             }
             return ss.str();
         }
+
+        JSON_FUNCS("if", { "condition", "body", "else" }, condition, body, els)
     };
 
     struct Nop : BacteriaNode {
@@ -83,6 +86,8 @@ namespace cheese::bacteria::nodes {
         std::string get_textual_representation(int depth) override {
             return "/* elided */";
         }
+
+        JSON_FUNCS("nop", std::vector<std::string>{})
     };
 
 
@@ -101,6 +106,8 @@ namespace cheese::bacteria::nodes {
             ss << '(' << static_cast<std::string>(value) << " @ " << type->to_string() << ')';
             return ss.str();
         }
+
+        JSON_FUNCS("integer", { "value", "ty" }, value, (type->to_string()));
     };
 
     struct FloatLiteral : BacteriaNode {
@@ -118,6 +125,8 @@ namespace cheese::bacteria::nodes {
             ss << '(' << value << " @ " << type->to_string() << ')';
             return ss.str();
         }
+
+        JSON_FUNCS("float", { "value", "ty" }, value, (type->to_string()));
     };
 
     struct ValueReference : BacteriaNode {
@@ -131,6 +140,8 @@ namespace cheese::bacteria::nodes {
         std::string get_textual_representation(int depth) override {
             return name;
         }
+
+        JSON_FUNCS("value", { "name" }, name)
     };
 
     struct CastNode : BacteriaNode {
@@ -148,6 +159,8 @@ namespace cheese::bacteria::nodes {
             ss << lhs->get_textual_representation(depth) << " @ " << rhs->to_string();
             return ss.str();
         }
+
+        JSON_FUNCS("cast", { "value", "ty" }, lhs, (rhs->to_string()))
     };
 
     struct NormalCallNode : BacteriaNode {
@@ -172,6 +185,8 @@ namespace cheese::bacteria::nodes {
             ss << ')';
             return ss.str();
         }
+
+        JSON_FUNCS("call", { "function", "arguments" }, function, arguments)
     };
 
     struct VariableInitializationNode : BacteriaNode {
@@ -189,6 +204,8 @@ namespace cheese::bacteria::nodes {
         std::string get_textual_representation(int depth) override {
             return name + ": " + type->to_string() + " = " + value->get_textual_representation(depth);
         }
+
+        JSON_FUNCS("init", { "name", "ty", "value" }, name, type->to_string(), value);
     };
 
     struct AggregrateObject : BacteriaNode {
@@ -213,6 +230,7 @@ namespace cheese::bacteria::nodes {
         TypePtr type;
         std::vector<BacteriaPtr> values;
 
+        JSON_FUNCS("object", { "ty", "values" }, type->to_string(), values);
     };
 
     struct UnaryMinusNode : BacteriaNode {
@@ -227,6 +245,7 @@ namespace cheese::bacteria::nodes {
 
         BacteriaPtr child;
 
+        JSON_FUNCS("unary -", { "child" }, child)
     };
 
 
@@ -242,6 +261,7 @@ namespace cheese::bacteria::nodes {
 
         BacteriaPtr child;
 
+        JSON_FUNCS("&&", { "child" }, child)
     };
 
     struct ObjectSubscriptNode : BacteriaNode {
@@ -258,6 +278,8 @@ namespace cheese::bacteria::nodes {
 
         BacteriaPtr child;
         int index;
+
+        JSON_FUNCS(".", { "child", "index" }, child, static_cast<int64_t>(index))
     };
 
     struct ReferenceSubscriptNode : BacteriaNode {
@@ -274,6 +296,8 @@ namespace cheese::bacteria::nodes {
 
         BacteriaPtr child;
         int index;
+
+        JSON_FUNCS("->", { "child", "index" }, child, static_cast<int64_t>(index))
     };
 
     struct BinaryNode : BacteriaNode {
@@ -282,7 +306,7 @@ namespace cheese::bacteria::nodes {
                                                                                    lhs(std::move(lhs)),
                                                                                    rhs(std::move(rhs)) {}
 
-        virtual const char *get_operator() = 0;
+        virtual const char *get_operator() const = 0;
 
         std::string get_textual_representation(int depth) override final {
             std::stringstream ss{};
@@ -293,6 +317,8 @@ namespace cheese::bacteria::nodes {
 
         BacteriaPtr lhs;
         BacteriaPtr rhs;
+
+        JSON_FUNCS(get_operator(), { "lhs", "rhs" }, lhs, rhs);
     };
 
     struct NotEqualNode : BinaryNode {
@@ -302,7 +328,7 @@ namespace cheese::bacteria::nodes {
 
         ~NotEqualNode() override = default;
 
-        const char *get_operator() override {
+        const char *get_operator() const override {
             return "!=";
         }
     };
@@ -314,7 +340,7 @@ namespace cheese::bacteria::nodes {
 
         ~EqualToNode() override = default;
 
-        const char *get_operator() override {
+        const char *get_operator() const override {
             return "==";
         }
     };
@@ -326,7 +352,7 @@ namespace cheese::bacteria::nodes {
 
         ~LesserThanNode() override = default;
 
-        const char *get_operator() override {
+        const char *get_operator() const override {
             return "<=";
         }
     };
@@ -338,7 +364,7 @@ namespace cheese::bacteria::nodes {
 
         ~MultiplyNode() override = default;
 
-        const char *get_operator() override {
+        const char *get_operator() const override {
             return "*";
         }
     };
@@ -350,7 +376,7 @@ namespace cheese::bacteria::nodes {
 
         ~SubtractNode() override = default;
 
-        const char *get_operator() override {
+        const char *get_operator() const override {
             return "-";
         }
     };
@@ -362,7 +388,7 @@ namespace cheese::bacteria::nodes {
 
         ~ModulusNode() override = default;
 
-        const char *get_operator() override {
+        const char *get_operator() const override {
             return "%";
         }
     };
@@ -374,7 +400,7 @@ namespace cheese::bacteria::nodes {
 
         ~DivisionNode() override = default;
 
-        const char *get_operator() override {
+        const char *get_operator() const override {
             return "%";
         }
     };
@@ -386,7 +412,7 @@ namespace cheese::bacteria::nodes {
 
         ~OrNode() override = default;
 
-        const char *get_operator() override {
+        const char *get_operator() const override {
             return "or";
         }
     };
@@ -398,7 +424,7 @@ namespace cheese::bacteria::nodes {
 
         ~AdditionNode() override = default;
 
-        const char *get_operator() override {
+        const char *get_operator() const override {
             return "+";
         }
     };

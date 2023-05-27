@@ -7,6 +7,7 @@
 
 #include "bacteria/BacteriaReciever.h"
 #include "bacteria/BacteriaType.h"
+#include "parser/Node.h"
 #include <sstream>
 
 namespace cheese::bacteria::nodes {
@@ -28,6 +29,30 @@ namespace cheese::bacteria::nodes {
         }
 
         ~BacteriaProgram() override = default;
+
+        [[nodiscard]] std::map<std::string, int> get_child_map() const;
+
+        // For this we actually want to return a dictionary with top level declarations, rather than anything else as it will make generating tests simpler as ordering is wierd
+        [[nodiscard]] nlohmann::json as_json() const override {
+            auto object = nlohmann::json::object();
+            auto map = get_child_map();
+            for (auto &kv: map) {
+                object[kv.first] = children[kv.second]->as_json();
+            }
+            return object;
+        }
+
+        [[nodiscard]] bool compare_json(const nlohmann::json &json) const override {
+            // This is going to be interesting
+            if (!json.is_object()) return false;
+            if (json.size() != children.size()) return false;
+            auto map = get_child_map();
+            for (auto &kv: map) {
+                if (!json.contains(kv.first)) return false;
+                if (!children[kv.second]->compare_json(json[kv.first])) return false;
+            }
+            return true;
+        }
     };
 
     struct UnnamedBlock : BacteriaReciever {
@@ -43,12 +68,10 @@ namespace cheese::bacteria::nodes {
             ss << "}";
             return ss.str();
         }
+
+        JSON_FUNCS("block", { "body" }, children);
     };
 
-    struct FunctionArgument {
-        bacteria::TypePtr type;
-        std::string name;
-    };
 
     struct Function : BacteriaReciever {
         Function(Coordinate location, std::string n, std::vector<FunctionArgument> args, bacteria::TypePtr rt)
@@ -82,6 +105,11 @@ namespace cheese::bacteria::nodes {
             ss << "}";
             return ss.str();
         }
+
+        ~Function() override = default;
+
+        JSON_FUNCS("function", { "name", "arguments", "return_type", "body" }, name, arguments,
+                   return_type->to_string(), children);
     };
 }
 

@@ -1,0 +1,126 @@
+[
+  [
+    "simple tests: entry",
+    "entry_test.chs",
+    {
+      "main": {
+        "type": "function",
+        "name": "main",
+        "arguments": [],
+        "return_type": "void"
+      }
+    }
+  ],
+  [
+    "simple tests: recursive factorial",
+    "call_test.chs",
+    {
+      "main": {
+        "type": "function",
+        "name": "main",
+        "arguments": [],
+        "return_type": "i64",
+        "body": [
+          {
+            "type": "return",
+            "value": {
+              "type": "call",
+              "function": "fact_ai64",
+              "arguments": [
+                {
+                  "type": "integer",
+                  "value": 3,
+                  "ty": "i64"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "fact_ai64": {
+        "type": "function",
+        "name": "fact_ai64",
+        "arguments": [
+          {
+            "name": "x",
+            "type": "i64"
+          }
+        ],
+        "return_type": "i64",
+        "body": [
+          {
+            "type": "return",
+            "value": {
+              "type": "if",
+              "condition": {
+                "type": "==",
+                "lhs": {
+                  "type": "value",
+                  "name": "x"
+                },
+                "rhs": {
+                  "type": "integer",
+                  "value": 0,
+                  "ty": "i64"
+                }
+              },
+              "body": {
+                "type": "integer",
+                "value": 1,
+                "ty": "i64"
+              },
+              "else": {
+                "type": "*",
+                "lhs": {
+                  "type": "value",
+                  "name": "x"
+                },
+                "rhs": {
+                  "type": "call",
+                  "function": "fact_ai64",
+                  "arguments": [
+                    {
+                      "type": "-",
+                      "lhs": {
+                        "type": "value",
+                        "name": "x"
+                      },
+                      "rhs": {
+                        "type": "integer",
+                        "value": 1,
+                        "ty": "i64"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ],
+  [
+    "constant folding: addition",
+    "fn main => void entry\n{let x: i64=1+1}",
+    {
+      "main": {
+        "type": "function",
+        "name": "main",
+        "arguments": [],
+        "return_type": "void",
+        "body": [
+          {
+            "type": "init",
+            "name": "x",
+            "value": {
+              "type": "integer",
+              "value": 2,
+              "ty": "i64"
+            }
+          }
+        ]
+      }
+    }
+  ]
+]
