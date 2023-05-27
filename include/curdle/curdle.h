@@ -13,6 +13,7 @@
 #include "curdle/Structure.h"
 #include "curdle/comptime.h"
 #include "curdle/runtime.h"
+#include "error.h"
 // This
 
 namespace cheese::curdle {
@@ -21,6 +22,28 @@ namespace cheese::curdle {
     gcref<Structure>
     translate_structure(ComptimeContext *ctx, parser::nodes::Structure *structure_node);
 
+
     void translate_function_body(RuntimeContext *rctx, parser::NodePtr functionBody);
+
+    // TODO: Completely refactor all error generation systems with this and only raise errors where they are necessary
+    class CurdleError : public std::runtime_error {
+
+    public:
+        CurdleError(std::string message, error::ErrorCode errorCode) : std::runtime_error(message), code(errorCode) {}
+
+        error::ErrorCode code;
+    };
+
+    class LocalizedCurdleError : public std::runtime_error {
+
+    public:
+        LocalizedCurdleError(std::string message, Coordinate location, error::ErrorCode errorCode) : std::runtime_error(
+                message), code(errorCode),
+                                                                                                     location(
+                                                                                                             location) {}
+
+        error::ErrorCode code;
+        Coordinate location;
+    };
 }
 #endif //CHEESE_CURDLE_H

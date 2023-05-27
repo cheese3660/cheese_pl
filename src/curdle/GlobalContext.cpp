@@ -41,7 +41,9 @@ namespace cheese::curdle {
             auto lexed = lexer::lex(sv, local_import.string());
             auto parsed = parser::parse(lexed);
             auto ctx = gc.gcnew<ComptimeContext>(this, local_import, pdir);
+            ctx->push_structure_name(path);
             auto structure = translate_structure(ctx, dynamic_cast<parser::nodes::Structure *>(parsed.get()));
+            ctx->pop_structure_name();
             imports[local_import] = structure;
             return structure;
         }
@@ -61,7 +63,9 @@ namespace cheese::curdle {
             auto lexed = lexer::lex(sv, local_library.string());
             auto parsed = parser::parse(lexed);
             auto ctx = gc.gcnew<ComptimeContext>(this, local_import, local_library.parent_path());
+            ctx->push_structure_name(path);
             auto structure = translate_structure(ctx, dynamic_cast<parser::nodes::Structure *>(parsed.get()));
+            ctx->pop_structure_name();
             imports[local_import] = structure;
             return structure;
         }
@@ -82,7 +86,9 @@ namespace cheese::curdle {
                 auto lexed = lexer::lex(sv, lib_import.string());
                 auto parsed = parser::parse(lexed);
                 auto ctx = gc.gcnew<ComptimeContext>(this, lib_import, lib_import.parent_path());
+                ctx->push_structure_name(path);
                 auto structure = translate_structure(ctx, dynamic_cast<parser::nodes::Structure *>(parsed.get()));
+                ctx->pop_structure_name();
                 imports[lib_import] = structure;
                 return structure;
             }
@@ -97,7 +103,9 @@ namespace cheese::curdle {
                 auto lexed = lexer::lex(sv, lib_library.string());
                 auto parsed = parser::parse(lexed);
                 auto ctx = gc.gcnew<ComptimeContext>(this, local_import, lib_library.parent_path());
+                ctx->push_structure_name(path);
                 auto structure = translate_structure(ctx, dynamic_cast<parser::nodes::Structure *>(parsed.get()));
+                ctx->pop_structure_name();
                 imports[local_import] = structure;
                 return structure;
             }
@@ -106,5 +114,26 @@ namespace cheese::curdle {
 
         error::raise_exiting_error("curdle", "Unresolved import: " + path, location,
                                    error::ErrorCode::UnresolvedImport);
+    }
+
+    std::string GlobalContext::verify_name(std::string struct_name) {
+        while (all_struct_names.contains(struct_name)) {
+            // Now time to figure out if it ends in a number and instead just choose a new number or add a number to it, then reverify
+            if (auto last_name = struct_name.rfind("::"); last_name != std::string::npos) {
+                auto to_check = struct_name.substr(last_name + 2);
+                char *p;
+                std::size_t converted = std::strtol(to_check.c_str(), &p, 10);
+                if (*p) {
+                    struct_name += "::" + std::to_string(anonymous_struct_offset++);
+                } else {
+                    auto before = struct_name.substr(0, last_name);
+                    struct_name = before + "::" + std::to_string(anonymous_struct_offset++);
+                }
+            } else {
+                struct_name += "::" + std::to_string(anonymous_struct_offset++);
+            }
+        }
+        all_struct_names.insert(struct_name);
+        return struct_name;
     }
 }

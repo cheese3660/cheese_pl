@@ -8,9 +8,12 @@
 #include <optional>
 #include <utility>
 #include "bacteria/BacteriaNode.h"
+#include "bacteria/nodes/reciever_nodes.h"
 #include <sstream>
 
 namespace cheese::bacteria::nodes {
+
+    //TODO: remove needless parentheses around expressions
     struct Return : BacteriaNode {
         std::optional<BacteriaPtr> retVal;
 
@@ -50,14 +53,21 @@ namespace cheese::bacteria::nodes {
         std::string get_textual_representation(int depth) override {
             std::stringstream ss{};
             ss << "if " << condition->get_textual_representation(depth) << '\n';
-            add_indentation(ss, depth + 1);
-            ss << body->get_textual_representation(depth + 1);
+            auto d = dynamic_cast<UnnamedBlock *>(body.get()) ? 0 : 1;
+            add_indentation(ss, depth + d);
+            ss << body->get_textual_representation(depth + d);
             if (els.has_value()) {
                 ss << '\n';
                 add_indentation(ss, depth);
-                ss << "else\n";
-                add_indentation(ss, depth + 1);
-                ss << els.value()->get_textual_representation(depth + 1);
+                if (dynamic_cast<If *>(els.value().get())) {
+                    ss << "else ";
+                    ss << els.value()->get_textual_representation(depth);
+                } else {
+                    ss << "else\n";
+                    auto d2 = dynamic_cast<UnnamedBlock *>(els.value().get()) ? 0 : 1;
+                    add_indentation(ss, depth + d2);
+                    ss << els.value()->get_textual_representation(depth + d2);
+                }
             }
             return ss.str();
         }
@@ -75,6 +85,7 @@ namespace cheese::bacteria::nodes {
         }
     };
 
+
     struct IntegerLiteral : BacteriaNode {
         IntegerLiteral(const Coordinate &location, const math::BigInteger &value, TypePtr type) : BacteriaNode(
                 location), value(value), type(std::move(type)) {
@@ -88,6 +99,23 @@ namespace cheese::bacteria::nodes {
         std::string get_textual_representation(int depth) override {
             std::stringstream ss{};
             ss << '(' << static_cast<std::string>(value) << " @ " << type->to_string() << ')';
+            return ss.str();
+        }
+    };
+
+    struct FloatLiteral : BacteriaNode {
+        FloatLiteral(const Coordinate &location, double value, TypePtr type) : BacteriaNode(
+                location), value(value), type(std::move(type)) {
+        }
+
+        double value;
+        TypePtr type;
+
+        ~FloatLiteral() override = default;
+
+        std::string get_textual_representation(int depth) override {
+            std::stringstream ss{};
+            ss << '(' << value << " @ " << type->to_string() << ')';
             return ss.str();
         }
     };
@@ -116,7 +144,8 @@ namespace cheese::bacteria::nodes {
 
         std::string get_textual_representation(int depth) override {
             std::stringstream ss{};
-            ss << '(' << lhs->get_textual_representation(depth) << " @ " << rhs->to_string() << ')';
+            bool parens = false;
+            ss << lhs->get_textual_representation(depth) << " @ " << rhs->to_string();
             return ss.str();
         }
     };
@@ -143,6 +172,108 @@ namespace cheese::bacteria::nodes {
             ss << ')';
             return ss.str();
         }
+    };
+
+    struct VariableInitializationNode : BacteriaNode {
+
+        std::string name;
+        TypePtr type;
+        BacteriaPtr value;
+
+        VariableInitializationNode(const Coordinate &location, const std::string &name, const TypePtr &type,
+                                   BacteriaPtr value) : BacteriaNode(location), name(name), type(type),
+                                                        value(std::move(value)) {}
+
+        ~VariableInitializationNode() = default;
+
+        std::string get_textual_representation(int depth) override {
+            return name + ": " + type->to_string() + " = " + value->get_textual_representation(depth);
+        }
+    };
+
+    struct AggregrateObject : BacteriaNode {
+        AggregrateObject(const Coordinate &location, const TypePtr &type, std::vector<BacteriaPtr> values)
+                : BacteriaNode(location), type(type), values(std::move(values)) {}
+
+        ~AggregrateObject() override = default;
+
+        std::string get_textual_representation(int depth) override {
+            std::stringstream ss{};
+            ss << "(" << type->to_string() << "){";
+            for (int i = 0; i < values.size(); i++) {
+                ss << values[i]->get_textual_representation(depth);
+                if (i < values.size() - 1) {
+                    ss << ", ";
+                }
+            }
+            ss << '}';
+            return ss.str();
+        }
+
+        TypePtr type;
+        std::vector<BacteriaPtr> values;
+
+    };
+
+    struct UnaryMinusNode : BacteriaNode {
+        UnaryMinusNode(const Coordinate &location, BacteriaPtr child) : BacteriaNode(location),
+                                                                        child(std::move(child)) {}
+
+        ~UnaryMinusNode() override = default;
+
+        std::string get_textual_representation(int depth) override {
+            return "(-" + child->get_textual_representation(depth) + ")";
+        }
+
+        BacteriaPtr child;
+
+    };
+
+
+    struct ImplicitReferenceNode : BacteriaNode {
+        ImplicitReferenceNode(const Coordinate &location, BacteriaPtr child) : BacteriaNode(location),
+                                                                               child(std::move(child)) {}
+
+        ~ImplicitReferenceNode() override = default;
+
+        std::string get_textual_representation(int depth) override {
+            return "(&&" + child->get_textual_representation(depth) + ")";
+        }
+
+        BacteriaPtr child;
+
+    };
+
+    struct ObjectSubscriptNode : BacteriaNode {
+        ObjectSubscriptNode(const Coordinate &location, BacteriaPtr child, int index) : BacteriaNode(location),
+                                                                                        child(std::move(child)),
+                                                                                        index(index) {}
+
+        ~ObjectSubscriptNode() override = default;
+
+        std::string get_textual_representation(int depth) override {
+            return "(" + child->get_textual_representation(depth) + "." + std::to_string(index) + ")";
+        }
+
+
+        BacteriaPtr child;
+        int index;
+    };
+
+    struct ReferenceSubscriptNode : BacteriaNode {
+        ReferenceSubscriptNode(const Coordinate &location, BacteriaPtr child, int index) : BacteriaNode(location),
+                                                                                           child(std::move(child)),
+                                                                                           index(index) {}
+
+        ~ReferenceSubscriptNode() override = default;
+
+        std::string get_textual_representation(int depth) override {
+            return "(" + child->get_textual_representation(depth) + "->" + std::to_string(index) + ")";
+        }
+
+
+        BacteriaPtr child;
+        int index;
     };
 
     struct BinaryNode : BacteriaNode {
@@ -188,6 +319,18 @@ namespace cheese::bacteria::nodes {
         }
     };
 
+    struct LesserThanNode : BinaryNode {
+        LesserThanNode(const Coordinate &location, BacteriaPtr lhs, BacteriaPtr rhs) : BinaryNode(location,
+                                                                                                  std::move(lhs),
+                                                                                                  std::move(rhs)) {}
+
+        ~LesserThanNode() override = default;
+
+        const char *get_operator() override {
+            return "<=";
+        }
+    };
+
     struct MultiplyNode : BinaryNode {
         MultiplyNode(const Coordinate &location, BacteriaPtr lhs, BacteriaPtr rhs) : BinaryNode(location,
                                                                                                 std::move(lhs),
@@ -209,6 +352,54 @@ namespace cheese::bacteria::nodes {
 
         const char *get_operator() override {
             return "-";
+        }
+    };
+
+    struct ModulusNode : BinaryNode {
+        ModulusNode(const Coordinate &location, BacteriaPtr lhs, BacteriaPtr rhs) : BinaryNode(location,
+                                                                                               std::move(lhs),
+                                                                                               std::move(rhs)) {}
+
+        ~ModulusNode() override = default;
+
+        const char *get_operator() override {
+            return "%";
+        }
+    };
+
+    struct DivisionNode : BinaryNode {
+        DivisionNode(const Coordinate &location, BacteriaPtr lhs, BacteriaPtr rhs) : BinaryNode(location,
+                                                                                                std::move(lhs),
+                                                                                                std::move(rhs)) {}
+
+        ~DivisionNode() override = default;
+
+        const char *get_operator() override {
+            return "%";
+        }
+    };
+
+    struct OrNode : BinaryNode {
+        OrNode(const Coordinate &location, BacteriaPtr lhs, BacteriaPtr rhs) : BinaryNode(location,
+                                                                                          std::move(lhs),
+                                                                                          std::move(rhs)) {}
+
+        ~OrNode() override = default;
+
+        const char *get_operator() override {
+            return "or";
+        }
+    };
+
+    struct AdditionNode : BinaryNode {
+        AdditionNode(const Coordinate &location, BacteriaPtr lhs, BacteriaPtr rhs) : BinaryNode(location,
+                                                                                                std::move(lhs),
+                                                                                                std::move(rhs)) {}
+
+        ~AdditionNode() override = default;
+
+        const char *get_operator() override {
+            return "+";
         }
     };
 }

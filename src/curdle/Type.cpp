@@ -4,6 +4,8 @@
 
 #include "curdle/Type.h"
 #include "curdle/comptime.h"
+#include "error.h"
+#include "curdle/curdle.h"
 #include <typeinfo>
 
 namespace cheese::curdle {
@@ -33,7 +35,7 @@ namespace cheese::curdle {
         return Comptimeness::Comptime;
     }
 
-    int32_t TypeType::compare(Type *other) {
+    int32_t TypeType::compare(Type *other, bool implicit) {
         return (other == this) ? 0 : -1; // Since this is a singleton, this should be all that is necessary
     }
 
@@ -57,7 +59,7 @@ namespace cheese::curdle {
         if (cached_type) {
             return cached_type;
         } else {
-            cached_type = get_bacteria_type();
+            cached_type = std::move(get_bacteria_type());
             return cached_type;
         }
     }
@@ -107,17 +109,25 @@ namespace cheese::curdle {
         return Comptimeness::Runtime;
     }
 
-    int32_t IntegerType::compare(Type *other) {
+    int32_t IntegerType::compare(Type *other, bool implicit) {
         // Due to being a singleton for each size of integer this should work well
         if (other == this) return 0;
         // Need to add comptime integers onto this as well.
         if (auto other_i = dynamic_cast<IntegerType *>(other); other_i) {
-            if (sign != other_i->sign) return -1;
-            if (other_i->size > size) return -1;
-            return (size - other_i->size);
+            if (implicit && sign != other_i->sign) return -1;
+            if (implicit && other_i->size > size) return -1;
+            return implicit ? (size - other_i->size) : 2;
         }
         if (auto other_c = dynamic_cast<ComptimeIntegerType *>(other); other_c) {
             return 131071 - ((size * 2) + (sign ? 1 : 0));
+        }
+        if (!implicit) {
+            if (auto other_f = dynamic_cast<Float64Type *>(other); other_f) {
+                return 1;
+            }
+            if (auto other_f = dynamic_cast<ComptimeFloatType *>(other); other_f) {
+                return 1;
+            }
         }
         return -1;
     }
@@ -141,10 +151,8 @@ namespace cheese::curdle {
     }
 
     bacteria::TypePtr ReferenceType::get_bacteria_type() {
+        // Weak reference generation will be done at the structure level
         auto child_type = child->get_cached_type();
-        if (child_type->type == bacteria::BacteriaType::Type::Object) {
-            child_type = std::make_shared<bacteria::BacteriaType>(bacteria::BacteriaType::Type::Opaque);
-        }
         return std::make_shared<bacteria::BacteriaType>(bacteria::BacteriaType::Type::Reference, 0, child_type);
     }
 
@@ -156,9 +164,16 @@ namespace cheese::curdle {
         return child->get_comptimeness();
     }
 
-    int32_t ReferenceType::compare(Type *other) {
+    // This kinda casting has to be specifically done w/ a "possible rvalue address" in bacteria which is &&(value)
+    // Rather than a regular address of operator which is &value
+    // But on a known lvalue the possible rvalue address gets converted into an lvalue in second stage lowering
+    int32_t ReferenceType::compare(Type *other, bool implicit) {
         if (auto other_r = dynamic_cast<ReferenceType *>(other); other_r && child->compare(other_r->child) == 0) {
             return 0;
+        }
+        auto child_comparison = child->compare(other);
+        if (child_comparison != -1) {
+            return child_comparison + 1;
         }
         return -1;
     }
@@ -196,7 +211,7 @@ namespace cheese::curdle {
         return Comptimeness::Runtime;
     }
 
-    int32_t VoidType::compare(Type *other) {
+    int32_t VoidType::compare(Type *other, bool implicit) {
         return other == this ? 0 : -1;
     }
 
@@ -231,7 +246,7 @@ namespace cheese::curdle {
         return Comptimeness::ArgumentDepending;
     }
 
-    int32_t AnyType::compare(Type *other) {
+    int32_t AnyType::compare(Type *other, bool implicit) {
         return 131072;
     }
 
@@ -265,7 +280,7 @@ namespace cheese::curdle {
         return Comptimeness::Comptime;
     }
 
-    int32_t FunctionTemplateType::compare(Type *other) {
+    int32_t FunctionTemplateType::compare(Type *other, bool implicit) {
         return other == this ? 0 : -1;
     }
 
@@ -302,14 +317,20 @@ namespace cheese::curdle {
         return Comptimeness::Comptime;
     }
 
-    int32_t ComptimeIntegerType::compare(Type *other) {
+    int32_t ComptimeIntegerType::compare(Type *other, bool implicit) {
         if (other == this) {
             return 0;
         } else if (auto other_i = dynamic_cast<IntegerType *>(other); other_i) {
             return 131071 - other_i->size;
-        } else {
-            return -1;
+        } else if (!implicit) {
+            if (auto other_f = dynamic_cast<ComptimeFloat *>(other); other_f) {
+                return 1;
+            }
+            if (auto other_f = dynamic_cast<Float64Type *>(other); other_f) {
+                return 1;
+            }
         }
+        return -1;
     }
 
     std::string ComptimeIntegerType::to_string() {
@@ -320,6 +341,8 @@ namespace cheese::curdle {
         if (other == this) return this;
         if (auto other_i = dynamic_cast<IntegerType *>(other); other_i) {
             return other_i;
+        } else if (auto other_f = dynamic_cast<Float64Type *>(other); other_f) {
+            return other_f;
         } else {
             return nullptr;
         }
@@ -348,7 +371,7 @@ namespace cheese::curdle {
         return Comptimeness::Runtime;
     }
 
-    int32_t BooleanType::compare(Type *other) {
+    int32_t BooleanType::compare(Type *other, bool implicit) {
         if (other == this) return 0;
         return -1;
     }
@@ -387,7 +410,7 @@ namespace cheese::curdle {
         return Comptimeness::Comptime;
     }
 
-    int32_t BuiltinReferenceType::compare(Type *other) {
+    int32_t BuiltinReferenceType::compare(Type *other, bool implicit) {
         if (other == this) return 0;
         return -1;
     }
@@ -425,7 +448,7 @@ namespace cheese::curdle {
         return Comptimeness::Comptime;
     }
 
-    int32_t NoReturnType::compare(Type *other) {
+    int32_t NoReturnType::compare(Type *other, bool implicit) {
         return 0; // No return can "cast" to anything
     }
 
@@ -436,7 +459,171 @@ namespace cheese::curdle {
     Type *NoReturnType::peer(Type *other, garbage_collector &gc) {
         if (other == this) return this;
         PEER_TYPE_CATCH_ANY();
+        return other;
+    }
+
+    bacteria::TypePtr Float64Type::get_bacteria_type() {
+        return std::make_shared<bacteria::BacteriaType>(bacteria::BacteriaType::Type::Float64);
+    }
+
+    void Float64Type::mark_type_references() {
+
+    }
+
+    Float64Type *f64t_instance;
+
+    Float64Type *Float64Type::get(garbage_collector &gc) {
+        if (f64t_instance == nullptr) {
+            auto ref = gc.gcnew<Float64Type>();
+            gc.add_root_object(ref);
+            f64t_instance = ref;
+        }
+        return f64t_instance;
+    }
+
+    Comptimeness Float64Type::get_comptimeness() {
+        return Comptimeness::Runtime;
+    }
+
+    int32_t Float64Type::compare(Type *other, bool implicit) {
+        if (other == this) return 0;
+        if (auto as_int = dynamic_cast<IntegerType *>(other); as_int) {
+            return 131071;
+        }
+        if (dynamic_cast<ComptimeIntegerType *>(other)) {
+            return 131071;
+        }
+        if (dynamic_cast<ComptimeFloatType *>(other)) {
+            return 131071 - 64;
+        }
+        return -1;
+    }
+
+    std::string Float64Type::to_string() {
+        return "f64";
+    }
+
+    Type *Float64Type::peer(Type *other, garbage_collector &gc) {
+        if (other == this) return this;
+        PEER_TYPE_CATCH_ANY();
+        if (dynamic_cast<IntegerType *>(other) || dynamic_cast<ComptimeIntegerType *>(other) ||
+            dynamic_cast<ComptimeFloatType *>(other)) {
+            return this;
+        }
         return nullptr;
+    }
+
+    bacteria::TypePtr ComptimeFloatType::get_bacteria_type() {
+        return cheese::bacteria::TypePtr();
+    }
+
+
+    void ComptimeFloatType::mark_type_references() {
+
+    }
+
+    ComptimeFloatType *cft_instance;
+
+    ComptimeFloatType *ComptimeFloatType::get(garbage_collector &gc) {
+        if (cft_instance == nullptr) {
+            auto ref = gc.gcnew<ComptimeFloatType>();
+            gc.add_root_object(ref);
+            cft_instance = ref;
+        }
+        return cft_instance;
+    }
+
+
+    Comptimeness ComptimeFloatType::get_comptimeness() {
+        return Comptimeness::Comptime;
+    }
+
+    int32_t ComptimeFloatType::compare(Type *other, bool implicit) {
+        if (other == this) return 0;
+        if (auto as_int = dynamic_cast<IntegerType *>(other); as_int) {
+            return 131071;
+        }
+        if (dynamic_cast<ComptimeIntegerType *>(other)) {
+            return 131071;
+        }
+        if (dynamic_cast<Float64Type *>(other)) {
+            return 131071 - 64;
+        }
+        return -1;
+    }
+
+    std::string ComptimeFloatType::to_string() {
+        return "comptime_float";
+    }
+
+
+    Type *ComptimeFloatType::peer(Type *other, garbage_collector &gc) {
+        if (other == this) return this;
+        PEER_TYPE_CATCH_ANY();
+        if (dynamic_cast<ComptimeIntegerType *>(other)) {
+            return this;
+        }
+        if (dynamic_cast<Float64Type *>(other) || dynamic_cast<IntegerType *>(other)) {
+            return other;
+        }
+        return nullptr;
+    }
+
+
+    bacteria::TypePtr ErrorType::get_bacteria_type() {
+        return cheese::bacteria::TypePtr();
+    }
+
+    void ErrorType::mark_type_references() {
+
+    }
+
+    Comptimeness ErrorType::get_comptimeness() {
+        return Comptimeness::Comptime;
+    }
+
+
+    int32_t ErrorType::compare(Type *other, bool implicit) {
+        if (other == this) return 0;
+        return -1;
+    }
+
+    // Lets always coalesce error types w/ peer types
+    Type *ErrorType::peer(Type *other, garbage_collector &gc) {
+        if (other == this) return this;
+        PEER_TYPE_CATCH_ANY();
+        return other;
+    }
+
+    std::string ErrorType::to_string() {
+        return "ERROR!";
+    }
+
+
+    ErrorType *et_instance;
+
+    ErrorType *ErrorType::get(garbage_collector &gc) {
+        if (et_instance == nullptr) {
+            auto ref = gc.gcnew<ErrorType>();
+            gc.add_root_object(ref);
+            et_instance = ref;
+        }
+        return et_instance;
+    }
+
+
+    std::string get_peer_type_list(std::vector<Type *> types) {
+        std::stringstream ss{};
+        for (int i = 0; i < types.size(); i++) {
+            ss << types[i]->to_string();
+            if (i < types.size() - 1) {
+                ss << ", ";
+            }
+            if (i > 0 and i == types.size() - 2) {
+                ss << "and ";
+            }
+        }
+        return ss.str();
     }
 
     Type *peer_type(std::vector<Type *> types, garbage_collector &gc) {
@@ -445,7 +632,10 @@ namespace cheese::curdle {
             if (types[i] != base_type)
                 base_type = base_type->peer(types[i], gc);
             if (base_type == nullptr) {
-                throw InvalidPeerTypeException{};
+                throw CurdleError{
+                        "No Peer Type: cannot find a peer type between " + get_peer_type_list(types),
+                        error::ErrorCode::NoPeerType,
+                };
             }
         }
         return base_type;
@@ -455,12 +645,13 @@ namespace cheese::curdle {
 #define TRIVIAL(T) if (dynamic_cast<T*>(type)) return true
         TRIVIAL(IntegerType);
         TRIVIAL(ComptimeIntegerType);
+        TRIVIAL(Float64Type);
+        TRIVIAL(ComptimeFloatType);
 #undef TRIVIAL
         return false;
     }
 
     const char *InvalidPeerTypeException::what() const noexcept {
-        return "Invalid peer type!";
+        return message.c_str();
     }
-
 }

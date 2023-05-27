@@ -71,7 +71,17 @@ namespace cheese::error {
         BadBuiltinCall,
         UnusedValue,
         UnexpectedReturn,
-
+        NotComptime,
+        OutOfOrderInitialization,
+        IncompleteInitialization,
+        InvalidField,
+        NoPeerType,
+        NoOverloadFound,
+        InvalidMatchStatement,
+        InvalidTupleLiteral,
+        InvalidObjectLiteral,
+        InvalidDestructure,
+        InvalidSubscript,
         //General error (thrown for example when multiple previous errors were printed)
         GeneralCompilerError = 9999,
     };

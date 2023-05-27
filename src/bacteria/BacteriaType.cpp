@@ -49,7 +49,7 @@ namespace cheese::bacteria {
                 ss << "{";
                 for (int i = 0; i < child_types.size(); i++) {
                     ss << child_types[i]->to_string();
-                    if (i < array_dimensions.size() - 1) {
+                    if (i < child_types.size() - 1) {
                         ss << ",";
                     }
                 }
@@ -60,12 +60,20 @@ namespace cheese::bacteria {
                 return "usize";
             case Type::SignedSize:
                 return "isize";
+            case Type::WeakReference:
+                return "*cyclic";
+            case Type::WeakPointer:
+                return "[*]cyclic";
+            case Type::WeakSlice:
+                return "<>cyclic";
         }
     }
 
     BacteriaType::BacteriaType(BacteriaType::Type type, uint16_t integerSize,
                                const std::shared_ptr<BacteriaType> &subtype,
                                const std::vector<std::size_t> &arrayDimensions,
-                               const std::vector<std::shared_ptr<BacteriaType>> &childTypes) : type(type), integer_size(
-            integerSize), subtype(subtype), array_dimensions(arrayDimensions), child_types(childTypes) {}
+                               const std::vector<std::shared_ptr<BacteriaType>> &childTypes,
+                               const std::weak_ptr<BacteriaType> &weak_reference) : type(type), integer_size(
+            integerSize), subtype(subtype), array_dimensions(arrayDimensions), child_types(childTypes),
+                                                                                    weak_reference(weak_reference) {}
 }

@@ -25,7 +25,7 @@ namespace cheese::curdle {
         if (!rctx) {
             return create_from_type(cctx->globalContext->gc, cctx->exec(arguments[0], rctx)->type);
         } else {
-            return create_from_type(cctx->globalContext->gc, rctx->get_type(arguments[0]));
+            return create_from_type(cctx->globalContext->gc, rctx->get_type(arguments[0]).get());
         }
     }
 

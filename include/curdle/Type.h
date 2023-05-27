@@ -27,7 +27,7 @@ namespace cheese::curdle {
         virtual Comptimeness get_comptimeness() = 0;
 
         // This should be done in a way that the other type is *always* concrete and not an "any"
-        virtual std::int32_t compare(Type *other) = 0;
+        virtual std::int32_t compare(Type *other, bool implicit = true) = 0;
 
         virtual Type *peer(Type *other, memory::garbage_collection::garbage_collector &gc) = 0;
 
@@ -58,7 +58,7 @@ namespace cheese::curdle {
 
         Comptimeness get_comptimeness() override;
 
-        int32_t compare(Type *other) override;
+        int32_t compare(Type *other, bool implicit = true) override;
 
         std::string to_string() override;
 
@@ -82,7 +82,7 @@ namespace cheese::curdle {
 
         Comptimeness get_comptimeness() override;
 
-        int32_t compare(Type *other) override;
+        int32_t compare(Type *other, bool implit = true) override;
 
         std::string to_string() override;
 
@@ -110,7 +110,7 @@ namespace cheese::curdle {
 
         Comptimeness get_comptimeness() override;
 
-        int32_t compare(Type *other) override;
+        int32_t compare(Type *other, bool implicit = true) override;
 
         std::string to_string() override;
 
@@ -133,7 +133,7 @@ namespace cheese::curdle {
 
         Comptimeness get_comptimeness() override;
 
-        int32_t compare(Type *other) override;
+        int32_t compare(Type *other, bool implicit = true) override;
 
         std::string to_string() override;
 
@@ -157,7 +157,7 @@ namespace cheese::curdle {
 
         Comptimeness get_comptimeness() override;
 
-        int32_t compare(Type *other) override;
+        int32_t compare(Type *other, bool implicit = true) override;
 
         std::string to_string() override;
 
@@ -179,7 +179,7 @@ namespace cheese::curdle {
 
         Comptimeness get_comptimeness() override;
 
-        int32_t compare(Type *other) override;
+        int32_t compare(Type *other, bool implicit = true) override;
 
         std::string to_string() override;
 
@@ -204,7 +204,7 @@ namespace cheese::curdle {
 
         Comptimeness get_comptimeness() override;
 
-        int32_t compare(Type *other) override;
+        int32_t compare(Type *other, bool implicit = true) override;
 
         std::string to_string() override;
 
@@ -228,7 +228,7 @@ namespace cheese::curdle {
 
         Comptimeness get_comptimeness() override;
 
-        int32_t compare(Type *other) override;
+        int32_t compare(Type *other, bool implicit = true) override;
 
         std::string to_string() override;
 
@@ -237,6 +237,56 @@ namespace cheese::curdle {
     private:
 
         BooleanType() = default;
+    };
+
+    struct Float64Type : Type {
+
+        friend class cheese::memory::garbage_collection::garbage_collector;
+
+        bacteria::TypePtr get_bacteria_type() override;
+
+        void mark_type_references() override;
+
+        ~Float64Type() override = default;
+
+        static Float64Type *get(memory::garbage_collection::garbage_collector &gc);
+
+        Comptimeness get_comptimeness() override;
+
+        int32_t compare(Type *other, bool implicit = true) override;
+
+        std::string to_string() override;
+
+        Type *peer(Type *other, memory::garbage_collection::garbage_collector &gc) override;
+
+    private:
+
+        Float64Type() = default;
+    };
+
+    struct ComptimeFloatType : Type {
+
+        friend class cheese::memory::garbage_collection::garbage_collector;
+
+        bacteria::TypePtr get_bacteria_type() override;
+
+        void mark_type_references() override;
+
+        ~ComptimeFloatType() override = default;
+
+        static ComptimeFloatType *get(memory::garbage_collection::garbage_collector &gc);
+
+        Comptimeness get_comptimeness() override;
+
+        int32_t compare(Type *other, bool implicit = true) override;
+
+        std::string to_string() override;
+
+        Type *peer(Type *other, memory::garbage_collection::garbage_collector &gc) override;
+
+    private:
+
+        ComptimeFloatType() = default;
     };
 
     struct FunctionTemplateType : Type {
@@ -252,7 +302,7 @@ namespace cheese::curdle {
 
         Comptimeness get_comptimeness() override;
 
-        int32_t compare(Type *other) override;
+        int32_t compare(Type *other, bool implicit = true) override;
 
         std::string to_string() override;
 
@@ -275,7 +325,7 @@ namespace cheese::curdle {
 
         Comptimeness get_comptimeness() override;
 
-        int32_t compare(Type *other) override;
+        int32_t compare(Type *other, bool implicit = true) override;
 
         std::string to_string() override;
 
@@ -285,9 +335,34 @@ namespace cheese::curdle {
         BuiltinReferenceType() = default;
     };
 
+    struct ErrorType : Type {
+        friend class cheese::memory::garbage_collection::garbage_collector;
+
+        bacteria::TypePtr get_bacteria_type() override;
+
+        void mark_type_references() override;
+
+        ~ErrorType() override = default;
+
+        static ErrorType *get(memory::garbage_collection::garbage_collector &gc);
+
+        Comptimeness get_comptimeness() override;
+
+        int32_t compare(Type *other, bool implicit = true) override;
+
+        std::string to_string() override;
+
+        Type *peer(Type *other, memory::garbage_collection::garbage_collector &gc) override;
+
+    private:
+        ErrorType() = default;
+    };
+
     class InvalidPeerTypeException : std::exception {
     public:
         ~InvalidPeerTypeException() noexcept override = default;
+
+        std::string message;
 
         const char *what() const noexcept override;
 

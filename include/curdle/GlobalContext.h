@@ -15,6 +15,7 @@
 #include "bacteria/BacteriaNode.h"
 #include "bacteria/BacteriaReciever.h"
 #include "bacteria/nodes/reciever_nodes.h"
+#include <set>
 
 namespace cheese::curdle {
     struct GlobalContext : managed_object {
@@ -32,6 +33,11 @@ namespace cheese::curdle {
         garbage_collector &gc;
         bool errored{false};
         std::map<std::filesystem::path, Structure *> imports;
+        size_t anonymous_struct_offset{0};
+        size_t anonymous_variable_offset{0};
+        std::set<std::string> all_struct_names;
+
+        std::string verify_name(std::string struct_name);
 
         inline void raise(std::string message, Coordinate location, error::ErrorCode code) {
             errored = true;
@@ -43,6 +49,10 @@ namespace cheese::curdle {
         Structure *import_structure(Coordinate location, std::string path, fs::path dir, fs::path pdir);
 
         ~GlobalContext() override = default;
+
+        std::string get_anonymous_variable(const std::string &base) {
+            return "__" + base + "__" + std::to_string(anonymous_variable_offset++);
+        }
 
     };
 }

@@ -86,7 +86,7 @@ namespace cheese::curdle {
         ptr = std::move(sharedPtr);
     }
 
-    FunctionInfo FunctionTemplate::get_info_for_arguments(const std::vector<PassedFunctionArgument> &&arguments,
+    FunctionInfo FunctionTemplate::get_info_for_arguments(const std::vector<PassedFunctionArgument> &arguments,
                                                           bool any_zero) const {
         auto &gc = ctx->globalContext->gc;
         auto fctx = gc.gcnew<ComptimeContext>(ctx);
@@ -154,7 +154,7 @@ namespace cheese::curdle {
                         force_comptime ? Comptimeness::Comptime : ref->get_comptimeness()
                 };
                 args.push_back(std::move(arg));
-            } else if (auto as_const_self = dynamic_cast<parser::nodes::Self *>(a2); as_const_self) {
+            } else if (auto as_const_self = dynamic_cast<parser::nodes::ConstSelf *>(a2); as_const_self) {
                 auto ref = ctx->currentStructure;
                 auto ref_type = gc.gcnew<ReferenceType>(static_cast<Type *>(ref), true);
                 if (ref_type->get_comptimeness() == Comptimeness::Comptime || force_comptime) {
@@ -270,12 +270,14 @@ namespace cheese::curdle {
     }
 
     ConcreteFunction *
-    FunctionTemplate::get(const std::vector<PassedFunctionArgument> &&arguments, Coordinate call_loc) {
+    FunctionTemplate::get(const std::vector<PassedFunctionArgument> &arguments) {
         auto info = get_info_for_arguments(arguments, true);
         auto expected_closeness = info.closeness;
         if (expected_closeness == -1) {
-            ctx->globalContext->raise("Mismatched function call, argument types or number do not match up", call_loc,
-                                      error::ErrorCode::MismatchedFunctionCall);
+//            ctx->globalContext->raise("Mismatched function call, argument types or number do not match up", call_loc,
+//                                      error::ErrorCode::MismatchedFunctionCall);
+            throw CurdleError("Mismatched function call, argument types or number do not match up",
+                              error::ErrorCode::MismatchedFunctionCall);
         }
         // Lets first check each concrete function we have defined so far :3
         ConcreteFunction *ret_val = nullptr;
@@ -290,8 +292,11 @@ namespace cheese::curdle {
         if (count == 1) {
             return ret_val;
         } else if (count > 1) {
-            ctx->globalContext->raise("Ambiguous function call for given arguments", call_loc,
-                                      error::ErrorCode::AmbiguousFunctionCall);
+            // We should just throw here
+//            ctx->globalContext->raise("Ambiguous function call for given arguments", call_loc,
+//                                      error::ErrorCode::AmbiguousFunctionCall);
+//            return nullptr;
+            throw CurdleError("Ambiguous function call for given arguments", error::ErrorCode::AmbiguousFunctionCall);
         }
         // Now here is where things get funky, where we have to generate a function definition since none other fits
         auto &gc = ctx->globalContext->gc;
@@ -361,18 +366,31 @@ namespace cheese::curdle {
         return new_function;
     }
 
-    FunctionInfo FunctionTemplate::get_info_for_arguments(const std::vector<PassedFunctionArgument> &arguments,
-                                                          bool any_zero) const {
-        return get_info_for_arguments(std::move(arguments), any_zero);
-    }
-
     void FunctionSet::mark_references() {
         for (auto &temp: templates) {
             temp->mark();
         }
     }
 
-    ConcreteFunction *FunctionSet::get(const std::vector<PassedFunctionArgument> &&arguments, Coordinate call_loc) {
+    std::string get_arg_name_list(const std::vector<PassedFunctionArgument> &arguments) {
+        std::stringstream ss;
+        for (int i = 0; i < arguments.size(); i++) {
+            if (arguments[i].is_type) {
+                ss << "(type) " << arguments[i].type->to_string();
+            } else {
+                ss << "(value) " << arguments[i].value->to_string();
+            }
+            if (i < arguments.size() - 1) {
+                ss << ", ";
+            }
+            if (i > 0 && i == arguments.size() - 2) {
+                ss << "and ";
+            }
+        }
+        return ss.str();
+    }
+
+    ConcreteFunction *FunctionSet::get(const std::vector<PassedFunctionArgument> &arguments) {
         int closest_closeness = std::numeric_limits<int>::max();
         FunctionTemplate *closest_function = nullptr;
         for (auto templ: templates) {
@@ -382,9 +400,12 @@ namespace cheese::curdle {
             }
         }
         if (closest_function == nullptr) {
-            throw IncorrectCallException();
+            throw CurdleError{
+                    "No Overload: No overload found for the following argument set: " + get_arg_name_list(arguments),
+                    error::ErrorCode::NoOverloadFound
+            };
         }
-        return closest_function->get(std::move(arguments), call_loc);
+        return closest_function->get(std::move(arguments));
     }
 
     IncorrectCallException::IncorrectCallException() = default;
@@ -482,5 +503,29 @@ namespace cheese::curdle {
             mangled_name = mangle(std::move(path), args, external);
         }
         this->arguments = std::move(arguments);
+    }
+
+
+    ConcreteFunction *get_function(RuntimeContext *rctx, ComptimeContext *cctx, LocalContext *lctx,
+                                   FunctionSet *function_set, parser::NodeList &arg_nodes) {
+        std::vector<PassedFunctionArgument> arguments;
+        // Store all the references so they will be deallocated at the *correct* time
+        std::vector<gcref<ComptimeValue>> value_refs;
+        std::vector<gcref<Type>> type_refs;
+        for (const auto &node: arg_nodes) {
+            if (auto arg_attempt = cctx->try_exec(node.get(),
+                                                  rctx); arg_attempt.has_value()) {
+                arguments.push_back(
+                        PassedFunctionArgument{false, arg_attempt->get(), arg_attempt->get()->type});
+                value_refs.push_back(std::move(arg_attempt.value()));
+            } else {
+                // We have to do a type deduction on this one :)
+                auto arg_ty = lctx->get_type(node.get());
+                arguments.push_back(PassedFunctionArgument{true, nullptr, arg_ty});
+            }
+        }
+        // TODO:  Use exceptions so we don't have to pass call loc
+        auto function = function_set->get(std::move(arguments));
+        return function;
     }
 }

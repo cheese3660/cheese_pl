@@ -30,6 +30,8 @@ namespace cheese::curdle {
     };
 
     struct Structure : Type {
+        Structure(std::string name, ComptimeContext *ctx, memory::garbage_collection::garbage_collector &gc);
+
         ComptimeContext *containedContext;
 
         bacteria::TypePtr get_bacteria_type() override;
@@ -40,7 +42,7 @@ namespace cheese::curdle {
 
         // This contains all the information of a structure. which is a type
         // It does not have its interfaces attached to it as that is part of the main type
-        // If the type of the structure is a tuple, then the names of the fields will be _0, _1, _2, _3, _4, _5, etc...
+        // If the type of the structure is a tuple, then the names of the fields will be 0, 1, 2, 3, 4, 5, etc...
         bool is_tuple{false};
         std::vector<StructureField> fields;
         std::map<std::string, TopLevelVariableInfo> top_level_variables;
@@ -48,8 +50,7 @@ namespace cheese::curdle {
         std::vector<LazyValue *> lazies;
         std::vector<Interface *> interfaces; // Separate from mixins as it isn't defining functions outside the structure
         std::map<std::string, FunctionSet *> function_sets;
-        std::string name; // Structures must have names bound to them
-
+        std::string name; // Structures must have names bound to them, at some point, unbound names start with ::(counter) which places where names can be bound automatically bind it by matching for a structure name starting with "::"
         void resolve_lazy(LazyValue *&lazy);
 
         void resolve_by_name(const std::string &name);
@@ -59,7 +60,7 @@ namespace cheese::curdle {
 
         Comptimeness get_comptimeness() override;
 
-        int32_t compare(Type *other) override;
+        int32_t compare(Type *other, bool implicit = true) override;
 
         std::string to_string() override;
 

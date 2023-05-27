@@ -78,6 +78,10 @@ namespace cheese::curdle {
     };
 
     struct ComptimeFloat : ComptimeValue {
+        explicit ComptimeFloat(double value, Type *ty) : value(value) {
+            type = ty;
+        }
+
         void mark_value() override;
 
         double value;
@@ -240,6 +244,9 @@ namespace cheese::curdle {
         ComptimeContext *parent;
         GlobalContext *globalContext;
         std::map<std::string, ComptimeVariable *> comptimeVariables;
+        std::vector<std::string> structure_name_stack;
+        size_t next_offset_for_structure_name = 0;
+
         fs::path path;
         fs::path project_dir; // This is $newProjectDir in the reference
 
@@ -277,6 +284,12 @@ namespace cheese::curdle {
         gcref<ComptimeValue> exec_tuple_call(parser::nodes::TupleCall *node, RuntimeContext *rtime);
 
         std::optional<gcref<ComptimeValue>> try_exec_tuple_call(parser::nodes::TupleCall *node, RuntimeContext *rtime);
+
+        std::string get_structure_name();
+
+        void push_structure_name(std::string);
+
+        void pop_structure_name();
     };
 }
 #endif //CHEESE_COMPTIME_H

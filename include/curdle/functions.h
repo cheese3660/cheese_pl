@@ -20,6 +20,7 @@ namespace cheese::curdle {
     using namespace cheese::memory::garbage_collection;
     struct ComptimeContext;
     struct RuntimeContext;
+    struct LocalContext;
 
     struct FunctionTemplateArgument {
         gcref<Type> type;
@@ -77,14 +78,11 @@ namespace cheese::curdle {
 
 
         FunctionInfo
-        get_info_for_arguments(const std::vector<PassedFunctionArgument> &&arguments, bool any_zero = false) const;
-
-        FunctionInfo
         get_info_for_arguments(const std::vector<PassedFunctionArgument> &arguments, bool any_zero = false) const;
 
 
         // The concrete func
-        ConcreteFunction *get(const std::vector<PassedFunctionArgument> &&arguments, Coordinate call_loc);
+        ConcreteFunction *get(const std::vector<PassedFunctionArgument> &arguments);
     };
 
     class IncorrectCallException : std::exception {
@@ -104,7 +102,11 @@ namespace cheese::curdle {
 
         std::vector<FunctionTemplate *> templates;
 
-        ConcreteFunction *get(const std::vector<PassedFunctionArgument> &&arguments, Coordinate call_loc);
+        ConcreteFunction *get(const std::vector<PassedFunctionArgument> &arguments);
     };
+
+
+    ConcreteFunction *get_function(RuntimeContext *rctx, ComptimeContext *cctx, LocalContext *lctx,
+                                   FunctionSet *function_set, parser::NodeList &arg_nodes);
 }
 #endif //CHEESE_FUNCTIONS_H

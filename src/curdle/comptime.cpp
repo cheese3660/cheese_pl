@@ -9,6 +9,7 @@
 #include "stringutil.h"
 #include <iostream>
 #include "curdle/builtin.h"
+#include "curdle/curdle.h"
 
 
 namespace cheese::curdle {
@@ -368,6 +369,12 @@ namespace cheese::curdle {
                 throw NotComptimeError("Bad Builtin Call: Builtin does not exist: " + pBuiltinReference->builtin);
             }
         }
+        WHEN_NODE_IS(parser::nodes::Structure, pStructure) {
+            return create_from_type(gc, translate_structure(this, pStructure).get());
+        }
+        WHEN_NODE_IS(parser::nodes::Float64, pFloat64) {
+            return create_from_type(gc, Float64Type::get(gc));
+        }
         NOT_IMPL_FOR(typeid(*node).name());
 #undef WHEN_NODE_IS
     }
@@ -425,10 +432,25 @@ namespace cheese::curdle {
         WHEN_NODE_IS(parser::nodes::IntegerLiteral, pIntegerLiteral) {
             return gc.gcnew<ComptimeInteger>(pIntegerLiteral->value, ComptimeIntegerType::get(gc));
         }
+
+        WHEN_NODE_IS(parser::nodes::FloatLiteral, pFloatLiteral) {
+            return gc.gcnew<ComptimeFloat>(pFloatLiteral->value, ComptimeFloatType::get(gc));
+        }
         WHEN_NODE_IS(parser::nodes::EqualTo, pEqualTo) {
             auto lhs = try_exec(pEqualTo->lhs.get(), rtime);
             if (!lhs.has_value()) return std::optional<gcref<ComptimeValue>>{};
             auto rhs = try_exec(pEqualTo->rhs.get(), rtime);
+            if (!rhs.has_value()) return std::optional<gcref<ComptimeValue>>{};
+            auto lhsv = std::move(lhs.value());
+            auto rhsv = std::move(rhs.value());
+            // Now we must define a few functions
+            NOT_IMPL_FOR(
+                    "Equality comparisons"); // This will be "fun" to mandate all these functions in the comptime value structure
+        }
+        WHEN_NODE_IS(parser::nodes::LesserThan, pLesserThan) {
+            auto lhs = try_exec(pLesserThan->lhs.get(), rtime);
+            if (!lhs.has_value()) return std::optional<gcref<ComptimeValue>>{};
+            auto rhs = try_exec(pLesserThan->rhs.get(), rtime);
             if (!rhs.has_value()) return std::optional<gcref<ComptimeValue>>{};
             auto lhsv = std::move(lhs.value());
             auto rhsv = std::move(rhs.value());
@@ -446,6 +468,39 @@ namespace cheese::curdle {
             // Now we must define a few functions
             NOT_IMPL_FOR(
                     "Subtraction"); // This will be "fun" to mandate all these functions in the comptime value structure
+        }
+        WHEN_NODE_IS(parser::nodes::Multiplication, pMultiplication) {
+            auto lhs = try_exec(pMultiplication->lhs.get(), rtime);
+            if (!lhs.has_value()) return std::optional<gcref<ComptimeValue>>{};
+            auto rhs = try_exec(pMultiplication->rhs.get(), rtime);
+            if (!rhs.has_value()) return std::optional<gcref<ComptimeValue>>{};
+            auto lhsv = std::move(lhs.value());
+            auto rhsv = std::move(rhs.value());
+            // Now we must define a few functions
+            NOT_IMPL_FOR(
+                    "Subtraction"); // This will be "fun" to mandate all these functions in the comptime value structure
+        }
+        WHEN_NODE_IS(parser::nodes::Modulus, pModulus) {
+            auto lhs = try_exec(pModulus->lhs.get(), rtime);
+            if (!lhs.has_value()) return std::optional<gcref<ComptimeValue>>{};
+            auto rhs = try_exec(pModulus->rhs.get(), rtime);
+            if (!rhs.has_value()) return std::optional<gcref<ComptimeValue>>{};
+            auto lhsv = std::move(lhs.value());
+            auto rhsv = std::move(rhs.value());
+            // Now we must define a few functions
+            NOT_IMPL_FOR(
+                    "Modulus"); // This will be "fun" to mandate all these functions in the comptime value structure
+        }
+        WHEN_NODE_IS(parser::nodes::Division, pDivision) {
+            auto lhs = try_exec(pDivision->lhs.get(), rtime);
+            if (!lhs.has_value()) return std::optional<gcref<ComptimeValue>>{};
+            auto rhs = try_exec(pDivision->rhs.get(), rtime);
+            if (!rhs.has_value()) return std::optional<gcref<ComptimeValue>>{};
+            auto lhsv = std::move(lhs.value());
+            auto rhsv = std::move(rhs.value());
+            // Now we must define a few functions
+            NOT_IMPL_FOR(
+                    "Division"); // This will be "fun" to mandate all these functions in the comptime value structure
         }
         WHEN_NODE_IS(parser::nodes::Cast, pCast) {
             auto lhs = try_exec(pCast->lhs.get(), rtime);
@@ -476,6 +531,42 @@ namespace cheese::curdle {
         WHEN_NODE_IS(parser::nodes::TupleCall, pTupleCall) {
             return try_exec_tuple_call(pTupleCall, rtime);
         }
+        WHEN_NODE_IS(parser::nodes::Subscription, pSubscription) {
+            auto lhs = try_exec(pSubscription->lhs.get(), rtime);
+            if (!lhs.has_value()) return {};
+            auto lhsv = std::move(lhs.value());
+            auto rhs_ptr = pSubscription->rhs.get();
+#define WHEN_RHS_IS(type, name) if (auto name = dynamic_cast<type*>(rhs_ptr); name)
+            WHEN_RHS_IS(parser::nodes::ValueReference, pValueReference) {
+                if (auto as_object = dynamic_cast<ComptimeObject *>(lhsv.get()); as_object) {
+                    if (!as_object->fields.contains(pValueReference->name)) {
+                        return {};
+                    } else {
+                        return gcref<ComptimeValue>(gc, as_object->fields[pValueReference->name]);
+                    }
+                } else {
+                    return {};
+                }
+            }
+            WHEN_RHS_IS(parser::nodes::IntegerLiteral, pIntegerLiteral) {
+                if (auto as_object = dynamic_cast<ComptimeObject *>(lhsv.get()); as_object) {
+                    auto field_name = static_cast<std::string>(pIntegerLiteral->value);
+                    // We have to do a lot more once interfaces and such are a thing at compile time
+                    if (!as_object->fields.contains(field_name)) {
+                        return {};
+                    } else {
+                        return gcref<ComptimeValue>(gc, as_object->fields[field_name]);
+                    }
+                } else {
+                    return {};
+                }
+            }
+            return {};
+#undef WHEN_RHS_IS
+        }
+        WHEN_NODE_IS(parser::nodes::Self, pSelf) {
+            return {};
+        }
         NOT_IMPL_FOR(typeid(*node).name());
 #undef WHEN_NODE_IS
     }
@@ -501,6 +592,28 @@ namespace cheese::curdle {
             return parent->get(name);
         }
         return {};
+    }
+
+    std::string ComptimeContext::get_structure_name() {
+        if (structure_name_stack.empty()) {
+            if (parent) {
+                return parent->get_structure_name();
+            } else {
+                return globalContext->verify_name("");
+            }
+        } else {
+            return globalContext->verify_name(structure_name_stack.back());
+        }
+    }
+
+    void ComptimeContext::push_structure_name(std::string n) {
+        structure_name_stack.push_back(n);
+    }
+
+    void ComptimeContext::pop_structure_name() {
+        if (!structure_name_stack.empty()) {
+            structure_name_stack.pop_back();
+        }
     }
 
 

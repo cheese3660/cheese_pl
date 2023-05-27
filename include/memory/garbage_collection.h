@@ -158,7 +158,15 @@ namespace cheese::memory::garbage_collection {
     template<class T>
     requires std::is_base_of_v<managed_object, T>
     gcref<T> garbage_collector::manage(T *ptr) {
-        managed_objects.push_back(reinterpret_cast<managed_object *>(ptr));
+        // Prevent managing an object twice
+        bool contains = false;
+        for (auto ptr2: managed_objects) {
+            if (ptr2 == (managed_object *) ptr) {
+                contains = true;
+                break;
+            }
+        }
+        if (!contains) managed_objects.push_back(reinterpret_cast<managed_object *>(ptr));
         return gcref<T>(*this, ptr);
     }
 

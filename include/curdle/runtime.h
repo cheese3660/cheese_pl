@@ -25,9 +25,9 @@ namespace cheese::curdle {
         RuntimeContext *runtime;
         Type *expected_type;
 
-        std::pair<Type *, Type *> get_binary_type(parser::Node *lhs, parser::Node *rhs);
+        std::pair<gcref<Type>, gcref<Type>> get_binary_type(parser::Node *lhs, parser::Node *rhs);
 
-        Type *get_type(parser::Node *node);
+        gcref<Type> get_type(parser::Node *node);
 
         void mark_references() override;
 
@@ -60,7 +60,7 @@ namespace cheese::curdle {
 
         std::optional<RuntimeVariableInfo> get(const std::string &name);
 
-        Type *get_type(parser::Node *node);
+        gcref<Type> get_type(parser::Node *node);
 
         void mark_references() override;
     };
