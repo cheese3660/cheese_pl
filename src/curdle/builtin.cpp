@@ -3,6 +3,7 @@
 //
 
 #include "curdle/builtin.h"
+#include "curdle/curdle.h"
 
 namespace cheese::curdle {
 
@@ -19,8 +20,9 @@ namespace cheese::curdle {
     type_builtin(Coordinate location, std::vector<parser::Node *> arguments, ComptimeContext *cctx,
                  RuntimeContext *rctx) {
         if (arguments.size() != 1) {
-            throw BadBuiltinCall(
-                    "Attempting to use $Type w/ the wrong number of arguments, it only takes one argument");
+            throw LocalizedCurdleError(
+                    "Attempting to use $Type w/ the wrong number of arguments, it only takes one argument", location,
+                    error::ErrorCode::BadBuiltinCall);
         }
         if (!rctx) {
             return create_from_type(cctx->globalContext, cctx->exec(arguments[0], rctx)->type);
@@ -41,7 +43,9 @@ namespace cheese::curdle {
             if (auto correct = dynamic_cast<ComptimeType *>(type_value.get()); correct) {
                 all_types.push_back(correct->typeValue);
             } else {
-                throw BadBuiltinCall("Attempting to use $Type w/ an argument of type " + type_value->type->to_string());
+                throw LocalizedCurdleError(
+                        "Attempting to use $Peer w/ an argument of type " + type_value->type->to_string(),
+                        argument->location, error::ErrorCode::BadBuiltinCall);
             }
             local_references.push_back(std::move(type_value));
         }

@@ -596,6 +596,10 @@ namespace cheese::curdle {
     }
 
     Type *peer_type(std::vector<Type *> types, GlobalContext *gctx) {
+        if (types.empty()) {
+            throw CurdleError{"No Peer Type: cannot find a peer type w/o any types to find a peer between",
+                              error::ErrorCode::NoPeerType};
+        }
         auto base_type = types[0];
         for (int i = 1; i < types.size(); i++) {
             if (types[i] != base_type)
