@@ -122,5 +122,235 @@
         ]
       }
     }
+  ],
+  [
+    "constant folding: subtraction",
+    "fn main => void entry\n{let x: i64=1-1}",
+    {
+      "main": {
+        "type": "function",
+        "name": "main",
+        "arguments": [],
+        "return_type": "void",
+        "body": [
+          {
+            "type": "init",
+            "name": "x",
+            "value": {
+              "type": "integer",
+              "value": 0,
+              "ty": "i64"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  [
+    "constant folding: division",
+    "fn main => void entry\n{let x: i64=1/1}",
+    {
+      "main": {
+        "type": "function",
+        "name": "main",
+        "arguments": [],
+        "return_type": "void",
+        "body": [
+          {
+            "type": "init",
+            "name": "x",
+            "value": {
+              "type": "integer",
+              "value": 1,
+              "ty": "i64"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  [
+    "constant folding: multiplication",
+    "fn main => void entry\n{let x: i64=1*1}",
+    {
+      "main": {
+        "type": "function",
+        "name": "main",
+        "arguments": [],
+        "return_type": "void",
+        "body": [
+          {
+            "type": "init",
+            "name": "x",
+            "value": {
+              "type": "integer",
+              "value": 1,
+              "ty": "i64"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  [
+    "constant folding: xor",
+    "fn main => void entry\n{let x: i64=1 xor 1}",
+    {
+      "main": {
+        "type": "function",
+        "name": "main",
+        "arguments": [],
+        "return_type": "void",
+        "body": [
+          {
+            "type": "init",
+            "name": "x",
+            "value": {
+              "type": "integer",
+              "value": 0,
+              "ty": "i64"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  [
+    "constant folding: or",
+    "fn main => void entry\n{let x: i64=1 or 1}",
+    {
+      "main": {
+        "type": "function",
+        "name": "main",
+        "arguments": [],
+        "return_type": "void",
+        "body": [
+          {
+            "type": "init",
+            "name": "x",
+            "value": {
+              "type": "integer",
+              "value": 1,
+              "ty": "i64"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  [
+    "constant folding: and",
+    "fn main => void entry\n{let x: i64=1 and 1}",
+    {
+      "main": {
+        "type": "function",
+        "name": "main",
+        "arguments": [],
+        "return_type": "void",
+        "body": [
+          {
+            "type": "init",
+            "name": "x",
+            "value": {
+              "type": "integer",
+              "value": 1,
+              "ty": "i64"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  [
+    "constant folding: not",
+    "fn main => void entry\n{let x: i64=not 1}",
+    {
+      "main": {
+        "type": "function",
+        "name": "main",
+        "arguments": [],
+        "return_type": "void",
+        "body": [
+          {
+            "type": "init",
+            "name": "x",
+            "value": {
+              "type": "integer",
+              "value": -2,
+              "ty": "i64"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  [
+    "constant folding: unary minus",
+    "fn main => void entry\n{let x: i64=- 1}",
+    {
+      "main": {
+        "type": "function",
+        "name": "main",
+        "arguments": [],
+        "return_type": "void",
+        "body": [
+          {
+            "type": "init",
+            "name": "x",
+            "value": {
+              "type": "integer",
+              "value": -1,
+              "ty": "i64"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  [
+    "constant folding: unary plus",
+    "fn main => void entry\n{let x: i64=+ 1}",
+    {
+      "main": {
+        "type": "function",
+        "name": "main",
+        "arguments": [],
+        "return_type": "void",
+        "body": [
+          {
+            "type": "init",
+            "name": "x",
+            "value": {
+              "type": "integer",
+              "value": 1,
+              "ty": "i64"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  [
+    "constant folding: complex equation",
+    "fn main => void entry\n{let x: i64 = ((5*3)+(10/2)) and 4}",
+    {
+      "main": {
+        "type": "function",
+        "name": "main",
+        "arguments": [],
+        "return_type": "void",
+        "body": [
+          {
+            "type": "init",
+            "name": "x",
+            "value": {
+              "type": "integer",
+              "value": 4,
+              "ty": "i64"
+            }
+          }
+        ]
+      }
+    }
   ]
 ]

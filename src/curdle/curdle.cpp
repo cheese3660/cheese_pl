@@ -607,6 +607,11 @@ namespace cheese::curdle {
     }
 
 
+    bacteria::BacteriaPtr translate_comptime(LocalContext *lctx, ComptimeValue *value) {
+
+        NOT_IMPL_FOR(typeid(*value).name());
+    }
+
     bacteria::BacteriaPtr translate_expression(LocalContext *lctx, parser::NodePtr expr) {
         auto rctx = lctx->runtime;
         auto cctx = rctx->comptime;
@@ -614,6 +619,11 @@ namespace cheese::curdle {
         auto &gc = gctx->gc;
         auto true_expr = expr.get();
         try {
+            auto execed = cctx->try_exec(expr.get(), rctx);
+            if (execed.has_value()) {
+                return translate_comptime(lctx, execed.value().get());
+            }
+
 #define WHEN_EXPR_IS(type, name) if (auto name = dynamic_cast<type*>(true_expr); name)
 #define NOP() return std::make_unique<bacteria::nodes::Nop>(expr->location)
             WHEN_EXPR_IS(parser::nodes::TupleCall, pTupleCall) {

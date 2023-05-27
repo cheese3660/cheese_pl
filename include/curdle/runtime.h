@@ -55,8 +55,7 @@ namespace cheese::curdle {
         Structure *structure;
         Type *functionReturnType{nullptr}; // This is the return type of a function
 
-
-        std::map<std::string, RuntimeVariableInfo> variables{};
+        std::unordered_map<std::string, RuntimeVariableInfo> variables;
 
         std::optional<RuntimeVariableInfo> get(const std::string &name);
 

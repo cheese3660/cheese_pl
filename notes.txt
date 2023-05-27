@@ -16,7 +16,8 @@ TODO:
 [X] interfaces
 [X] concepts
 [ ] refactor using modules
-
+[ ] refactor std::map -> std::unordered_map
+[ ] refactor ComptimeValue ->  ComptimeValue.h/cpp
 
 
 ROADMAP:
@@ -28,5 +29,4 @@ ROADMAP:
     [ ] Redeveloping Representation
 [ ] LLVM Shit
     [X] Linking LLVM
-
 

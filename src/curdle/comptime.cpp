@@ -18,6 +18,103 @@ namespace cheese::curdle {
         mark_value();
     }
 
+#define OPERATOR_NOT_DEFINED_FOR(operator_name) throw CurdleError("Invalid Comptime Operation: " operator_name " cannot be used on a value of type " + type->to_string() + " at compile time", error::ErrorCode::NotComptime)
+
+    gcref<ComptimeValue> ComptimeValue::op_tuple_call(GlobalContext *gctx, std::vector<ComptimeValue *> values) {
+        OPERATOR_NOT_DEFINED_FOR("()");
+    }
+
+    gcref<ComptimeValue> ComptimeValue::op_array_call(GlobalContext *gctx, std::vector<ComptimeValue *> values) {
+        OPERATOR_NOT_DEFINED_FOR("[]");
+    }
+
+    gcref<ComptimeValue>
+    ComptimeValue::op_object_call(GlobalContext *gctx, std::unordered_map<std::string, ComptimeValue *> values) {
+        OPERATOR_NOT_DEFINED_FOR("{}");
+    }
+
+    gcref<ComptimeValue> ComptimeValue::op_unary_plus(GlobalContext *gctx) {
+        OPERATOR_NOT_DEFINED_FOR("unary+");
+    }
+
+    gcref<ComptimeValue> ComptimeValue::op_unary_minus(GlobalContext *gctx) {
+        OPERATOR_NOT_DEFINED_FOR("unary-");
+    }
+
+    gcref<ComptimeValue> ComptimeValue::op_not(GlobalContext *gctx) {
+        OPERATOR_NOT_DEFINED_FOR("not");
+    }
+
+    gcref<ComptimeValue> ComptimeValue::op_multiply(GlobalContext *gctx, ComptimeValue *other) {
+        OPERATOR_NOT_DEFINED_FOR("*");
+    }
+
+    gcref<ComptimeValue> ComptimeValue::op_divide(GlobalContext *gctx, ComptimeValue *other) {
+        OPERATOR_NOT_DEFINED_FOR("*");
+    }
+
+    gcref<ComptimeValue> ComptimeValue::op_remainder(GlobalContext *gctx, ComptimeValue *other) {
+        OPERATOR_NOT_DEFINED_FOR("%");
+    }
+
+    gcref<ComptimeValue> ComptimeValue::op_add(GlobalContext *gctx, ComptimeValue *other) {
+        OPERATOR_NOT_DEFINED_FOR("+");
+    }
+
+    gcref<ComptimeValue> ComptimeValue::op_subtract(GlobalContext *gctx, ComptimeValue *other) {
+        OPERATOR_NOT_DEFINED_FOR("-");
+    }
+
+    gcref<ComptimeValue> ComptimeValue::op_left_shift(GlobalContext *gctx, ComptimeValue *other) {
+        OPERATOR_NOT_DEFINED_FOR("<<");
+    }
+
+    gcref<ComptimeValue> ComptimeValue::op_right_shift(GlobalContext *gctx, ComptimeValue *other) {
+        OPERATOR_NOT_DEFINED_FOR(">>");
+    }
+
+    gcref<ComptimeValue> ComptimeValue::op_lesser_than(GlobalContext *gctx, ComptimeValue *other) {
+        OPERATOR_NOT_DEFINED_FOR("<");
+    }
+
+    gcref<ComptimeValue> ComptimeValue::op_greater_than(GlobalContext *gctx, ComptimeValue *other) {
+        OPERATOR_NOT_DEFINED_FOR(">");
+    }
+
+    gcref<ComptimeValue> ComptimeValue::op_lesser_than_equal(GlobalContext *gctx, ComptimeValue *other) {
+        OPERATOR_NOT_DEFINED_FOR("<=");
+    }
+
+    gcref<ComptimeValue> ComptimeValue::op_greater_than_equal(GlobalContext *gctx, ComptimeValue *other) {
+        OPERATOR_NOT_DEFINED_FOR(">=");
+    }
+
+    gcref<ComptimeValue> ComptimeValue::op_equal(GlobalContext *gctx, ComptimeValue *other) {
+        OPERATOR_NOT_DEFINED_FOR("==");
+    }
+
+    gcref<ComptimeValue> ComptimeValue::op_not_equal(GlobalContext *gctx, ComptimeValue *other) {
+        OPERATOR_NOT_DEFINED_FOR("!=");
+    }
+
+    gcref<ComptimeValue> ComptimeValue::op_and(GlobalContext *gctx, ComptimeValue *other) {
+        OPERATOR_NOT_DEFINED_FOR("and");
+    }
+
+    gcref<ComptimeValue> ComptimeValue::op_xor(GlobalContext *gctx, ComptimeValue *other) {
+        OPERATOR_NOT_DEFINED_FOR("xor");
+    }
+
+    gcref<ComptimeValue> ComptimeValue::op_or(GlobalContext *gctx, ComptimeValue *other) {
+        OPERATOR_NOT_DEFINED_FOR("or");
+    }
+
+    gcref<ComptimeValue> ComptimeValue::op_combine(GlobalContext *gctx, ComptimeValue *other) {
+        OPERATOR_NOT_DEFINED_FOR("&");
+    }
+
+#undef OPERATOR_NOT_DEFINED_FOR
+
     void ComptimeContext::mark_references() {
         if (currentStructure != nullptr) {
             currentStructure->mark();
@@ -292,18 +389,9 @@ namespace cheese::curdle {
         auto function = exec(call->object.get(), rtime);
         auto fptr = function.get();
 #define WHEN_FUNCTION_IS(type, name) if (auto name = dynamic_cast<type*>(fptr); name)
-        WHEN_FUNCTION_IS(ComptimeFunctionSet, pComptimeFunctionSet) {
-            std::vector<PassedFunctionArgument> arguments;
-            // Store all the references so they will be deallocated at the *correct* time
-            std::vector<gcref<ComptimeValue>> value_refs;
-            for (const auto &node: call->args) {
-                auto arg = exec(node.get(), rtime);
-                arguments.push_back(
-                        PassedFunctionArgument{false, arg, arg->type});
-                value_refs.push_back(std::move(arg));
-            }
-            NOT_IMPL_FOR("Functions");
-        }
+//        WHEN_FUNCTION_IS(ComptimeFunctionSet, pComptimeFunctionSet) {
+
+//        }
         WHEN_FUNCTION_IS(BuiltinFunctionReference, pBuiltinFunctionReference) {
             if (pBuiltinFunctionReference->builtin->comptime) {
                 std::vector<parser::Node *> arguments;
@@ -317,167 +405,182 @@ namespace cheese::curdle {
                         pBuiltinFunctionReference->name, call->location, error::ErrorCode::BadBuiltinCall);
             }
         }
-        NOT_IMPL_FOR(typeid(*fptr).name());
+        std::vector<ComptimeValue *> arguments;
+        // Store all the references so they will be deallocated at the *correct* time
+        std::vector<gcref<ComptimeValue>> value_refs;
+        for (const auto &node: call->args) {
+            auto arg = exec(node.get(), rtime);
+            arguments.push_back(arg);
+            value_refs.push_back(std::move(arg));
+        }
+        return function->op_tuple_call(globalContext, arguments);
+//        NOT_IMPL_FOR(typeid(*fptr).name());
 #undef WHEN_FUNCTION_IS
     }
 
     gcref<ComptimeValue> ComptimeContext::exec(parser::Node *node, RuntimeContext *rtime) {
+        try {
 #define WHEN_NODE_IS(type, name) if (auto name = dynamic_cast<type*>(node); name)
-        auto &gc = globalContext->gc;
-        WHEN_NODE_IS(parser::nodes::SignedIntType, pSignedIntType) {
-            return create_from_type(globalContext, IntegerType::get(globalContext, true, pSignedIntType->size));
-        }
-        WHEN_NODE_IS(parser::nodes::UnsignedIntType, pUnsignedIntType) {
-            return create_from_type(globalContext, IntegerType::get(globalContext, false, pUnsignedIntType->size));
-        }
-        WHEN_NODE_IS(parser::nodes::Void, pVoid) {
-            return create_from_type(globalContext, VoidType::get(globalContext));
-        }
-        WHEN_NODE_IS(parser::nodes::ValueReference, pValueReference) {
-            // Do the same as below but throw errors on an invalid value reference
-            auto gotten = get(pValueReference->name);
-            if (gotten.has_value()) {
-                return std::move(gotten.value());
-            } else {
-                throw LocalizedCurdleError(
-                        "Compile Time Execution Error: referencing a non-extant compile time variable: " +
-                        pValueReference->name, pValueReference->location, error::ErrorCode::NotComptime);
+            auto &gc = globalContext->gc;
+            WHEN_NODE_IS(parser::nodes::SignedIntType, pSignedIntType) {
+                return create_from_type(globalContext, IntegerType::get(globalContext, true, pSignedIntType->size));
             }
-        }
-        WHEN_NODE_IS(parser::nodes::AnyType, pAnyType) {
-            return create_from_type(globalContext, AnyType::get(globalContext));
-        }
-        // Ah fun, tuple calling at compile time this is going to be fun
-        WHEN_NODE_IS(parser::nodes::TupleCall, pTupleCall) {
-            return exec_tuple_call(pTupleCall, rtime);
-        }
-        WHEN_NODE_IS(parser::nodes::BuiltinReference, pBuiltinReference) {
-            if (builtins.contains(pBuiltinReference->builtin)) {
-                auto &builtin = builtins.at(pBuiltinReference->builtin);
-                if (builtin.comptime || builtin.runtime) {
-                    return gc.gcnew<BuiltinFunctionReference>(pBuiltinReference->builtin, &builtin, globalContext);
+            WHEN_NODE_IS(parser::nodes::UnsignedIntType, pUnsignedIntType) {
+                return create_from_type(globalContext, IntegerType::get(globalContext, false, pUnsignedIntType->size));
+            }
+            WHEN_NODE_IS(parser::nodes::Void, pVoid) {
+                return create_from_type(globalContext, VoidType::get(globalContext));
+            }
+            WHEN_NODE_IS(parser::nodes::ValueReference, pValueReference) {
+                // Do the same as below but throw errors on an invalid value reference
+                auto gotten = get(pValueReference->name);
+                if (gotten.has_value()) {
+                    return std::move(gotten.value());
                 } else {
-                    return builtin.get(pBuiltinReference->location, this, rtime);
+                    throw LocalizedCurdleError(
+                            "Compile Time Execution Error: referencing a non-extant compile time variable: " +
+                            pValueReference->name, pValueReference->location, error::ErrorCode::NotComptime);
                 }
-            } else {
-                throw LocalizedCurdleError("Bad Builtin Call: Builtin does not exist: " + pBuiltinReference->builtin,
-                                           pBuiltinReference->location, error::ErrorCode::BadBuiltinCall);
             }
-        }
-        WHEN_NODE_IS(parser::nodes::Structure, pStructure) {
-            return create_from_type(globalContext, translate_structure(this, pStructure).get());
-        }
-        WHEN_NODE_IS(parser::nodes::Float64, pFloat64) {
-            return create_from_type(globalContext, Float64Type::get(globalContext));
-        }
-        WHEN_NODE_IS(parser::nodes::IntegerLiteral, pIntegerLiteral) {
-            return gc.gcnew<ComptimeInteger>(pIntegerLiteral->value, ComptimeIntegerType::get(globalContext));
-        }
-
-        WHEN_NODE_IS(parser::nodes::FloatLiteral, pFloatLiteral) {
-            return gc.gcnew<ComptimeFloat>(pFloatLiteral->value, ComptimeFloatType::get(globalContext));
-        }
-
-        WHEN_NODE_IS(parser::nodes::EqualTo, pEqualTo) {
-            auto lhs = exec(pEqualTo->lhs.get(), rtime);
-            auto rhs = exec(pEqualTo->rhs.get(), rtime);
-            // Now we must define a few functions
-            NOT_IMPL_FOR(
-                    "Equality comparisons"); // This will be "fun" to mandate all these functions in the comptime value structure
-        }
-        WHEN_NODE_IS(parser::nodes::LesserThan, pLesserThan) {
-            auto lhs = exec(pLesserThan->lhs.get(), rtime);
-            auto rhs = exec(pLesserThan->rhs.get(), rtime);
-            // Now we must define a few functions
-            NOT_IMPL_FOR(
-                    "LesserThan"); // This will be "fun" to mandate all these functions in the comptime value structure
-        }
-        WHEN_NODE_IS(parser::nodes::Subtraction, pSubtraction) {
-            auto lhs = exec(pSubtraction->lhs.get(), rtime);
-            auto rhs = exec(pSubtraction->rhs.get(), rtime);
-            // Now we must define a few functions
-            NOT_IMPL_FOR(
-                    "LesserThan"); // This will be "fun" to mandate all these functions in the comptime value structure
-        }
-        WHEN_NODE_IS(parser::nodes::Multiplication, pMultiplication) {
-            auto lhs = exec(pMultiplication->lhs.get(), rtime);
-            auto rhs = exec(pMultiplication->rhs.get(), rtime);
-            // Now we must define a few functions
-            NOT_IMPL_FOR(
-                    "LesserThan"); // This will be "fun" to mandate all these functions in the comptime value structure
-        }
-        WHEN_NODE_IS(parser::nodes::Modulus, pModulus) {
-            auto lhs = exec(pModulus->lhs.get(), rtime);
-            auto rhs = exec(pModulus->rhs.get(), rtime);
-            // Now we must define a few functions
-            NOT_IMPL_FOR(
-                    "LesserThan"); // This will be "fun" to mandate all these functions in the comptime value structure
-        }
-        WHEN_NODE_IS(parser::nodes::Division, pDivision) {
-            auto lhs = exec(pDivision->lhs.get(), rtime);
-            auto rhs = exec(pDivision->rhs.get(), rtime);
-            // Now we must define a few functions
-            NOT_IMPL_FOR(
-                    "LesserThan"); // This will be "fun" to mandate all these functions in the comptime value structure
-        }
-        WHEN_NODE_IS(parser::nodes::Cast, pCast) {
-            auto lhs = exec(pCast->lhs.get(), rtime);
-            gcref<ComptimeValue> rhs = exec(pCast->rhs.get(), rtime);
-            if (auto as_type = dynamic_cast<ComptimeType *>(rhs.get()); as_type) {
-                return lhs->cast(as_type->typeValue, gc);
-            } else {
-                throw LocalizedCurdleError("Expected Type: Expected a value convertible to a type",
-                                           pCast->rhs->location,
-                                           error::ErrorCode::ExpectedType);
+            WHEN_NODE_IS(parser::nodes::AnyType, pAnyType) {
+                return create_from_type(globalContext, AnyType::get(globalContext));
             }
-        }
-        WHEN_NODE_IS(parser::nodes::Subscription, pSubscription) {
-            auto lhs = exec(pSubscription->lhs.get(), rtime);
-            auto rhs_ptr = pSubscription->rhs.get();
+            // Ah fun, tuple calling at compile time this is going to be fun
+            WHEN_NODE_IS(parser::nodes::TupleCall, pTupleCall) {
+                return exec_tuple_call(pTupleCall, rtime);
+            }
+            WHEN_NODE_IS(parser::nodes::BuiltinReference, pBuiltinReference) {
+                if (builtins.contains(pBuiltinReference->builtin)) {
+                    auto &builtin = builtins.at(pBuiltinReference->builtin);
+                    if (builtin.comptime || builtin.runtime) {
+                        return gc.gcnew<BuiltinFunctionReference>(pBuiltinReference->builtin, &builtin, globalContext);
+                    } else {
+                        return builtin.get(pBuiltinReference->location, this, rtime);
+                    }
+                } else {
+                    throw LocalizedCurdleError(
+                            "Bad Builtin Call: Builtin does not exist: " + pBuiltinReference->builtin,
+                            pBuiltinReference->location, error::ErrorCode::BadBuiltinCall);
+                }
+            }
+            WHEN_NODE_IS(parser::nodes::Structure, pStructure) {
+                return create_from_type(globalContext, translate_structure(this, pStructure).get());
+            }
+            WHEN_NODE_IS(parser::nodes::Float64, pFloat64) {
+                return create_from_type(globalContext, Float64Type::get(globalContext));
+            }
+            WHEN_NODE_IS(parser::nodes::IntegerLiteral, pIntegerLiteral) {
+                return gc.gcnew<ComptimeInteger>(pIntegerLiteral->value, ComptimeIntegerType::get(globalContext));
+            }
+
+            WHEN_NODE_IS(parser::nodes::FloatLiteral, pFloatLiteral) {
+                return gc.gcnew<ComptimeFloat>(pFloatLiteral->value, ComptimeFloatType::get(globalContext));
+            }
+
+            WHEN_NODE_IS(parser::nodes::EqualTo, pEqualTo) {
+                auto lhs = exec(pEqualTo->lhs.get(), rtime);
+                auto rhs = exec(pEqualTo->rhs.get(), rtime);
+                // Now we must define a few functions
+                NOT_IMPL_FOR(
+                        "Equality comparisons"); // This will be "fun" to mandate all these functions in the comptime value structure
+            }
+            WHEN_NODE_IS(parser::nodes::LesserThan, pLesserThan) {
+                auto lhs = exec(pLesserThan->lhs.get(), rtime);
+                auto rhs = exec(pLesserThan->rhs.get(), rtime);
+                // Now we must define a few functions
+                NOT_IMPL_FOR(
+                        "LesserThan"); // This will be "fun" to mandate all these functions in the comptime value structure
+            }
+            WHEN_NODE_IS(parser::nodes::Subtraction, pSubtraction) {
+                auto lhs = exec(pSubtraction->lhs.get(), rtime);
+                auto rhs = exec(pSubtraction->rhs.get(), rtime);
+                // Now we must define a few functions
+                NOT_IMPL_FOR(
+                        "LesserThan"); // This will be "fun" to mandate all these functions in the comptime value structure
+            }
+            WHEN_NODE_IS(parser::nodes::Multiplication, pMultiplication) {
+                auto lhs = exec(pMultiplication->lhs.get(), rtime);
+                auto rhs = exec(pMultiplication->rhs.get(), rtime);
+                // Now we must define a few functions
+                NOT_IMPL_FOR(
+                        "LesserThan"); // This will be "fun" to mandate all these functions in the comptime value structure
+            }
+            WHEN_NODE_IS(parser::nodes::Modulus, pModulus) {
+                auto lhs = exec(pModulus->lhs.get(), rtime);
+                auto rhs = exec(pModulus->rhs.get(), rtime);
+                // Now we must define a few functions
+                NOT_IMPL_FOR(
+                        "LesserThan"); // This will be "fun" to mandate all these functions in the comptime value structure
+            }
+            WHEN_NODE_IS(parser::nodes::Division, pDivision) {
+                auto lhs = exec(pDivision->lhs.get(), rtime);
+                auto rhs = exec(pDivision->rhs.get(), rtime);
+                // Now we must define a few functions
+                NOT_IMPL_FOR(
+                        "LesserThan"); // This will be "fun" to mandate all these functions in the comptime value structure
+            }
+            WHEN_NODE_IS(parser::nodes::Cast, pCast) {
+                auto lhs = exec(pCast->lhs.get(), rtime);
+                gcref<ComptimeValue> rhs = exec(pCast->rhs.get(), rtime);
+                if (auto as_type = dynamic_cast<ComptimeType *>(rhs.get()); as_type) {
+                    return lhs->cast(as_type->typeValue, gc);
+                } else {
+                    throw LocalizedCurdleError("Expected Type: Expected a value convertible to a type",
+                                               pCast->rhs->location,
+                                               error::ErrorCode::ExpectedType);
+                }
+            }
+            WHEN_NODE_IS(parser::nodes::Subscription, pSubscription) {
+                auto lhs = exec(pSubscription->lhs.get(), rtime);
+                auto rhs_ptr = pSubscription->rhs.get();
 #define WHEN_RHS_IS(type, name) if (auto name = dynamic_cast<type*>(rhs_ptr); name)
-            WHEN_RHS_IS(parser::nodes::ValueReference, pValueReference) {
-                if (auto as_object = dynamic_cast<ComptimeObject *>(lhs.get()); as_object) {
-                    if (!as_object->fields.contains(pValueReference->name)) {
-                        throw LocalizedCurdleError("Invalid Subscript: " + as_object->type->to_string() +
-                                                   " does not contain a field by the name of: " + pValueReference->name,
-                                                   pSubscription->location, error::ErrorCode::InvalidSubscript);
+                WHEN_RHS_IS(parser::nodes::ValueReference, pValueReference) {
+                    if (auto as_object = dynamic_cast<ComptimeObject *>(lhs.get()); as_object) {
+                        if (!as_object->fields.contains(pValueReference->name)) {
+                            throw LocalizedCurdleError("Invalid Subscript: " + as_object->type->to_string() +
+                                                       " does not contain a field by the name of: " +
+                                                       pValueReference->name,
+                                                       pSubscription->location, error::ErrorCode::InvalidSubscript);
+                        } else {
+                            return {gc, as_object->fields[pValueReference->name]};
+                        }
                     } else {
-                        return {gc, as_object->fields[pValueReference->name]};
+                        NOT_IMPL_FOR("Non-objects");
                     }
-                } else {
-                    NOT_IMPL_FOR("Non-objects");
                 }
-            }
-            WHEN_RHS_IS(parser::nodes::IntegerLiteral, pIntegerLiteral) {
-                if (auto as_object = dynamic_cast<ComptimeObject *>(lhs.get()); as_object) {
-                    auto field_name = static_cast<std::string>(pIntegerLiteral->value);
-                    // We have to do a lot more once interfaces and such are a thing at compile time
-                    if (!as_object->fields.contains(field_name)) {
-                        throw LocalizedCurdleError("Invalid Subscript: " + as_object->type->to_string() +
-                                                   " does not contain a field by the name of: " + field_name,
-                                                   pSubscription->location, error::ErrorCode::InvalidSubscript);
+                WHEN_RHS_IS(parser::nodes::IntegerLiteral, pIntegerLiteral) {
+                    if (auto as_object = dynamic_cast<ComptimeObject *>(lhs.get()); as_object) {
+                        auto field_name = static_cast<std::string>(pIntegerLiteral->value);
+                        // We have to do a lot more once interfaces and such are a thing at compile time
+                        if (!as_object->fields.contains(field_name)) {
+                            throw LocalizedCurdleError("Invalid Subscript: " + as_object->type->to_string() +
+                                                       " does not contain a field by the name of: " + field_name,
+                                                       pSubscription->location, error::ErrorCode::InvalidSubscript);
+                        } else {
+                            return {gc, as_object->fields[field_name]};
+                        }
                     } else {
-                        return {gc, as_object->fields[field_name]};
+                        NOT_IMPL_FOR("Non-objects");
                     }
-                } else {
-                    NOT_IMPL_FOR("Non-objects");
                 }
-            }
-            NOT_IMPL_FOR("Non integer/name indices");
+                NOT_IMPL_FOR("Non integer/name indices");
 #undef WHEN_RHS_IS
-        }
-        WHEN_NODE_IS(parser::nodes::Self, pSelf) {
-            auto gotten = get("self");
-            if (gotten.has_value()) {
-                return std::move(gotten.value());
-            } else {
-                throw LocalizedCurdleError(
-                        "Compile Time Execution Error: referencing a non-extant compile time variable: self",
-                        pSelf->location, error::ErrorCode::NotComptime);
             }
-        }
-        NOT_IMPL_FOR(typeid(*node).name());
+            WHEN_NODE_IS(parser::nodes::Self, pSelf) {
+                auto gotten = get("self");
+                if (gotten.has_value()) {
+                    return std::move(gotten.value());
+                } else {
+                    throw LocalizedCurdleError(
+                            "Compile Time Execution Error: referencing a non-extant compile time variable: self",
+                            pSelf->location, error::ErrorCode::NotComptime);
+                }
+            }
+            NOT_IMPL_FOR(typeid(*node).name());
 #undef WHEN_NODE_IS
+        } catch (const CurdleError &e) {
+            throw LocalizedCurdleError(e.what(), node->location, e.code);
+        }
     }
 
 //    std::optional<gcref<ComptimeValue>>

@@ -57,6 +57,56 @@ namespace cheese::curdle {
 
         // A comptime value can have many types
         Type *type;
+
+        // Now we implement the actual interfaces for everything, addition, subtraction, any operation that can be overloaded at compile time
+        // This is before we implement mixins, once we add those we might need to rewrite some stuff
+
+        virtual gcref<ComptimeValue> op_tuple_call(GlobalContext *gctx, std::vector<ComptimeValue *> values);
+
+        virtual gcref<ComptimeValue> op_array_call(GlobalContext *gctx, std::vector<ComptimeValue *> values);
+
+        virtual gcref<ComptimeValue>
+        op_object_call(GlobalContext *gctx, std::unordered_map<std::string, ComptimeValue *> values);
+
+        virtual gcref<ComptimeValue> op_unary_plus(GlobalContext *gctx);
+
+        virtual gcref<ComptimeValue> op_unary_minus(GlobalContext *gctx);
+
+        virtual gcref<ComptimeValue> op_not(GlobalContext *gctx);
+
+        virtual gcref<ComptimeValue> op_multiply(GlobalContext *gctx, ComptimeValue *other);
+
+        virtual gcref<ComptimeValue> op_divide(GlobalContext *gctx, ComptimeValue *other);
+
+        virtual gcref<ComptimeValue> op_remainder(GlobalContext *gctx, ComptimeValue *other);
+
+        virtual gcref<ComptimeValue> op_add(GlobalContext *gctx, ComptimeValue *other);
+
+        virtual gcref<ComptimeValue> op_subtract(GlobalContext *gctx, ComptimeValue *other);
+
+        virtual gcref<ComptimeValue> op_left_shift(GlobalContext *gctx, ComptimeValue *other);
+
+        virtual gcref<ComptimeValue> op_right_shift(GlobalContext *gctx, ComptimeValue *other);
+
+        virtual gcref<ComptimeValue> op_lesser_than(GlobalContext *gctx, ComptimeValue *other);
+
+        virtual gcref<ComptimeValue> op_greater_than(GlobalContext *gctx, ComptimeValue *other);
+
+        virtual gcref<ComptimeValue> op_lesser_than_equal(GlobalContext *gctx, ComptimeValue *other);
+
+        virtual gcref<ComptimeValue> op_greater_than_equal(GlobalContext *gctx, ComptimeValue *other);
+
+        virtual gcref<ComptimeValue> op_equal(GlobalContext *gctx, ComptimeValue *other);
+
+        virtual gcref<ComptimeValue> op_not_equal(GlobalContext *gctx, ComptimeValue *other);
+
+        virtual gcref<ComptimeValue> op_and(GlobalContext *gctx, ComptimeValue *other);
+
+        virtual gcref<ComptimeValue> op_xor(GlobalContext *gctx, ComptimeValue *other);
+
+        virtual gcref<ComptimeValue> op_or(GlobalContext *gctx, ComptimeValue *other);
+
+        virtual gcref<ComptimeValue> op_combine(GlobalContext *gctx, ComptimeValue *other);
     };
 
 
@@ -243,7 +293,7 @@ namespace cheese::curdle {
         Structure *currentStructure;
         ComptimeContext *parent;
         GlobalContext *globalContext;
-        std::map<std::string, ComptimeVariable *> comptimeVariables;
+        std::unordered_map<std::string, ComptimeVariable *> comptimeVariables;
         std::vector<std::string> structure_name_stack;
         size_t next_offset_for_structure_name = 0;
 

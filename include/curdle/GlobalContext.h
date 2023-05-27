@@ -32,7 +32,7 @@ namespace cheese::curdle {
         FunctionTemplate *entry_function;
         garbage_collector &gc;
         bool errored{false};
-        std::map<std::filesystem::path, Structure *> imports;
+        std::unordered_map<std::filesystem::path, Structure *> imports;
         size_t anonymous_struct_offset{0};
         size_t anonymous_variable_offset{0};
         std::set<std::string> all_struct_names;
@@ -55,7 +55,7 @@ namespace cheese::curdle {
         }
 
         // This is a lookup for cached objects
-        std::map<std::string, managed_object *> cached_objects;
+        std::unordered_map<std::string, managed_object *> cached_objects;
 
     };
 }
