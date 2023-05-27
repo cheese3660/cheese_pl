@@ -137,7 +137,7 @@ namespace cheese::curdle {
     };
 
     struct ComptimeType : ComptimeValue {
-        ComptimeType(garbage_collector &gc, Type *pType);
+        ComptimeType(GlobalContext *gctx, Type *pType);
 
         void mark_value() override;
 
@@ -178,7 +178,7 @@ namespace cheese::curdle {
     };
 
     struct ComptimeFunctionSet : ComptimeValue {
-        ComptimeFunctionSet(FunctionSet *set, garbage_collector &gc);
+        ComptimeFunctionSet(FunctionSet *set, GlobalContext *gc);
 
         FunctionSet *set;
 
@@ -198,9 +198,9 @@ namespace cheese::curdle {
         std::string name;
         Builtin *builtin;
 
-        explicit BuiltinFunctionReference(std::string name, Builtin *builtin, garbage_collector &gc) : name(name),
-                                                                                                       builtin(builtin) {
-            type = BuiltinReferenceType::get(gc);
+        explicit BuiltinFunctionReference(std::string name, Builtin *builtin, GlobalContext *gctx) : name(name),
+                                                                                                     builtin(builtin) {
+            type = BuiltinReferenceType::get(gctx);
         }
 
         void mark_value() override {

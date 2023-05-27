@@ -20,6 +20,9 @@ namespace cheese::curdle {
         for (auto &imp: imports) {
             imp.second->mark();
         }
+        for (auto &object: cached_objects) {
+            object.second->mark();
+        }
     }
 
     Structure *GlobalContext::import_structure(Coordinate location, std::string path, fs::path dir, fs::path pdir) {

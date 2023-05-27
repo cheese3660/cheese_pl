@@ -54,6 +54,9 @@ namespace cheese::curdle {
             return "__" + base + "__" + std::to_string(anonymous_variable_offset++);
         }
 
+        // This is a lookup for cached objects
+        std::map<std::string, managed_object *> cached_objects;
+
     };
 }
 #endif //CHEESE_GLOBALCONTEXT_H

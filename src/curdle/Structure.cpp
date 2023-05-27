@@ -124,9 +124,9 @@ namespace cheese::curdle {
 
     template<typename T>
     requires std::is_base_of_v<Type, T>
-    static gcref<ComptimeValue> create_from_type(garbage_collector &gc, T *ref) {
-        auto type = new ComptimeType{gc, static_cast<Type *>(ref)};
-        return gc.manage<ComptimeValue>(type);
+    static gcref<ComptimeValue> create_from_type(GlobalContext *gctx, T *ref) {
+        auto type = new ComptimeType{gctx, static_cast<Type *>(ref)};
+        return {gctx->gc, type};
     }
 
     void Structure::resolve_lazy(LazyValue *&lazy) {
@@ -139,8 +139,8 @@ namespace cheese::curdle {
                                                                                     containedContext->path.parent_path(),
                                                                                     containedContext->project_dir);
             lazy = nullptr;
-            auto from_type = create_from_type(gc, imported);
-            ComptimeVariableInfo info{true, true, TypeType::get(gc), from_type};
+            auto from_type = create_from_type(gctx, imported);
+            ComptimeVariableInfo info{true, true, TypeType::get(gctx), from_type};
             comptime_variables[lazy->name] = info;
             return;
         }
@@ -244,7 +244,7 @@ namespace cheese::curdle {
         }
     }
 
-    Type *Structure::peer(Type *other, garbage_collector &gc) {
+    Type *Structure::peer(Type *other, GlobalContext *gctx) {
         if (compare(other) == 0) return this;
         if (dynamic_cast<AnyType *>(other)) return this;
         return nullptr;

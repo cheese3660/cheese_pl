@@ -180,8 +180,8 @@ namespace cheese::curdle {
         typeValue->mark();
     }
 
-    ComptimeType::ComptimeType(garbage_collector &gc, Type *pType) {
-        type = TypeType::get(gc);
+    ComptimeType::ComptimeType(GlobalContext *gctx, Type *pType) {
+        type = TypeType::get(gctx);
         typeValue = pType;
     }
 
@@ -265,8 +265,8 @@ namespace cheese::curdle {
         return std::to_string((size_t) set);
     }
 
-    ComptimeFunctionSet::ComptimeFunctionSet(FunctionSet *set, garbage_collector &gc) : set(set) {
-        type = FunctionTemplateType::get(gc);
+    ComptimeFunctionSet::ComptimeFunctionSet(FunctionSet *set, GlobalContext *gctx) : set(set) {
+        type = FunctionTemplateType::get(gctx);
     }
 
     gcref<ComptimeValue> ComptimeFunctionSet::cast(Type *target_type, garbage_collector &garbageCollector) {
@@ -275,9 +275,9 @@ namespace cheese::curdle {
 
     template<typename T>
     requires std::is_base_of_v<Type, T>
-    static gcref<ComptimeValue> create_from_type(garbage_collector &gc, T *ref) {
-        auto type = new ComptimeType{gc, static_cast<Type *>(ref)};
-        return gc.manage<ComptimeValue>(type);
+    static gcref<ComptimeValue> create_from_type(GlobalContext *gctx, T *ref) {
+        auto type = new ComptimeType{gctx, static_cast<Type *>(ref)};
+        return {gctx->gc, type};
     }
 
     gcref<ComptimeValue> ComptimeContext::exec(parser::NodePtr node, RuntimeContext *rtime) {
@@ -326,13 +326,13 @@ namespace cheese::curdle {
 #define WHEN_NODE_IS(type, name) if (auto name = dynamic_cast<type*>(node); name)
         auto &gc = globalContext->gc;
         WHEN_NODE_IS(parser::nodes::SignedIntType, pSignedIntType) {
-            return create_from_type(gc, IntegerType::get(gc, true, pSignedIntType->size));
+            return create_from_type(globalContext, IntegerType::get(globalContext, true, pSignedIntType->size));
         }
         WHEN_NODE_IS(parser::nodes::UnsignedIntType, pUnsignedIntType) {
-            return create_from_type(gc, IntegerType::get(gc, false, pUnsignedIntType->size));
+            return create_from_type(globalContext, IntegerType::get(globalContext, false, pUnsignedIntType->size));
         }
         WHEN_NODE_IS(parser::nodes::Void, pVoid) {
-            return create_from_type(gc, VoidType::get(gc));
+            return create_from_type(globalContext, VoidType::get(globalContext));
         }
         WHEN_NODE_IS(parser::nodes::ValueReference, pValueReference) {
             // Do the same as below but throw errors on an invalid value reference
@@ -349,7 +349,7 @@ namespace cheese::curdle {
             }
         }
         WHEN_NODE_IS(parser::nodes::AnyType, pAnyType) {
-            return create_from_type(gc, AnyType::get(gc));
+            return create_from_type(globalContext, AnyType::get(globalContext));
         }
         // Ah fun, tuple calling at compile time this is going to be fun
         WHEN_NODE_IS(parser::nodes::TupleCall, pTupleCall) {
@@ -359,7 +359,7 @@ namespace cheese::curdle {
             if (builtins.contains(pBuiltinReference->builtin)) {
                 auto &builtin = builtins.at(pBuiltinReference->builtin);
                 if (builtin.comptime || builtin.runtime) {
-                    return gc.gcnew<BuiltinFunctionReference>(pBuiltinReference->builtin, &builtin, gc);
+                    return gc.gcnew<BuiltinFunctionReference>(pBuiltinReference->builtin, &builtin, globalContext);
                 } else {
                     return builtin.get(pBuiltinReference->location, this, rtime);
                 }
@@ -370,10 +370,10 @@ namespace cheese::curdle {
             }
         }
         WHEN_NODE_IS(parser::nodes::Structure, pStructure) {
-            return create_from_type(gc, translate_structure(this, pStructure).get());
+            return create_from_type(globalContext, translate_structure(this, pStructure).get());
         }
         WHEN_NODE_IS(parser::nodes::Float64, pFloat64) {
-            return create_from_type(gc, Float64Type::get(gc));
+            return create_from_type(globalContext, Float64Type::get(globalContext));
         }
         NOT_IMPL_FOR(typeid(*node).name());
 #undef WHEN_NODE_IS
@@ -418,23 +418,23 @@ namespace cheese::curdle {
 #define WHEN_NODE_IS(type, name) if (auto name = dynamic_cast<type*>(node); name)
         auto &gc = globalContext->gc;
         WHEN_NODE_IS(parser::nodes::SignedIntType, pSignedIntType) {
-            return create_from_type(gc, IntegerType::get(gc, true, pSignedIntType->size));
+            return create_from_type(globalContext, IntegerType::get(globalContext, true, pSignedIntType->size));
         }
         WHEN_NODE_IS(parser::nodes::UnsignedIntType, pUnsignedIntType) {
-            return create_from_type(gc, IntegerType::get(gc, false, pUnsignedIntType->size));
+            return create_from_type(globalContext, IntegerType::get(globalContext, false, pUnsignedIntType->size));
         }
         WHEN_NODE_IS(parser::nodes::Void, pVoid) {
-            return create_from_type(gc, VoidType::get(gc));
+            return create_from_type(globalContext, VoidType::get(globalContext));
         }
         WHEN_NODE_IS(parser::nodes::ValueReference, pValueReference) {
             return get(pValueReference->name);
         }
         WHEN_NODE_IS(parser::nodes::IntegerLiteral, pIntegerLiteral) {
-            return gc.gcnew<ComptimeInteger>(pIntegerLiteral->value, ComptimeIntegerType::get(gc));
+            return gc.gcnew<ComptimeInteger>(pIntegerLiteral->value, ComptimeIntegerType::get(globalContext));
         }
 
         WHEN_NODE_IS(parser::nodes::FloatLiteral, pFloatLiteral) {
-            return gc.gcnew<ComptimeFloat>(pFloatLiteral->value, ComptimeFloatType::get(gc));
+            return gc.gcnew<ComptimeFloat>(pFloatLiteral->value, ComptimeFloatType::get(globalContext));
         }
         WHEN_NODE_IS(parser::nodes::EqualTo, pEqualTo) {
             auto lhs = try_exec(pEqualTo->lhs.get(), rtime);
@@ -584,7 +584,7 @@ namespace cheese::curdle {
                 // At some point we have to combine function sets...
                 auto function_set = currentStructure->function_sets[name];
                 auto new_function_set = new ComptimeFunctionSet(function_set,
-                                                                globalContext->gc);
+                                                                globalContext);
                 return gcref<ComptimeValue>(globalContext->gc, new_function_set);
             }
         }

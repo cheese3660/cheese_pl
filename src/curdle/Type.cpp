@@ -7,6 +7,7 @@
 #include "error.h"
 #include "curdle/curdle.h"
 #include <typeinfo>
+#include "curdle/GlobalContext.h"
 
 namespace cheese::curdle {
 #define PEER_TYPE_CATCH_ANY() if (dynamic_cast<AnyType*>(other)) return this
@@ -20,15 +21,14 @@ namespace cheese::curdle {
 
     }
 
-    static TypeType *tt_instance;
 
-    TypeType *TypeType::get(memory::garbage_collection::garbage_collector &gc) {
-        if (tt_instance == nullptr) {
-            auto ref = gc.gcnew<TypeType>();
-            gc.add_root_object(ref);
-            tt_instance = ref;
+    TypeType *TypeType::get(GlobalContext *gctx) {
+        if (!gctx->cached_objects.contains("type: type")) {
+            auto ref = gctx->gc.gcnew<TypeType>();
+            gctx->cached_objects["type: type"] = ref;
+            return ref;
         }
-        return tt_instance;
+        return dynamic_cast<TypeType *>(gctx->cached_objects["type: type"]);
     }
 
     Comptimeness TypeType::get_comptimeness() {
@@ -43,7 +43,7 @@ namespace cheese::curdle {
         return "type";
     }
 
-    Type *TypeType::peer(Type *other, garbage_collector &gc) {
+    Type *TypeType::peer(Type *other, GlobalContext *gctx) {
         PEER_TYPE_CATCH_ANY();
         return nullptr;
     }
@@ -64,21 +64,14 @@ namespace cheese::curdle {
         }
     }
 
-    static std::map<std::uint16_t, IntegerType *> signed_instances;
-    static std::map<std::uint16_t, IntegerType *> unsigned_instances;
-
-    IntegerType *IntegerType::get(memory::garbage_collection::garbage_collector &gc, bool sign, std::uint16_t size) {
-        if (sign) {
-            if (signed_instances.contains(size)) {
-                return signed_instances[size];
-            }
-            return gc.gcnew<IntegerType>(gc, sign, size);
-        } else {
-            if (unsigned_instances.contains(size)) {
-                return unsigned_instances[size];
-            }
-            return gc.gcnew<IntegerType>(gc, sign, size);
+    IntegerType *IntegerType::get(GlobalContext *gctx, bool sign, std::uint16_t size) {
+        std::string name = std::string("type: ") + (sign ? "i" : "u") + std::to_string(size);
+        if (!gctx->cached_objects.contains(name)) {
+            auto ref = gctx->gc.gcnew<IntegerType>(sign, size);
+            gctx->cached_objects[name] = ref;
+            return ref;
         }
+        return dynamic_cast<IntegerType *>(gctx->cached_objects[name]);
     }
 
     bacteria::TypePtr IntegerType::get_bacteria_type() {
@@ -92,17 +85,6 @@ namespace cheese::curdle {
 
     void IntegerType::mark_type_references() {
 
-    }
-
-    IntegerType::IntegerType(memory::garbage_collection::garbage_collector &gc, bool sn, std::uint16_t sz) {
-        sign = sn;
-        size = sz;
-        if (sign) {
-            signed_instances[sz] = this;
-        } else {
-            unsigned_instances[sz] = this;
-        }
-        gc.add_root_object(this);
     }
 
     Comptimeness IntegerType::get_comptimeness() {
@@ -136,7 +118,7 @@ namespace cheese::curdle {
         return (sign ? "i" : "u") + std::to_string(size);
     }
 
-    Type *IntegerType::peer(Type *other, garbage_collector &gc) {
+    Type *IntegerType::peer(Type *other, GlobalContext *gctx) {
         if (other == this) return this;
         PEER_TYPE_CATCH_ANY();
         if (auto other_c = dynamic_cast<ComptimeIntegerType *>(other); other_c) {
@@ -145,7 +127,7 @@ namespace cheese::curdle {
         if (auto other_i = dynamic_cast<IntegerType *>(other); other_i) {
             auto new_sign = sign || other_i->sign;
             auto new_size = std::max(size, other_i->size);
-            return IntegerType::get(gc, new_sign, new_size);
+            return IntegerType::get(gctx, new_sign, new_size);
         }
         return nullptr;
     }
@@ -182,7 +164,7 @@ namespace cheese::curdle {
         return (constant ? "*~" : "*") + child->to_string();
     }
 
-    Type *ReferenceType::peer(Type *other, garbage_collector &gc) {
+    Type *ReferenceType::peer(Type *other, GlobalContext *gctx) {
         if (compare(other) == 0) return this;
         PEER_TYPE_CATCH_ANY();
         return nullptr;
@@ -198,13 +180,13 @@ namespace cheese::curdle {
 
     static VoidType *vt_instance;
 
-    VoidType *VoidType::get(memory::garbage_collection::garbage_collector &gc) {
-        if (vt_instance == nullptr) {
-            auto ref = gc.gcnew<VoidType>();
-            gc.add_root_object(ref);
-            vt_instance = ref;
+    VoidType *VoidType::get(GlobalContext *gctx) {
+        if (!gctx->cached_objects.contains("type: void")) {
+            auto ref = gctx->gc.gcnew<VoidType>();
+            gctx->cached_objects["type: void"] = ref;
+            return ref;
         }
-        return vt_instance;
+        return dynamic_cast<VoidType *>(gctx->cached_objects["type: void"]);
     }
 
     Comptimeness VoidType::get_comptimeness() {
@@ -219,7 +201,7 @@ namespace cheese::curdle {
         return "void";
     }
 
-    Type *VoidType::peer(Type *other, garbage_collector &gc) {
+    Type *VoidType::peer(Type *other, GlobalContext *gctx) {
         PEER_TYPE_CATCH_ANY();
     }
 
@@ -231,15 +213,14 @@ namespace cheese::curdle {
 
     }
 
-    static AnyType *at_instance;
 
-    AnyType *AnyType::get(memory::garbage_collection::garbage_collector &gc) {
-        if (at_instance == nullptr) {
-            auto ref = gc.gcnew<AnyType>();
-            gc.add_root_object(ref);
-            at_instance = ref;
+    AnyType *AnyType::get(GlobalContext *gctx) {
+        if (!gctx->cached_objects.contains("type: any")) {
+            auto ref = gctx->gc.gcnew<AnyType>();
+            gctx->cached_objects["type: any"] = ref;
+            return ref;
         }
-        return at_instance;
+        return dynamic_cast<AnyType *>(gctx->cached_objects["type: any"]);
     }
 
     Comptimeness AnyType::get_comptimeness() {
@@ -254,7 +235,7 @@ namespace cheese::curdle {
         return "any";
     }
 
-    Type *AnyType::peer(Type *other, garbage_collector &gc) {
+    Type *AnyType::peer(Type *other, GlobalContext *gctx) {
         return other;
     }
 
@@ -265,15 +246,14 @@ namespace cheese::curdle {
     void FunctionTemplateType::mark_type_references() {
     }
 
-    static FunctionTemplateType *ftt_instance;
 
-    FunctionTemplateType *FunctionTemplateType::get(memory::garbage_collection::garbage_collector &gc) {
-        if (ftt_instance == nullptr) {
-            auto ref = gc.gcnew<FunctionTemplateType>();
-            gc.add_root_object(ref);
-            ftt_instance = ref;
+    FunctionTemplateType *FunctionTemplateType::get(GlobalContext *gctx) {
+        if (!gctx->cached_objects.contains("type: function_template")) {
+            auto ref = gctx->gc.gcnew<FunctionTemplateType>();
+            gctx->cached_objects["type: function_template"] = ref;
+            return ref;
         }
-        return ftt_instance;
+        return dynamic_cast<FunctionTemplateType *>(gctx->cached_objects["type: function_template"]);
     }
 
     Comptimeness FunctionTemplateType::get_comptimeness() {
@@ -288,7 +268,7 @@ namespace cheese::curdle {
         return "$FunctionSet";
     }
 
-    Type *FunctionTemplateType::peer(Type *other, garbage_collector &gc) {
+    Type *FunctionTemplateType::peer(Type *other, GlobalContext *gctx) {
         if (other == this) return this;
         PEER_TYPE_CATCH_ANY();
         return other;
@@ -304,13 +284,13 @@ namespace cheese::curdle {
 
     }
 
-    ComptimeIntegerType *ComptimeIntegerType::get(memory::garbage_collection::garbage_collector &gc) {
-        if (cit_instance == nullptr) {
-            auto ref = gc.gcnew<ComptimeIntegerType>();
-            gc.add_root_object(ref);
-            cit_instance = ref;
+    ComptimeIntegerType *ComptimeIntegerType::get(GlobalContext *gctx) {
+        if (!gctx->cached_objects.contains("type: comptime_int")) {
+            auto ref = gctx->gc.gcnew<ComptimeIntegerType>();
+            gctx->cached_objects["type: comptime_int"] = ref;
+            return ref;
         }
-        return cit_instance;
+        return dynamic_cast<ComptimeIntegerType *>(gctx->cached_objects["type: comptime_int"]);
     }
 
     Comptimeness ComptimeIntegerType::get_comptimeness() {
@@ -337,7 +317,7 @@ namespace cheese::curdle {
         return "comptime_int";
     }
 
-    Type *ComptimeIntegerType::peer(Type *other, garbage_collector &gc) {
+    Type *ComptimeIntegerType::peer(Type *other, GlobalContext *gctx) {
         if (other == this) return this;
         if (auto other_i = dynamic_cast<IntegerType *>(other); other_i) {
             return other_i;
@@ -356,15 +336,13 @@ namespace cheese::curdle {
 
     }
 
-    BooleanType *bt_instance;
-
-    BooleanType *BooleanType::get(garbage_collector &gc) {
-        if (bt_instance == nullptr) {
-            auto ref = gc.gcnew<BooleanType>();
-            gc.add_root_object(ref);
-            bt_instance = ref;
+    BooleanType *BooleanType::get(GlobalContext *gctx) {
+        if (!gctx->cached_objects.contains("type: boolean")) {
+            auto ref = gctx->gc.gcnew<BooleanType>();
+            gctx->cached_objects["type: boolean"] = ref;
+            return ref;
         }
-        return bt_instance;
+        return dynamic_cast<BooleanType *>(gctx->cached_objects["type: boolean"]);
     }
 
     Comptimeness BooleanType::get_comptimeness() {
@@ -380,13 +358,12 @@ namespace cheese::curdle {
         return "bool";
     }
 
-    Type *BooleanType::peer(Type *other, garbage_collector &gc) {
+    Type *BooleanType::peer(Type *other, GlobalContext *gctx) {
         if (other == this) return this;
         PEER_TYPE_CATCH_ANY();
         return nullptr;
     }
 
-    BuiltinReferenceType *brt_instance;
 
     bacteria::TypePtr BuiltinReferenceType::get_bacteria_type() {
         return cheese::bacteria::TypePtr();
@@ -396,13 +373,13 @@ namespace cheese::curdle {
 
     }
 
-    BuiltinReferenceType *BuiltinReferenceType::get(garbage_collector &gc) {
-        if (brt_instance == nullptr) {
-            auto ref = gc.gcnew<BuiltinReferenceType>();
-            gc.add_root_object(ref);
-            brt_instance = ref;
+    BuiltinReferenceType *BuiltinReferenceType::get(GlobalContext *gctx) {
+        if (!gctx->cached_objects.contains("type: builtin_reference")) {
+            auto ref = gctx->gc.gcnew<BuiltinReferenceType>();
+            gctx->cached_objects["type: builtin_reference"] = ref;
+            return ref;
         }
-        return brt_instance;
+        return dynamic_cast<BuiltinReferenceType *>(gctx->cached_objects["type: builtin_reference"]);
     }
 
 
@@ -419,21 +396,19 @@ namespace cheese::curdle {
         return "$BuiltinReference";
     }
 
-    Type *BuiltinReferenceType::peer(Type *other, garbage_collector &gc) {
+    Type *BuiltinReferenceType::peer(Type *other, GlobalContext *gctx) {
         if (other == this) return this;
         PEER_TYPE_CATCH_ANY();
         return nullptr;
     }
 
-    NoReturnType *nrt_instance;
-
-    NoReturnType *NoReturnType::get(garbage_collector &gc) {
-        if (nrt_instance == nullptr) {
-            auto ref = gc.gcnew<NoReturnType>();
-            gc.add_root_object(ref);
-            nrt_instance = ref;
+    NoReturnType *NoReturnType::get(GlobalContext *gctx) {
+        if (!gctx->cached_objects.contains("type: noreturn")) {
+            auto ref = gctx->gc.gcnew<NoReturnType>();
+            gctx->cached_objects["type: noreturn"] = ref;
+            return ref;
         }
-        return nrt_instance;
+        return dynamic_cast<NoReturnType *>(gctx->cached_objects["type: noreturn"]);
     }
 
     bacteria::TypePtr NoReturnType::get_bacteria_type() {
@@ -456,7 +431,7 @@ namespace cheese::curdle {
         return "noreturn";
     }
 
-    Type *NoReturnType::peer(Type *other, garbage_collector &gc) {
+    Type *NoReturnType::peer(Type *other, GlobalContext *gctx) {
         if (other == this) return this;
         PEER_TYPE_CATCH_ANY();
         return other;
@@ -470,15 +445,13 @@ namespace cheese::curdle {
 
     }
 
-    Float64Type *f64t_instance;
-
-    Float64Type *Float64Type::get(garbage_collector &gc) {
-        if (f64t_instance == nullptr) {
-            auto ref = gc.gcnew<Float64Type>();
-            gc.add_root_object(ref);
-            f64t_instance = ref;
+    Float64Type *Float64Type::get(GlobalContext *gctx) {
+        if (!gctx->cached_objects.contains("type: f64")) {
+            auto ref = gctx->gc.gcnew<Float64Type>();
+            gctx->cached_objects["type: f64"] = ref;
+            return ref;
         }
-        return f64t_instance;
+        return dynamic_cast<Float64Type *>(gctx->cached_objects["type: f64"]);
     }
 
     Comptimeness Float64Type::get_comptimeness() {
@@ -503,7 +476,7 @@ namespace cheese::curdle {
         return "f64";
     }
 
-    Type *Float64Type::peer(Type *other, garbage_collector &gc) {
+    Type *Float64Type::peer(Type *other, GlobalContext *gctx) {
         if (other == this) return this;
         PEER_TYPE_CATCH_ANY();
         if (dynamic_cast<IntegerType *>(other) || dynamic_cast<ComptimeIntegerType *>(other) ||
@@ -522,15 +495,13 @@ namespace cheese::curdle {
 
     }
 
-    ComptimeFloatType *cft_instance;
-
-    ComptimeFloatType *ComptimeFloatType::get(garbage_collector &gc) {
-        if (cft_instance == nullptr) {
-            auto ref = gc.gcnew<ComptimeFloatType>();
-            gc.add_root_object(ref);
-            cft_instance = ref;
+    ComptimeFloatType *ComptimeFloatType::get(GlobalContext *gctx) {
+        if (!gctx->cached_objects.contains("type: comptime_float")) {
+            auto ref = gctx->gc.gcnew<ComptimeFloatType>();
+            gctx->cached_objects["type: comptime_float"] = ref;
+            return ref;
         }
-        return cft_instance;
+        return dynamic_cast<ComptimeFloatType *>(gctx->cached_objects["type: comptime_float"]);
     }
 
 
@@ -557,7 +528,7 @@ namespace cheese::curdle {
     }
 
 
-    Type *ComptimeFloatType::peer(Type *other, garbage_collector &gc) {
+    Type *ComptimeFloatType::peer(Type *other, GlobalContext *gctx) {
         if (other == this) return this;
         PEER_TYPE_CATCH_ANY();
         if (dynamic_cast<ComptimeIntegerType *>(other)) {
@@ -589,7 +560,7 @@ namespace cheese::curdle {
     }
 
     // Lets always coalesce error types w/ peer types
-    Type *ErrorType::peer(Type *other, garbage_collector &gc) {
+    Type *ErrorType::peer(Type *other, GlobalContext *gctx) {
         if (other == this) return this;
         PEER_TYPE_CATCH_ANY();
         return other;
@@ -600,15 +571,13 @@ namespace cheese::curdle {
     }
 
 
-    ErrorType *et_instance;
-
-    ErrorType *ErrorType::get(garbage_collector &gc) {
-        if (et_instance == nullptr) {
-            auto ref = gc.gcnew<ErrorType>();
-            gc.add_root_object(ref);
-            et_instance = ref;
+    ErrorType *ErrorType::get(GlobalContext *gctx) {
+        if (!gctx->cached_objects.contains("type: error")) {
+            auto ref = gctx->gc.gcnew<ErrorType>();
+            gctx->cached_objects["type: error"] = ref;
+            return ref;
         }
-        return et_instance;
+        return dynamic_cast<ErrorType *>(gctx->cached_objects["type: error"]);
     }
 
 
@@ -626,11 +595,11 @@ namespace cheese::curdle {
         return ss.str();
     }
 
-    Type *peer_type(std::vector<Type *> types, garbage_collector &gc) {
+    Type *peer_type(std::vector<Type *> types, GlobalContext *gctx) {
         auto base_type = types[0];
         for (int i = 1; i < types.size(); i++) {
             if (types[i] != base_type)
-                base_type = base_type->peer(types[i], gc);
+                base_type = base_type->peer(types[i], gctx);
             if (base_type == nullptr) {
                 throw CurdleError{
                         "No Peer Type: cannot find a peer type between " + get_peer_type_list(types),

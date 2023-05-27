@@ -440,7 +440,7 @@ namespace cheese::curdle {
                 if (pIf->els.has_value()) {
                     else_ty = lctx->get_type(pIf->els.value().get());
                     // Now we have to get a peer type between the two for the true type
-                    true_ty = peer_type({body_ty, else_ty}, gc);
+                    true_ty = peer_type({body_ty, else_ty}, gctx);
                 }
                 auto body_lctx = gc.gcnew<LocalContext>(lctx, true_ty);
                 body_ty = body_lctx->get_type(pIf->body.get());
@@ -597,7 +597,7 @@ namespace cheese::curdle {
         auto &gc = gctx->gc;
         static_assert(std::is_base_of_v<bacteria::nodes::BinaryNode, T>, "Class must be of type binary node");
         auto bin_type = lctx->get_binary_type(lhs.get(), rhs.get());
-        auto peer = peer_type({bin_type.first, bin_type.second}, gc);
+        auto peer = peer_type({bin_type.first, bin_type.second}, gctx);
         auto peer_ctx = gc.gcnew<LocalContext>(lctx, peer);
         // At some point we are going to need to respect operators which will be fun
         auto lhs_expr = translate_expression(peer_ctx, lhs);
@@ -654,7 +654,7 @@ namespace cheese::curdle {
                                                                          pIntegerLiteral->value,
                                                                          lctx->expected_type
                                                                          ? lctx->expected_type->get_cached_type()
-                                                                         : IntegerType::get(gc, true,
+                                                                         : IntegerType::get(gctx, true,
                                                                                             64)->get_cached_type());
             }
             WHEN_EXPR_IS(parser::nodes::EqualTo, pEqualTo) {
@@ -761,7 +761,7 @@ namespace cheese::curdle {
                 return std::make_unique<bacteria::nodes::FloatLiteral>(pFloatLiteral->location, pFloatLiteral->value,
                                                                        lctx->expected_type
                                                                        ? lctx->expected_type->get_cached_type()
-                                                                       : Float64Type::get(gc)->get_cached_type());
+                                                                       : Float64Type::get(gctx)->get_cached_type());
             }
             WHEN_EXPR_IS(parser::nodes::Subscription, pSubscription) {
                 auto subscript_type = rctx->get_type(pSubscription->lhs.get());

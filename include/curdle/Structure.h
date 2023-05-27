@@ -64,7 +64,7 @@ namespace cheese::curdle {
 
         std::string to_string() override;
 
-        Type *peer(Type *other, memory::garbage_collection::garbage_collector &gc) override;
+        Type *peer(Type *other, GlobalContext *gc) override;
     };
 }
 

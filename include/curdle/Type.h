@@ -10,6 +10,7 @@
 #include "memory/garbage_collection.h"
 
 namespace cheese::curdle {
+    struct GlobalContext;
     enum class Comptimeness {
         Comptime,
         ArgumentDepending, //For "any" types
@@ -29,7 +30,7 @@ namespace cheese::curdle {
         // This should be done in a way that the other type is *always* concrete and not an "any"
         virtual std::int32_t compare(Type *other, bool implicit = true) = 0;
 
-        virtual Type *peer(Type *other, memory::garbage_collection::garbage_collector &gc) = 0;
+        virtual Type *peer(Type *other, GlobalContext *gc) = 0;
 
         virtual std::string to_string() = 0;
 
@@ -54,7 +55,7 @@ namespace cheese::curdle {
 
         ~TypeType() override = default;
 
-        static TypeType *get(memory::garbage_collection::garbage_collector &gc);
+        static TypeType *get(GlobalContext *gctx);
 
         Comptimeness get_comptimeness() override;
 
@@ -62,7 +63,7 @@ namespace cheese::curdle {
 
         std::string to_string() override;
 
-        Type *peer(Type *other, memory::garbage_collection::garbage_collector &gc) override;
+        Type *peer(Type *other, GlobalContext *gctx) override;
 
     private:
 
@@ -78,7 +79,7 @@ namespace cheese::curdle {
 
         ~ComptimeIntegerType() override = default;
 
-        static ComptimeIntegerType *get(memory::garbage_collection::garbage_collector &gc);
+        static ComptimeIntegerType *get(GlobalContext *gctx);
 
         Comptimeness get_comptimeness() override;
 
@@ -86,7 +87,7 @@ namespace cheese::curdle {
 
         std::string to_string() override;
 
-        Type *peer(Type *other, memory::garbage_collection::garbage_collector &gc) override;
+        Type *peer(Type *other, GlobalContext *gctx) override;
 
     private:
 
@@ -100,7 +101,7 @@ namespace cheese::curdle {
         bool sign{false};
         std::uint16_t size;
 
-        static IntegerType *get(memory::garbage_collection::garbage_collector &gc, bool sign, std::uint16_t size);
+        static IntegerType *get(GlobalContext *gctx, bool sign, std::uint16_t size);
 
         bacteria::TypePtr get_bacteria_type() override;
 
@@ -114,11 +115,11 @@ namespace cheese::curdle {
 
         std::string to_string() override;
 
-        Type *peer(Type *other, memory::garbage_collection::garbage_collector &gc) override;
+        Type *peer(Type *other, GlobalContext *gctx) override;
 
     private:
 
-        IntegerType(memory::garbage_collection::garbage_collector &gc, bool sn, std::uint16_t sz);
+        IntegerType(bool sn, std::uint16_t sz) : sign(sn), size(sz) {}
     };
 
 
@@ -137,7 +138,7 @@ namespace cheese::curdle {
 
         std::string to_string() override;
 
-        Type *peer(Type *other, memory::garbage_collection::garbage_collector &gc) override;
+        Type *peer(Type *other, GlobalContext *gctx) override;
 
         Type *child;
         bool constant; //Whether this is a constant reference type
@@ -153,7 +154,7 @@ namespace cheese::curdle {
 
         ~VoidType() override = default;
 
-        static VoidType *get(memory::garbage_collection::garbage_collector &gc);
+        static VoidType *get(GlobalContext *gctx);
 
         Comptimeness get_comptimeness() override;
 
@@ -161,7 +162,7 @@ namespace cheese::curdle {
 
         std::string to_string() override;
 
-        Type *peer(Type *other, memory::garbage_collection::garbage_collector &gc) override;
+        Type *peer(Type *other, GlobalContext *gctx) override;
 
     private:
 
@@ -183,9 +184,9 @@ namespace cheese::curdle {
 
         std::string to_string() override;
 
-        Type *peer(Type *other, memory::garbage_collection::garbage_collector &gc) override;
+        Type *peer(Type *other, GlobalContext *gctx) override;
 
-        static NoReturnType *get(memory::garbage_collection::garbage_collector &gc);
+        static NoReturnType *get(GlobalContext *gctx);
 
     private:
         NoReturnType() = default;
@@ -200,7 +201,7 @@ namespace cheese::curdle {
 
         ~AnyType() override = default;
 
-        static AnyType *get(memory::garbage_collection::garbage_collector &gc);
+        static AnyType *get(GlobalContext *gctx);
 
         Comptimeness get_comptimeness() override;
 
@@ -208,7 +209,7 @@ namespace cheese::curdle {
 
         std::string to_string() override;
 
-        Type *peer(Type *other, memory::garbage_collection::garbage_collector &gc) override;
+        Type *peer(Type *other, GlobalContext *gctx) override;
 
     private:
 
@@ -224,7 +225,7 @@ namespace cheese::curdle {
 
         ~BooleanType() override = default;
 
-        static BooleanType *get(memory::garbage_collection::garbage_collector &gc);
+        static BooleanType *get(GlobalContext *gctx);
 
         Comptimeness get_comptimeness() override;
 
@@ -232,7 +233,7 @@ namespace cheese::curdle {
 
         std::string to_string() override;
 
-        Type *peer(Type *other, memory::garbage_collection::garbage_collector &gc) override;
+        Type *peer(Type *other, GlobalContext *gctx) override;
 
     private:
 
@@ -249,7 +250,7 @@ namespace cheese::curdle {
 
         ~Float64Type() override = default;
 
-        static Float64Type *get(memory::garbage_collection::garbage_collector &gc);
+        static Float64Type *get(GlobalContext *gctx);
 
         Comptimeness get_comptimeness() override;
 
@@ -257,7 +258,7 @@ namespace cheese::curdle {
 
         std::string to_string() override;
 
-        Type *peer(Type *other, memory::garbage_collection::garbage_collector &gc) override;
+        Type *peer(Type *other, GlobalContext *gctx) override;
 
     private:
 
@@ -274,7 +275,7 @@ namespace cheese::curdle {
 
         ~ComptimeFloatType() override = default;
 
-        static ComptimeFloatType *get(memory::garbage_collection::garbage_collector &gc);
+        static ComptimeFloatType *get(GlobalContext *gctx);
 
         Comptimeness get_comptimeness() override;
 
@@ -282,7 +283,7 @@ namespace cheese::curdle {
 
         std::string to_string() override;
 
-        Type *peer(Type *other, memory::garbage_collection::garbage_collector &gc) override;
+        Type *peer(Type *other, GlobalContext *gctx) override;
 
     private:
 
@@ -298,7 +299,7 @@ namespace cheese::curdle {
 
         ~FunctionTemplateType() override = default;
 
-        static FunctionTemplateType *get(memory::garbage_collection::garbage_collector &gc);
+        static FunctionTemplateType *get(GlobalContext *gctx);
 
         Comptimeness get_comptimeness() override;
 
@@ -306,7 +307,7 @@ namespace cheese::curdle {
 
         std::string to_string() override;
 
-        Type *peer(Type *other, memory::garbage_collection::garbage_collector &gc) override;
+        Type *peer(Type *other, GlobalContext *gctx) override;
 
     private:
         FunctionTemplateType() = default;
@@ -321,7 +322,7 @@ namespace cheese::curdle {
 
         ~BuiltinReferenceType() override = default;
 
-        static BuiltinReferenceType *get(memory::garbage_collection::garbage_collector &gc);
+        static BuiltinReferenceType *get(GlobalContext *gctx);
 
         Comptimeness get_comptimeness() override;
 
@@ -329,7 +330,7 @@ namespace cheese::curdle {
 
         std::string to_string() override;
 
-        Type *peer(Type *other, memory::garbage_collection::garbage_collector &gc) override;
+        Type *peer(Type *other, GlobalContext *gctx) override;
 
     private:
         BuiltinReferenceType() = default;
@@ -344,7 +345,7 @@ namespace cheese::curdle {
 
         ~ErrorType() override = default;
 
-        static ErrorType *get(memory::garbage_collection::garbage_collector &gc);
+        static ErrorType *get(GlobalContext *gctx);
 
         Comptimeness get_comptimeness() override;
 
@@ -352,7 +353,7 @@ namespace cheese::curdle {
 
         std::string to_string() override;
 
-        Type *peer(Type *other, memory::garbage_collection::garbage_collector &gc) override;
+        Type *peer(Type *other, GlobalContext *gctx) override;
 
     private:
         ErrorType() = default;
@@ -368,7 +369,7 @@ namespace cheese::curdle {
 
     };
 
-    Type *peer_type(std::vector<Type *> types, memory::garbage_collection::garbage_collector &gc);
+    Type *peer_type(std::vector<Type *> types, GlobalContext *gctx);
 
     bool trivial_arithmetic_type(Type *type);
 }

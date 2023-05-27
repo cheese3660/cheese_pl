@@ -10,9 +10,9 @@ namespace cheese::curdle {
 
     template<typename T>
     requires std::is_base_of_v<Type, T>
-    static gcref<ComptimeValue> create_from_type(garbage_collector &gc, T *ref) {
-        auto type = new ComptimeType{gc, static_cast<Type *>(ref)};
-        return gc.manage<ComptimeValue>(type);
+    static gcref<ComptimeValue> create_from_type(GlobalContext *gctx, T *ref) {
+        auto type = new ComptimeType{gctx, static_cast<Type *>(ref)};
+        return {gctx->gc, type};
     }
 
     gcref<ComptimeValue>
@@ -23,9 +23,9 @@ namespace cheese::curdle {
                     "Attempting to use $Type w/ the wrong number of arguments, it only takes one argument");
         }
         if (!rctx) {
-            return create_from_type(cctx->globalContext->gc, cctx->exec(arguments[0], rctx)->type);
+            return create_from_type(cctx->globalContext, cctx->exec(arguments[0], rctx)->type);
         } else {
-            return create_from_type(cctx->globalContext->gc, rctx->get_type(arguments[0]).get());
+            return create_from_type(cctx->globalContext, rctx->get_type(arguments[0]).get());
         }
     }
 
@@ -45,7 +45,7 @@ namespace cheese::curdle {
             }
             local_references.push_back(std::move(type_value));
         }
-        return create_from_type(cctx->globalContext->gc, peer_type(all_types, cctx->globalContext->gc));
+        return create_from_type(cctx->globalContext, peer_type(all_types, cctx->globalContext));
     }
 
     BUILTIN("Peer", peer_builtin)

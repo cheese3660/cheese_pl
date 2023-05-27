@@ -4,6 +4,7 @@
 #include "curdle/runtime.h"
 #include "curdle/GlobalContext.h"
 #include "curdle/curdle.h"
+#include "curdle/Structure.h"
 
 
 namespace cheese::curdle {
@@ -140,13 +141,14 @@ namespace cheese::curdle {
     }
 
     gcref<Type> getBinaryType(LocalContext *lctx, parser::NodePtr lhs, parser::NodePtr rhs) {
-        auto &gc = lctx->runtime->comptime->globalContext->gc;
+        auto gctx = lctx->runtime->comptime->globalContext;
+        auto &gc = gctx->gc;
         auto pair = lctx->get_binary_type(lhs.get(), rhs.get());
         auto lhs_ty = pair.first.get();
         auto rhs_ty = pair.second.get();
         // Now we have to check if a type is a trivial arithmetic type
         if (trivial_arithmetic_type(lhs_ty) && trivial_arithmetic_type(rhs_ty)) {
-            return gcref<Type>(gc, peer_type({lhs_ty, rhs_ty}, gc));
+            return gcref<Type>(gc, peer_type({lhs_ty, rhs_ty}, gctx));
         } else {
             NOT_IMPL_FOR(lhs_ty->to_string() + " & " + rhs_ty->to_string());
         }
@@ -199,7 +201,8 @@ namespace cheese::curdle {
 
     // Might want to make this return a gcref, as it might at some point create new types, but it shouldn't
     gcref<Type> LocalContext::get_type(parser::Node *node) {
-        auto &gc = runtime->comptime->globalContext->gc;
+        auto gctx = runtime->comptime->globalContext;
+        auto &gc = gctx->gc;
         try {
 #define WHEN_NODE_IS(type, name) if (auto name = dynamic_cast<type*>(node); name)
             WHEN_NODE_IS(parser::nodes::EqualTo, pEqualTo) {
@@ -209,7 +212,7 @@ namespace cheese::curdle {
                 // Now we have to check if a type is a trivial arithmetic type
                 if (trivial_arithmetic_type(lhs_ty) && trivial_arithmetic_type(rhs_ty)) {
                     // Now we do the boolean type here :3
-                    return {gc, BooleanType::get(gc)};
+                    return {gc, BooleanType::get(gctx)};
                 } else {
                     NOT_IMPL_FOR(std::string{"equal to w/ "} + lhs_ty->to_string() + " & " + rhs_ty->to_string());
                 }
@@ -221,7 +224,7 @@ namespace cheese::curdle {
                 // Now we have to check if a type is a trivial arithmetic type
                 if (trivial_arithmetic_type(lhs_ty) && trivial_arithmetic_type(rhs_ty)) {
                     // Now we do the boolean type here :3
-                    return {gc, BooleanType::get(gc)};
+                    return {gc, BooleanType::get(gctx)};
                 } else {
                     NOT_IMPL_FOR(std::string{"less than to w/ "} + lhs_ty->to_string() + " & " + rhs_ty->to_string());
                 }
@@ -233,14 +236,14 @@ namespace cheese::curdle {
                 if (expected_type && dynamic_cast<IntegerType *>(expected_type)) {
                     return {gc, expected_type};
                 } else {
-                    return {gc, ComptimeIntegerType::get(gc)};
+                    return {gc, ComptimeIntegerType::get(gctx)};
                 }
             }
             WHEN_NODE_IS(parser::nodes::FloatLiteral, pFloatLiteral) {
                 if (expected_type && (dynamic_cast<Float64Type *>(expected_type))) {
                     return {gc, expected_type};
                 } else {
-                    return {gc, ComptimeFloatType::get(gc)};
+                    return {gc, ComptimeFloatType::get(gctx)};
                 }
             }
             WHEN_NODE_IS(parser::nodes::Multiplication, pMultiplication) {
@@ -275,14 +278,14 @@ namespace cheese::curdle {
                 }
             }
             WHEN_NODE_IS(parser::nodes::Return, pReturn) {
-                return {gc, NoReturnType::get(gc)};
+                return {gc, NoReturnType::get(gctx)};
             }
             WHEN_NODE_IS(parser::nodes::ObjectCall, pObjectCall) {
                 // Now time to do a bunch of work to get the type of *one* function call
                 return {gc, get_object_call_type(this, pObjectCall)};
             }
             WHEN_NODE_IS(parser::nodes::Structure, pStructure) {
-                return {gc, TypeType::get(gc)};
+                return {gc, TypeType::get(gctx)};
             }
             WHEN_NODE_IS(parser::nodes::Subscription, pSubscription) {
                 auto subscript_type = runtime->get_type(pSubscription->lhs.get());
@@ -326,7 +329,7 @@ namespace cheese::curdle {
                 return {gc, runtime->get("self")->type};
             }
             WHEN_NODE_IS(parser::nodes::Destructure, pDestructure) {
-                return {gc, VoidType::get(gc)};
+                return {gc, VoidType::get(gctx)};
             }
             WHEN_NODE_IS(parser::nodes::ObjectLiteral, pObjectLiteral) {
                 if (expected_type != nullptr) {
@@ -367,12 +370,12 @@ namespace cheese::curdle {
                     all_arm_types.push_back(ty.get());
                     all_referenced_types.push_back(std::move(ty));
                 }
-                return {gc, peer_type(all_arm_types, gc)};
+                return {gc, peer_type(all_arm_types, gctx)};
             }
             NOT_IMPL_FOR(typeid(*node).name());
 #undef WHEN_NODE_IS
         } catch (const CurdleError &e) {
-            return {gc, ErrorType::get(gc)};
+            return {gc, ErrorType::get(gctx)};
         } catch (const NotImplementedException &notImplementedException) {
             throw LocalizedCurdleError(notImplementedException.what(), node->location,
                                        error::ErrorCode::GeneralCompilerError);
@@ -380,13 +383,14 @@ namespace cheese::curdle {
     }
 
     std::pair<gcref<Type>, gcref<Type>> LocalContext::get_binary_type(parser::Node *lhs, parser::Node *rhs) {
-        auto &gc = runtime->comptime->globalContext->gc;
+        auto gctx = runtime->comptime->globalContext;
+        auto &gc = gctx->gc;
         auto lhs_ty = get_type(lhs);
         // To make this easier
         auto sub_ctx = gc.gcnew<LocalContext>(this, lhs_ty);
         auto rhs_ty = sub_ctx->get_type(rhs);
         try {
-            auto peer = peer_type({lhs_ty, rhs_ty}, gc);
+            auto peer = peer_type({lhs_ty, rhs_ty}, gctx);
             auto peer_ctx = gc.gcnew<LocalContext>(this, peer);
             lhs_ty = peer_ctx->get_type(lhs);
             rhs_ty = peer_ctx->get_type(rhs);
