@@ -110,23 +110,6 @@ namespace cheese::curdle {
     };
 
 
-    // An integer of any integral type
-    struct ComptimeInteger : ComptimeValue {
-        explicit ComptimeInteger(const math::BigInteger &value, Type *ty);
-
-        void mark_value() override;
-
-        ~ComptimeInteger() override = default;
-
-        bool is_same_as(ComptimeValue *other) override;
-
-        std::string to_string() override;
-
-        gcref<ComptimeValue> cast(Type *target_type, garbage_collector &garbageCollector) override;
-
-        math::BigInteger value;
-    };
-
     struct ComptimeFloat : ComptimeValue {
         explicit ComptimeFloat(double value, Type *ty) : value(value) {
             type = ty;

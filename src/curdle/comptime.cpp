@@ -10,6 +10,7 @@
 #include <iostream>
 #include "curdle/builtin.h"
 #include "curdle/curdle.h"
+#include "curdle/ComptimeInteger.h"
 
 
 namespace cheese::curdle {
@@ -130,62 +131,6 @@ namespace cheese::curdle {
     void ComptimeVariable::mark_references() {
         declaringType->mark();
         value->mark();
-    }
-
-    void ComptimeInteger::mark_value() {
-
-    }
-
-    bool ComptimeInteger::is_same_as(ComptimeValue *other) {
-        if (other->type->compare(type) != 0) return false;
-        if (auto as_int = dynamic_cast<ComptimeInteger *>(other); as_int) {
-            return value == as_int->value;
-        } else {
-            return false;
-        }
-    }
-
-    std::string ComptimeInteger::to_string() {
-        return static_cast<std::string>(value);
-    }
-
-    ComptimeInteger::ComptimeInteger(const math::BigInteger &value, Type *ty) : value(value) {
-        type = ty;
-    }
-
-    static gcref<ComptimeValue> new_value(garbage_collector &garbageCollector, ComptimeValue *value) {
-        return garbageCollector.manage(value);
-    }
-
-
-    gcref<ComptimeValue> ComptimeInteger::cast(Type *target_type, garbage_collector &garbageCollector) {
-#define WHEN_TYPE_IS(type, name) if (auto name = dynamic_cast<type*>(target_type); name)
-        WHEN_TYPE_IS(ComptimeIntegerType, pComptimeIntegerType) {
-            return new_value(garbageCollector, new ComptimeInteger(value, pComptimeIntegerType));
-        }
-        WHEN_TYPE_IS(IntegerType, pIntegerType) {
-            // Now we must check if the value fits in that range
-//            auto max = math::BigInteger(1,pIntegerType->size);
-            math::BigInteger max, min;
-            if (pIntegerType->sign) {
-                max = math::BigInteger(1, pIntegerType->size - 1) - 1;
-                min = -math::BigInteger(1, pIntegerType->size - 1);
-            } else {
-                max = math::BigInteger(1, pIntegerType->size) - 1;
-                min = 0;
-            }
-            if (value < min || value > max) {
-                throw InvalidCastError(
-                        "Invalid Cast: cannot convert compile time known integer with value: " +
-                        static_cast<std::string>(value) +
-                        " to type: " + pIntegerType->to_string() + " as it cannot fit w/in range");
-            }
-            return new_value(garbageCollector, new ComptimeInteger(value, pIntegerType));
-        }
-        throw BadComptimeCastError(
-                "Bad Compile Time Cast: Cannot convert value of type: " + type->to_string() + " to type: " +
-                target_type->to_string());
-#undef WHEN_TYPE_IS
     }
 
 
@@ -477,48 +422,105 @@ namespace cheese::curdle {
                 return gc.gcnew<ComptimeFloat>(pFloatLiteral->value, ComptimeFloatType::get(globalContext));
             }
 
-            WHEN_NODE_IS(parser::nodes::EqualTo, pEqualTo) {
-                auto lhs = exec(pEqualTo->lhs.get(), rtime);
-                auto rhs = exec(pEqualTo->rhs.get(), rtime);
-                // Now we must define a few functions
-                NOT_IMPL_FOR(
-                        "Equality comparisons"); // This will be "fun" to mandate all these functions in the comptime value structure
-            }
-            WHEN_NODE_IS(parser::nodes::LesserThan, pLesserThan) {
-                auto lhs = exec(pLesserThan->lhs.get(), rtime);
-                auto rhs = exec(pLesserThan->rhs.get(), rtime);
-                // Now we must define a few functions
-                NOT_IMPL_FOR(
-                        "LesserThan"); // This will be "fun" to mandate all these functions in the comptime value structure
-            }
-            WHEN_NODE_IS(parser::nodes::Subtraction, pSubtraction) {
-                auto lhs = exec(pSubtraction->lhs.get(), rtime);
-                auto rhs = exec(pSubtraction->rhs.get(), rtime);
-                // Now we must define a few functions
-                NOT_IMPL_FOR(
-                        "LesserThan"); // This will be "fun" to mandate all these functions in the comptime value structure
-            }
+#define BIN_OP(name) return lhs->op_##name(globalContext,rhs)
             WHEN_NODE_IS(parser::nodes::Multiplication, pMultiplication) {
                 auto lhs = exec(pMultiplication->lhs.get(), rtime);
                 auto rhs = exec(pMultiplication->rhs.get(), rtime);
-                // Now we must define a few functions
-                NOT_IMPL_FOR(
-                        "LesserThan"); // This will be "fun" to mandate all these functions in the comptime value structure
+                BIN_OP(multiply);
             }
             WHEN_NODE_IS(parser::nodes::Modulus, pModulus) {
                 auto lhs = exec(pModulus->lhs.get(), rtime);
                 auto rhs = exec(pModulus->rhs.get(), rtime);
-                // Now we must define a few functions
-                NOT_IMPL_FOR(
-                        "LesserThan"); // This will be "fun" to mandate all these functions in the comptime value structure
+                BIN_OP(remainder);
             }
             WHEN_NODE_IS(parser::nodes::Division, pDivision) {
                 auto lhs = exec(pDivision->lhs.get(), rtime);
                 auto rhs = exec(pDivision->rhs.get(), rtime);
-                // Now we must define a few functions
-                NOT_IMPL_FOR(
-                        "LesserThan"); // This will be "fun" to mandate all these functions in the comptime value structure
+                BIN_OP(divide);
             }
+            WHEN_NODE_IS(parser::nodes::Addition, pAddition) {
+                auto lhs = exec(pAddition->lhs.get(), rtime);
+                auto rhs = exec(pAddition->rhs.get(), rtime);
+                BIN_OP(add);
+            }
+            WHEN_NODE_IS(parser::nodes::Subtraction, pSubtraction) {
+                auto lhs = exec(pSubtraction->lhs.get(), rtime);
+                auto rhs = exec(pSubtraction->rhs.get(), rtime);
+                BIN_OP(subtract);
+            }
+            WHEN_NODE_IS(parser::nodes::LeftShift, pLeftShift) {
+                auto lhs = exec(pLeftShift->lhs.get(), rtime);
+                auto rhs = exec(pLeftShift->rhs.get(), rtime);
+                BIN_OP(left_shift);
+            }
+            WHEN_NODE_IS(parser::nodes::RightShift, pRightShift) {
+                auto lhs = exec(pRightShift->lhs.get(), rtime);
+                auto rhs = exec(pRightShift->rhs.get(), rtime);
+                BIN_OP(right_shift);
+            }
+            WHEN_NODE_IS(parser::nodes::LesserThan, pLesserThan) {
+                auto lhs = exec(pLesserThan->lhs.get(), rtime);
+                auto rhs = exec(pLesserThan->rhs.get(), rtime);
+                BIN_OP(lesser_than);
+            }
+            WHEN_NODE_IS(parser::nodes::GreaterThan, pGreaterThan) {
+                auto lhs = exec(pGreaterThan->lhs.get(), rtime);
+                auto rhs = exec(pGreaterThan->rhs.get(), rtime);
+                BIN_OP(greater_than);
+            }
+            WHEN_NODE_IS(parser::nodes::LesserEqual, pLesserEqual) {
+                auto lhs = exec(pLesserEqual->lhs.get(), rtime);
+                auto rhs = exec(pLesserEqual->rhs.get(), rtime);
+                BIN_OP(lesser_than_equal);
+            }
+            WHEN_NODE_IS(parser::nodes::GreaterEqual, pGreaterEqual) {
+                auto lhs = exec(pGreaterEqual->lhs.get(), rtime);
+                auto rhs = exec(pGreaterEqual->rhs.get(), rtime);
+                BIN_OP(greater_than_equal);
+            }
+            WHEN_NODE_IS(parser::nodes::EqualTo, pEqualTo) {
+                auto lhs = exec(pEqualTo->lhs.get(), rtime);
+                auto rhs = exec(pEqualTo->rhs.get(), rtime);
+                BIN_OP(equal);
+            }
+            WHEN_NODE_IS(parser::nodes::NotEqualTo, pNotEqualTo) {
+                auto lhs = exec(pNotEqualTo->lhs.get(), rtime);
+                auto rhs = exec(pNotEqualTo->rhs.get(), rtime);
+                BIN_OP(not_equal);
+            }
+            WHEN_NODE_IS(parser::nodes::And, pAnd) {
+                auto lhs = exec(pAnd->lhs.get(), rtime);
+                auto rhs = exec(pAnd->rhs.get(), rtime);
+                BIN_OP(and);
+            }
+            WHEN_NODE_IS(parser::nodes::Xor, pXor) {
+                auto lhs = exec(pXor->lhs.get(), rtime);
+                auto rhs = exec(pXor->rhs.get(), rtime);
+                BIN_OP(xor);
+            }
+            WHEN_NODE_IS(parser::nodes::Or, pOr) {
+                auto lhs = exec(pOr->lhs.get(), rtime);
+                auto rhs = exec(pOr->rhs.get(), rtime);
+                BIN_OP(or);
+            }
+            WHEN_NODE_IS(parser::nodes::Combination, pCombination) {
+                auto lhs = exec(pCombination->lhs.get(), rtime);
+                auto rhs = exec(pCombination->rhs.get(), rtime);
+                BIN_OP(combine);
+            }
+            WHEN_NODE_IS(parser::nodes::UnaryMinus, pUnaryMinus) {
+                auto child = exec(pUnaryMinus->child.get(), rtime);
+                return child->op_unary_minus(globalContext);
+            }
+            WHEN_NODE_IS(parser::nodes::UnaryPlus, pUnaryPlus) {
+                auto child = exec(pUnaryPlus->child.get(), rtime);
+                return child->op_unary_plus(globalContext);
+            }
+            WHEN_NODE_IS(parser::nodes::Not, pNot) {
+                auto child = exec(pNot->child.get(), rtime);
+                return child->op_not(globalContext);
+            }
+#undef BIN_OP
             WHEN_NODE_IS(parser::nodes::Cast, pCast) {
                 auto lhs = exec(pCast->lhs.get(), rtime);
                 gcref<ComptimeValue> rhs = exec(pCast->rhs.get(), rtime);
@@ -574,6 +576,27 @@ namespace cheese::curdle {
                     throw LocalizedCurdleError(
                             "Compile Time Execution Error: referencing a non-extant compile time variable: self",
                             pSelf->location, error::ErrorCode::NotComptime);
+                }
+            }
+            WHEN_NODE_IS(parser::nodes::If, pIf) {
+                if (pIf->unwrap.has_value()) {
+                    // This is where we do a wierd translation for optionals, which are going to be a builtin type
+                    // But essentially it becomes
+                    // named_block: {
+                    //     let tmp = condition;
+                    //     <==(named_block) if tmp has value
+                    //         inner_named_block: {
+                    //             let unwrap = value of tmp
+                    //             <==(inner_named_block) body
+                    //         }
+                    //     else
+                    //        els
+                    // }
+                    // But for this we need to implement optionals :3
+                    NOT_IMPL_FOR("If unwrapping");
+                } else {
+                    auto condition = exec(pIf->condition, rtime);
+                    NOT_IMPL;
                 }
             }
             NOT_IMPL_FOR(typeid(*node).name());

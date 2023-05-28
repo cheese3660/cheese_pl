@@ -20,6 +20,7 @@
 #include "bacteria/BacteriaNode.h"
 #include "bacteria/nodes/expression_nodes.h"
 #include "curdle/builtin.h"
+#include "curdle/ComptimeInteger.h"
 
 using namespace cheese::memory::garbage_collection;
 
@@ -607,8 +608,25 @@ namespace cheese::curdle {
     }
 
 
-    bacteria::BacteriaPtr translate_comptime(LocalContext *lctx, ComptimeValue *value) {
-
+    bacteria::BacteriaPtr translate_comptime(LocalContext *lctx, Coordinate location, ComptimeValue *value) {
+        auto result_type = lctx->expected_type ? lctx->expected_type : value->type;
+        if (result_type->get_comptimeness() == Comptimeness::Comptime) {
+            throw CurdleError(
+                    "Not Runtime: cannot convert value of type " + value->type->to_string() + " to a runtime literal",
+                    error::ErrorCode::NotRuntime);
+        }
+        gcref<ComptimeValue> v = {lctx->runtime->comptime->globalContext->gc, nullptr};
+        if (value->type->compare(result_type) != 0) {
+            v = std::move(value->cast(result_type, lctx->runtime->comptime->globalContext->gc));
+        } else {
+            v = {lctx->runtime->comptime->globalContext->gc, value};
+        }
+#define WHEN_COMPTIME_IS(type, name) if (auto name = dynamic_cast<type*>(v.get()); name)
+        WHEN_COMPTIME_IS(ComptimeInteger, pComptimeInteger) {
+            return std::make_unique<bacteria::nodes::IntegerLiteral>(location, pComptimeInteger->value,
+                                                                     result_type->get_cached_type());
+        }
+#undef WHEN_COMPTIME_IS
         NOT_IMPL_FOR(typeid(*value).name());
     }
 
@@ -621,7 +639,7 @@ namespace cheese::curdle {
         try {
             auto execed = cctx->try_exec(expr.get(), rctx);
             if (execed.has_value()) {
-                return translate_comptime(lctx, execed.value().get());
+                return translate_comptime(lctx, expr->location, execed.value().get());
             }
 
 #define WHEN_EXPR_IS(type, name) if (auto name = dynamic_cast<type*>(true_expr); name)

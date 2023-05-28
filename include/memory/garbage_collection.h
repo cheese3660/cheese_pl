@@ -102,6 +102,7 @@ namespace cheese::memory::garbage_collection {
         gcref(gcref<V> &&other) noexcept: gc(other.gc) {
             static_assert(std::is_base_of_v<T, V>, "V must derive from T");
             value = other.value;
+            other.value = nullptr;
         }
 
         gcref<T> &operator=(gcref<T> &&other) noexcept {

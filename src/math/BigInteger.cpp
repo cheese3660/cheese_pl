@@ -278,7 +278,7 @@ namespace cheese::math {
         BigInteger a = twos_complement(max_size);
         BigInteger b = other.twos_complement(max_size);
         for (size_t i = 0; i < max_size; i++) {
-            a.words[i] |= b.words[i];
+            a.words[i] &= b.words[i];
         }
         a.reverse_complement();
         a.normalize_size();

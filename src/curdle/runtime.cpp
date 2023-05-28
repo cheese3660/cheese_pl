@@ -261,6 +261,24 @@ namespace cheese::curdle {
             WHEN_NODE_IS(parser::nodes::Addition, pAddition) {
                 return getBinaryType(this, pAddition->lhs, pAddition->rhs);
             }
+            WHEN_NODE_IS(parser::nodes::And, pAnd) {
+                return getBinaryType(this, pAnd->lhs, pAnd->rhs);
+            }
+            WHEN_NODE_IS(parser::nodes::Xor, pXor) {
+                return getBinaryType(this, pXor->lhs, pXor->rhs);
+            }
+            WHEN_NODE_IS(parser::nodes::Or, pOr) {
+                return getBinaryType(this, pOr->lhs, pOr->rhs);
+            }
+            WHEN_NODE_IS(parser::nodes::Not, pNot) {
+                return get_type(pNot->child.get());
+            }
+            WHEN_NODE_IS(parser::nodes::UnaryMinus, pUnaryMinus) {
+                return get_type(pUnaryMinus->child.get());
+            }
+            WHEN_NODE_IS(parser::nodes::UnaryPlus, pUnaryPlus) {
+                return get_type(pUnaryPlus->child.get());
+            }
             WHEN_NODE_IS(parser::nodes::TupleCall, pTupleCall) {
                 // Now time to do a bunch of work to get the type of *one* function call
                 return get_function_call_type(this, pTupleCall);
@@ -320,10 +338,6 @@ namespace cheese::curdle {
                     }
                 }
                 NOT_IMPL_FOR("Possible traits");
-            }
-            WHEN_NODE_IS(parser::nodes::UnaryMinus, pUnaryMinus) {
-                // TODO: functions
-                return get_type(pUnaryMinus->child.get());
             }
             WHEN_NODE_IS(parser::nodes::Self, pSelf) {
                 return {gc, runtime->get("self")->type};

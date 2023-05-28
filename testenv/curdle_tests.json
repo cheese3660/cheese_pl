@@ -113,6 +113,7 @@
           {
             "type": "init",
             "name": "x",
+            "ty": "i64",
             "value": {
               "type": "integer",
               "value": 2,
@@ -136,6 +137,7 @@
           {
             "type": "init",
             "name": "x",
+            "ty": "i64",
             "value": {
               "type": "integer",
               "value": 0,
@@ -159,6 +161,7 @@
           {
             "type": "init",
             "name": "x",
+            "ty": "i64",
             "value": {
               "type": "integer",
               "value": 1,
@@ -182,6 +185,7 @@
           {
             "type": "init",
             "name": "x",
+            "ty": "i64",
             "value": {
               "type": "integer",
               "value": 1,
@@ -205,6 +209,7 @@
           {
             "type": "init",
             "name": "x",
+            "ty": "i64",
             "value": {
               "type": "integer",
               "value": 0,
@@ -228,6 +233,7 @@
           {
             "type": "init",
             "name": "x",
+            "ty": "i64",
             "value": {
               "type": "integer",
               "value": 1,
@@ -251,6 +257,7 @@
           {
             "type": "init",
             "name": "x",
+            "ty": "i64",
             "value": {
               "type": "integer",
               "value": 1,
@@ -274,6 +281,7 @@
           {
             "type": "init",
             "name": "x",
+            "ty": "i64",
             "value": {
               "type": "integer",
               "value": -2,
@@ -297,6 +305,7 @@
           {
             "type": "init",
             "name": "x",
+            "ty": "i64",
             "value": {
               "type": "integer",
               "value": -1,
@@ -320,6 +329,7 @@
           {
             "type": "init",
             "name": "x",
+            "ty": "i64",
             "value": {
               "type": "integer",
               "value": 1,
@@ -343,6 +353,7 @@
           {
             "type": "init",
             "name": "x",
+            "ty": "i64",
             "value": {
               "type": "integer",
               "value": 4,

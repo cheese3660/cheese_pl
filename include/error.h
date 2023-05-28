@@ -72,6 +72,7 @@ namespace cheese::error {
         UnusedValue,
         UnexpectedReturn,
         NotComptime,
+        NotRuntime,
         OutOfOrderInitialization,
         IncompleteInitialization,
         InvalidField,
@@ -82,6 +83,9 @@ namespace cheese::error {
         InvalidObjectLiteral,
         InvalidDestructure,
         InvalidSubscript,
+        InvalidComptimeValue,
+        BadComptimeCast,
+        InvalidComptimeOperation,
         //General error (thrown for example when multiple previous errors were printed)
         GeneralCompilerError = 9999,
     };

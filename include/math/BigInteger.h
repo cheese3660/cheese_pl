@@ -40,29 +40,29 @@ namespace cheese::math {
             sign = false;
         }
 
+
         template<std::signed_integral T>
         BigInteger(T other) {
+            if (other == std::numeric_limits<T>::min()) {
+                // Now we do something different
+                auto max = std::numeric_limits<T>::max(); // Should be -other + 1
+                auto other_v = BigInteger((std::make_unsigned_t<T>) max);
+                other_v += 1;
+                words = other_v.words;
+                sign = true;
+                return;
+            }
             if (other < 0) {
                 sign = true;
+                other = -other;
             }
             std::make_unsigned_t<T> us = other;
-            size_t bits_to_flip = sizeof(T) * 8;
-            if constexpr (sizeof(other) <= sizeof(std::uint32_t)) {
+            if constexpr (sizeof(us) <= sizeof(std::uint32_t)) {
                 words.push_back(us);
             } else {
                 while (us != 0) {
                     words.push_back(us & 0xfffffffful);
-                    us >>= other;
-                }
-            }
-            if (bits_to_flip == words.size() * 32) {
-                reverse_complement();
-            } else {
-                if (sign) {
-                    for (size_t i = 0; i < words.size() * 32; i++) {
-                        set(i, !get(i));
-                    }
-                    *this += 1;
+                    us >>= 32;
                 }
             }
         }

@@ -111,7 +111,7 @@ add_executable(
         src/bacteria/nodes/reciever_nodes.cpp
         src/tests/curdle_tests.cpp
         src/tests/curdle_tests.cpp
-)
+        include/curdle/ComptimeInteger.h src/curdle/ComptimeInteger.cpp)
 if (UNIX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++ -Wall")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++ -lc++abi")
