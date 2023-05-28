@@ -18,6 +18,8 @@ TODO:
 [ ] refactor using modules
 [ ] refactor std::map -> std::unordered_map
 [ ] refactor ComptimeValue ->  ComptimeValue.h/cpp
+[ ] A whole shit ton of curdle tests
+
 
 
 ROADMAP:

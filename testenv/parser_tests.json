@@ -6000,6 +6000,80 @@
     }
   ],
   [
+    "function pointer top level variable after function",
+    "fn test_fn x: any => x.$Type public\n    x\nlet fn_pointer_integer public = $fnPtr(test_fn,.Type(i64))",
+    {
+      "children": [
+        {
+          "args": [
+            {
+              "arg_type": "any",
+              "name": "x",
+              "type": "arg"
+            }
+          ],
+          "body": {
+            "name": "x",
+            "type": "ref"
+          },
+          "flags": [
+            "public"
+          ],
+          "name": "test_fn",
+          "return_type": {
+            "lhs": {
+              "name": "x",
+              "type": "ref"
+            },
+            "rhs": {
+              "builtin": "Type",
+              "type": "builtin"
+            },
+            "type": "subscript"
+          },
+          "type": "function"
+        },
+        {
+          "def": {
+            "flags": [
+              "public"
+            ],
+            "name": "fn_pointer_integer",
+            "type": "var_def"
+          },
+          "type": "var_decl",
+          "value": {
+            "args": [
+              {
+                "name": "test_fn",
+                "type": "ref"
+              },
+              {
+                "args": [
+                  {
+                    "size": 64,
+                    "type": "int_type"
+                  }
+                ],
+                "object": {
+                  "name": "Type",
+                  "type": "enum_literal"
+                },
+                "type": "tuple_call"
+              }
+            ],
+            "object": {
+              "builtin": "fnPtr",
+              "type": "builtin"
+            },
+            "type": "tuple_call"
+          }
+        }
+      ],
+      "type": "struct"
+    }
+  ],
+  [
     "example full program (always last!!!)",
     "fn abs arg: f64 => f64\nif arg < 0\n-arg\nelse\narg\n\nlet HSL=struct{\nh:f64\ns:f64\nl:f64\nfn to_rgb ~self=>RGB public{\nlet c =(1-abs(2.0*self.l-1.0))*self.s\nlet x=c*(1-abs((self.h/60.0)%2.0-1.0))\nlet m=self.l-self.c/2.0\nlet h60=(self.h/60.0)@u8\nlet(rprime, gprime, bprime)=match h60\n{\n0=>\n.(c,x,0.0)\n1=>\n.(x,c,0.0)\n2=>\n.(0.0,x,c)\n3=>\n.(x,0.0,c)\n4=>\n.(c,0.0,x)\n_=>\n.(0.0,0.0,0.0)\n}\n==>.{\nr: ((rprime+m)*255)@u8\ng: ((gprime+m)*255)@u8\nb: ((bprime+m)*255)@u8\n}\n}\n}\n\nlet RGB=struct{\nr:u8\ng:u8\nb:u8\n}\n\nfn main=>u8 entry{\nlet hsl=HSL{\nh:130.0\ns:0.5\nl:0.5\n}\n\nhsl.to_rgb()\n\n==>0\n}",
     {

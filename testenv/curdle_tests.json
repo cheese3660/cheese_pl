@@ -363,5 +363,541 @@
         ]
       }
     }
+  ],
+  [
+    "expressions: Taking reference of something (immutable)",
+    "fn main => void entry\n{let x: i64 = 0\nlet y = &x}",
+    {}
+  ],
+  [
+    "expressions: Taking reference of something (mutable)",
+    "fn main => void entry\n{let x: i64 = 0\nlet y = &x}",
+    {}
+  ],
+  [
+    "expressions: Subscription (tuple, value)",
+    "fn main => void entry\n{let x: struct(i64,i64,i64) = .(1,2,3)\nlet y = x.0}",
+    {}
+  ],
+  [
+    "expressions: Subscription (tuple, reference)",
+    "fn main => void entry\n{let x: struct(i64,i64,i64) = .(1,2,3)\nlet y = &x\nlet z = y.0}",
+    {}
+  ],
+  [
+    "expressions: Subscription (structure, value)",
+    "fn main => void entry\n{let x: struct{a:i64\nb:i64\nc:i64} = .{a:1,b:2,c:3}\nlet y = x.a}",
+    {}
+  ],
+  [
+    "expressions: Subscription (structure, reference)",
+    "fn main => void entry\n{let x: struct{a:i64\nb:i64\nc:i64} = .{a:1,b:2,c:3}\nlet y = &x\nlet z = y.a}",
+    {}
+  ],
+  [
+    "expressions: Unary plus (integers)",
+    "fn main => void entry\n{let x: i64 = 1\n_ = +x}",
+    {}
+  ],
+  [
+    "expressions: Unary plus (floats)",
+    "fn main => void entry\n{let x: f64 = 1\n_ = +x}",
+    {}
+  ],
+  [
+    "expressions: Unary plus (complex numbers)",
+    "fn main => void entry\n{let x: c64 = 1+2I\n_ = +x}",
+    {}
+  ],
+  [
+    "expressions: Unary plus (function pointers)",
+    "import function_pointers @ l\nfn main => void entry\n{_ = +l.fn_pointer_integer}",
+    {}
+  ],
+  [
+    "expressions: Unary minus (integers)",
+    "fn main => void entry\n{let x: i64 = 1\n_ = -x}",
+    {
+      "main": {
+        "arguments": [],
+        "body": [
+          {
+            "name": "x",
+            "ty": "i64",
+            "type": "init",
+            "value": {
+              "ty": "i64",
+              "type": "integer",
+              "value": 1
+            }
+          },
+          {
+            "child": {
+              "name": "x",
+              "type": "value"
+            },
+            "type": "unary -"
+          }
+        ],
+        "name": "main",
+        "return_type": "void",
+        "type": "function"
+      }
+    }
+  ],
+  [
+    "expressions: Unary minus (floats)",
+    "fn main => void entry\n{let x: f64 = 1\n_ = -x}",
+    {}
+  ],
+  [
+    "expressions: Unary minus (complex numbers)",
+    "fn main => void entry\n{let x: c64 = 1+2I\n_ = -x}",
+    {}
+  ],
+  [
+    "expressions: Unary minus (function pointers)",
+    "import function_pointers @ l\nfn main => void entry\n{_ = -l.fn_pointer_integer}",
+    {}
+  ],
+  [
+    "expressions: Not (integers)",
+    "fn main => void entry\n{let x: i64 = 1\n_ = not x}",
+    {}
+  ],
+  [
+    "expressions: Not (booleans)",
+    "fn main => void entry\n{let x = false\n_ = not x}",
+    {}
+  ],
+  [
+    "expressions: Not (function pointers)",
+    "import function_pointers @ l\nfn main => void entry\n{_ = not l.fn_pointer_integer}",
+    {}
+  ],
+  [
+    "expressions: Multiplication (integer-integer)",
+    "fn main => void entry\n{let x: i64 = 1\nlet y: i64 = 2\n_ = x*y}",
+    {
+      "main": {
+        "arguments": [],
+        "body": [
+          {
+            "name": "x",
+            "ty": "i64",
+            "type": "init",
+            "value": {
+              "ty": "i64",
+              "type": "integer",
+              "value": 1
+            }
+          },
+          {
+            "name": "y",
+            "ty": "i64",
+            "type": "init",
+            "value": {
+              "ty": "i64",
+              "type": "integer",
+              "value": 2
+            }
+          },
+          {
+            "lhs": {
+              "name": "x",
+              "type": "value"
+            },
+            "rhs": {
+              "name": "y",
+              "type": "value"
+            },
+            "type": "*"
+          }
+        ],
+        "name": "main",
+        "return_type": "void",
+        "type": "function"
+      }
+    }
+  ],
+  [
+    "expressions: Multiplication (integer-float)",
+    "fn main => void entry\n{let x: i64 = 1\nlet y: f64 = 2.0\n_ = x*y}",
+    {}
+  ],
+  [
+    "expressions: Multiplication (integer-complex)",
+    "fn main => void entry\n{let x: i64 = 1\nlet y: f64 = 2.0+3I\n_ = x*y}",
+    {}
+  ],
+  [
+    "expressions: Multiplication (float-float)",
+    "fn main => void entry\n{let x: f64 = 1.0\nlet y: f64 = 2.0\n_ = x*y}",
+    {}
+  ],
+  [
+    "expressions: Multiplication (float-complex)",
+    "fn main => void entry\n{let x: f64 = 1.0\nlet y: f64 = 2.0+3I\n_ = x*y}",
+    {}
+  ],
+  [
+    "expressions: Multiplication (function pointer-integer)",
+    "import function_pointers @ l\nfn main => void entry\n{let y: i64 = 2\n_ = l.fn_pointer_integer*y}",
+    {}
+  ],
+  [
+    "expressions: Multiplication (function pointer-float)",
+    "import function_pointers @ l\nfn main => void entry\n{let y: f64 = 2.0\n_ = l.fn_pointer_float*y}",
+    {}
+  ],
+  [
+    "expressions: Multiplication (function pointer-complex)",
+    "import function_pointers @ l\nfn main => void entry\n{let y: f64 = 2.0+3I\n_ = l.fn_pointer_complex*y}",
+    {}
+  ],
+  [
+    "expressions: Multiplication (function pointer-function pointer)",
+    "import function_pointers @ l\nfn main => void entry\n{\n_ = l.fn_pointer_integer*l.fn_pointer_integer}",
+    {}
+  ],
+  [
+    "expressions: Division (integer-integer)",
+    "fn main => void entry\n{let x: i64 = 1\nlet y: i64 = 2\n_ = x/y}",
+    {
+      "main": {
+        "arguments": [],
+        "body": [
+          {
+            "name": "x",
+            "ty": "i64",
+            "type": "init",
+            "value": {
+              "ty": "i64",
+              "type": "integer",
+              "value": 1
+            }
+          },
+          {
+            "name": "y",
+            "ty": "i64",
+            "type": "init",
+            "value": {
+              "ty": "i64",
+              "type": "integer",
+              "value": 2
+            }
+          },
+          {
+            "lhs": {
+              "name": "x",
+              "type": "value"
+            },
+            "rhs": {
+              "name": "y",
+              "type": "value"
+            },
+            "type": "/"
+          }
+        ],
+        "name": "main",
+        "return_type": "void",
+        "type": "function"
+      }
+    }
+  ],
+  [
+    "expressions: Division (integer-float)",
+    "fn main => void entry\n{let x: i64 = 1\nlet y: f64 = 2.0\n_ = x/y}",
+    {}
+  ],
+  [
+    "expressions: Division (integer-complex)",
+    "fn main => void entry\n{let x: i64 = 1\nlet y: f64 = 2.0+3I\n_ = x/y}",
+    {}
+  ],
+  [
+    "expressions: Division (float-float)",
+    "fn main => void entry\n{let x: f64 = 1.0\nlet y: f64 = 2.0\n_ = x/y}",
+    {}
+  ],
+  [
+    "expressions: Division (float-complex)",
+    "fn main => void entry\n{let x: f64 = 1.0\nlet y: f64 = 2.0+3I\n_ = x/y}",
+    {}
+  ],
+  [
+    "expressions: Division (function pointer-integer)",
+    "import function_pointers @ l\nfn main => void entry\n{let y: i64 = 2\n_ = l.fn_pointer_integer/y}",
+    {}
+  ],
+  [
+    "expressions: Division (function pointer-float)",
+    "import function_pointers @ l\nfn main => void entry\n{let y: f64 = 2.0\n_ = l.fn_pointer_float/y}",
+    {}
+  ],
+  [
+    "expressions: Division (function pointer-complex)",
+    "import function_pointers @ l\nfn main => void entry\n{let y: f64 = 2.0+3I\n_ = l.fn_pointer_complex/y}",
+    {}
+  ],
+  [
+    "expressions: Division (function pointer-function pointer)",
+    "import function_pointers @ l\nfn main => void entry\n{\n_ = l.fn_pointer_integer/l.fn_pointer_integer}",
+    {}
+  ],
+  [
+    "expressions: Remainder (integer-integer)",
+    "fn main => void entry\n{let x: i64 = 1\nlet y: i64 = 2\n_ = x%y}",
+    {
+      "main": {
+        "arguments": [],
+        "body": [
+          {
+            "name": "x",
+            "ty": "i64",
+            "type": "init",
+            "value": {
+              "ty": "i64",
+              "type": "integer",
+              "value": 1
+            }
+          },
+          {
+            "name": "y",
+            "ty": "i64",
+            "type": "init",
+            "value": {
+              "ty": "i64",
+              "type": "integer",
+              "value": 2
+            }
+          },
+          {
+            "lhs": {
+              "name": "x",
+              "type": "value"
+            },
+            "rhs": {
+              "name": "y",
+              "type": "value"
+            },
+            "type": "%"
+          }
+        ],
+        "name": "main",
+        "return_type": "void",
+        "type": "function"
+      }
+    }
+  ],
+  [
+    "expressions: Remainder (integer-float)",
+    "fn main => void entry\n{let x: i64 = 1\nlet y: f64 = 2.0\n_ = x%y}",
+    {}
+  ],
+  [
+    "expressions: Remainder (integer-complex)",
+    "fn main => void entry\n{let x: i64 = 1\nlet y: f64 = 2.0+3I\n_ = x%y}",
+    {}
+  ],
+  [
+    "expressions: Remainder (float-float)",
+    "fn main => void entry\n{let x: f64 = 1.0\nlet y: f64 = 2.0\n_ = x%y}",
+    {}
+  ],
+  [
+    "expressions: Remainder (float-complex)",
+    "fn main => void entry\n{let x: f64 = 1.0\nlet y: f64 = 2.0+3I\n_ = x%y}",
+    {}
+  ],
+  [
+    "expressions: Remainder (function pointer-integer)",
+    "import function_pointers @ l\nfn main => void entry\n{let y: i64 = 2\n_ = l.fn_pointer_integer%y}",
+    {}
+  ],
+  [
+    "expressions: Remainder (function pointer-float)",
+    "import function_pointers @ l\nfn main => void entry\n{let y: f64 = 2.0\n_ = l.fn_pointer_float%y}",
+    {}
+  ],
+  [
+    "expressions: Remainder (function pointer-complex)",
+    "import function_pointers @ l\nfn main => void entry\n{let y: f64 = 2.0+3I\n_ = l.fn_pointer_complex%y}",
+    {}
+  ],
+  [
+    "expressions: Remainder (function pointer-function pointer)",
+    "import function_pointers @ l\nfn main => void entry\n{\n_ = l.fn_pointer_integer%l.fn_pointer_integer}",
+    {}
+  ],
+  [
+    "expressions: Addition (integer-integer)",
+    "fn main => void entry\n{let x: i64 = 1\nlet y: i64 = 2\n_ = x+y}",
+    {
+      "main": {
+        "arguments": [],
+        "body": [
+          {
+            "name": "x",
+            "ty": "i64",
+            "type": "init",
+            "value": {
+              "ty": "i64",
+              "type": "integer",
+              "value": 1
+            }
+          },
+          {
+            "name": "y",
+            "ty": "i64",
+            "type": "init",
+            "value": {
+              "ty": "i64",
+              "type": "integer",
+              "value": 2
+            }
+          },
+          {
+            "lhs": {
+              "name": "x",
+              "type": "value"
+            },
+            "rhs": {
+              "name": "y",
+              "type": "value"
+            },
+            "type": "+"
+          }
+        ],
+        "name": "main",
+        "return_type": "void",
+        "type": "function"
+      }
+    }
+  ],
+  [
+    "expressions: Addition (integer-float)",
+    "fn main => void entry\n{let x: i64 = 1\nlet y: f64 = 2.0\n_ = x+y}",
+    {}
+  ],
+  [
+    "expressions: Addition (integer-complex)",
+    "fn main => void entry\n{let x: i64 = 1\nlet y: f64 = 2.0+3I\n_ = x+y}",
+    {}
+  ],
+  [
+    "expressions: Addition (float-float)",
+    "fn main => void entry\n{let x: f64 = 1.0\nlet y: f64 = 2.0\n_ = x+y}",
+    {}
+  ],
+  [
+    "expressions: Addition (float-complex)",
+    "fn main => void entry\n{let x: f64 = 1.0\nlet y: f64 = 2.0+3I\n_ = x+y}",
+    {}
+  ],
+  [
+    "expressions: Addition (function pointer-integer)",
+    "import function_pointers @ l\nfn main => void entry\n{let y: i64 = 2\n_ = l.fn_pointer_integer+y}",
+    {}
+  ],
+  [
+    "expressions: Addition (function pointer-float)",
+    "import function_pointers @ l\nfn main => void entry\n{let y: f64 = 2.0\n_ = l.fn_pointer_float+y}",
+    {}
+  ],
+  [
+    "expressions: Addition (function pointer-complex)",
+    "import function_pointers @ l\nfn main => void entry\n{let y: f64 = 2.0+3I\n_ = l.fn_pointer_complex+y}",
+    {}
+  ],
+  [
+    "expressions: Addition (function pointer-function pointer)",
+    "import function_pointers @ l\nfn main => void entry\n{\n_ = l.fn_pointer_integer+l.fn_pointer_integer}",
+    {}
+  ],
+  [
+    "expressions: Subtraction (integer-integer)",
+    "fn main => void entry\n{let x: i64 = 1\nlet y: i64 = 2\n_ = x-y}",
+    {
+      "main": {
+        "arguments": [],
+        "body": [
+          {
+            "name": "x",
+            "ty": "i64",
+            "type": "init",
+            "value": {
+              "ty": "i64",
+              "type": "integer",
+              "value": 1
+            }
+          },
+          {
+            "name": "y",
+            "ty": "i64",
+            "type": "init",
+            "value": {
+              "ty": "i64",
+              "type": "integer",
+              "value": 2
+            }
+          },
+          {
+            "lhs": {
+              "name": "x",
+              "type": "value"
+            },
+            "rhs": {
+              "name": "y",
+              "type": "value"
+            },
+            "type": "-"
+          }
+        ],
+        "name": "main",
+        "return_type": "void",
+        "type": "function"
+      }
+    }
+  ],
+  [
+    "expressions: Subtraction (integer-float)",
+    "fn main => void entry\n{let x: i64 = 1\nlet y: f64 = 2.0\n_ = x-y}",
+    {}
+  ],
+  [
+    "expressions: Subtraction (integer-complex)",
+    "fn main => void entry\n{let x: i64 = 1\nlet y: f64 = 2.0-3I\n_ = x-y}",
+    {}
+  ],
+  [
+    "expressions: Subtraction (float-float)",
+    "fn main => void entry\n{let x: f64 = 1.0\nlet y: f64 = 2.0\n_ = x-y}",
+    {}
+  ],
+  [
+    "expressions: Subtraction (float-complex)",
+    "fn main => void entry\n{let x: f64 = 1.0\nlet y: f64 = 2.0-3I\n_ = x-y}",
+    {}
+  ],
+  [
+    "expressions: Subtraction (function pointer-integer)",
+    "import function_pointers @ l\nfn main => void entry\n{let y: i64 = 2\n_ = l.fn_pointer_integer-y}",
+    {}
+  ],
+  [
+    "expressions: Subtraction (function pointer-float)",
+    "import function_pointers @ l\nfn main => void entry\n{let y: f64 = 2.0\n_ = l.fn_pointer_float-y}",
+    {}
+  ],
+  [
+    "expressions: Subtraction (function pointer-complex)",
+    "import function_pointers @ l\nfn main => void entry\n{let y: f64 = 2.0-3I\n_ = l.fn_pointer_complex-y}",
+    {}
+  ],
+  [
+    "expressions: Subtraction (function pointer-function pointer)",
+    "import function_pointers @ l\nfn main => void entry\n{\n_ = l.fn_pointer_integer-l.fn_pointer_integer}",
+    {}
   ]
 ]

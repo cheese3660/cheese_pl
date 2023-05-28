@@ -61,7 +61,7 @@ namespace cheese::tests::curdle_tests {
                             bacteria::BacteriaPtr bact;
                             TEST_TRY(bact = cheese::curdle::curdle(cheese::curdle::Project{
                                 "./testenv_src/",
-                                {},
+                                {"./testenv_imports/"},
                                 fname,
                                 root,
                                 cheese::curdle::ProjectType::Application

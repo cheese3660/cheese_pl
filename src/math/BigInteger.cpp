@@ -303,7 +303,7 @@ namespace cheese::math {
         return *this / BigInteger(1, other);
     }
 
-    const BigInteger BigInteger::operator++(int) {
+    BigInteger BigInteger::operator++(int) {
         BigInteger copy = *this;
         ++*this;
         return copy;

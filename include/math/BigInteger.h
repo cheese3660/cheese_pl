@@ -138,7 +138,7 @@ namespace cheese::math {
 
         BigInteger operator>>(size_t other) const;
 
-        const BigInteger operator++(int);
+        BigInteger operator++(int);
 
         BigInteger &operator++();
 

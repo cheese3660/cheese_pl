@@ -138,10 +138,11 @@ namespace cheese::curdle {
             Structure *imported = containedContext->globalContext->import_structure(pImport->location, pImport->path,
                                                                                     containedContext->path.parent_path(),
                                                                                     containedContext->project_dir);
+            auto n = lazy->name;
             lazy = nullptr;
             auto from_type = create_from_type(gctx, imported);
             ComptimeVariableInfo info{true, true, TypeType::get(gctx), from_type};
-            comptime_variables[lazy->name] = info;
+            comptime_variables[n] = info;
             return;
         }
         WHEN_LAZY_IS(parser::nodes::VariableDeclaration, pVariableDeclaration) {

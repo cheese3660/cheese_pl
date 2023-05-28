@@ -1,0 +1,244 @@
+Curdle tests that need to be written
+------------------------------------
+Values
+    [X] - Integer Values
+    [ ] - Floating point values
+    [ ] - Complex numbers
+    [ ] - Booleans
+    [ ] - Optionals (find better syntax)
+    [ ] - Errors (find better syntax)
+    [ ] - Arrays (Implicit)
+    [ ] - Arrays (Explicit)
+    [ ] - Arrays as slices
+    [ ] - Arrays as many item pointers
+    [ ] - Tuples (implicit)
+    [ ] - Tuples (explicit)
+    [ ] - Enumerations (no fields)
+    [ ] - Enumerations (fields)
+    [ ] - Enum constants
+    [ ] - Strings (arrays)
+    [ ] - Strings (slices)
+    [ ] - Strings (pointers)
+Statements
+    [ ] - Assignments
+    [ ] - Defining
+    [ ] - Destructuring
+    [ ] - Reference Reassignment
+Expressions
+    [X] - Taking reference of something
+    [X] - Subscription
+    [X] - Unary plus (integers)
+    [X] - Unary plus (floats)
+    [X] - Unary plus (complex numbers)
+    [X] - Unary plus (function pointer) // Also closures and all that can be applied to this at runtime
+    [X] - Unary minus (integers)
+    [X] - Unary minus (floats)
+    [X] - Unary minus (complex numbers)
+    [X] - Unary minus (function pointer)
+    [X] - Not (integers)
+    [X] - Not (booleans)
+    [X] - Not (function pointer)
+    [X] - Multiplication (integer-integer)
+    [X] - Multiplication (integer-float)
+    [X] - Multiplication (integer-complex)
+    [X] - Multiplication (float-float)
+    [X] - Multiplication (float-complex)
+    [X] - Multiplication (complex-complex)
+    [X] - Multiplication (function pointer-integer)
+    [X] - Multiplication (function pointer-float)
+    [X] - Multiplication (function pointer-complex)
+    [X] - Multiplication (function pointer-function pointer)
+    [X] - Division (integer-integer)
+    [X] - Division (integer-float)
+    [X] - Division (integer-complex)
+    [X] - Division (float-float)
+    [X] - Division (float-complex)
+    [X] - Division (complex-complex)
+    [X] - Division (function pointer-integer)
+    [X] - Division (function pointer-float)
+    [X] - Division (function pointer-complex)
+    [X] - Division (function pointer-function pointer)
+    [X] - Remainder (integer-integer)
+    [X] - Remainder (integer-float)
+    [X] - Remainder (integer-complex)
+    [X] - Remainder (float-float)
+    [X] - Remainder (float-complex)
+    [X] - Remainder (complex-complex)
+    [X] - Remainder (function pointer-integer)
+    [X] - Remainder (function pointer-float)
+    [X] - Remainder (function pointer-complex)
+    [X] - Remainder (function pointer-function pointer)
+    [X] - Addition (integer-integer)
+    [X] - Addition (integer-float)
+    [X] - Addition (integer-complex)
+    [X] - Addition (float-float)
+    [X] - Addition (float-complex)
+    [X] - Addition (complex-complex)
+    [X] - Addition (function pointer-integer)
+    [X] - Addition (function pointer-float)
+    [X] - Addition (function pointer-complex)
+    [X] - Addition (function pointer-function pointer)
+    [X] - Subtraction (integer-integer)
+    [X] - Subtraction (integer-float)
+    [X] - Subtraction (integer-complex)
+    [X] - Subtraction (float-float)
+    [X] - Subtraction (float-complex)
+    [X] - Subtraction (complex-complex)
+    [X] - Subtraction (function pointer-integer)
+    [X] - Subtraction (function pointer-float)
+    [X] - Subtraction (function pointer-complex)
+    [X] - Subtraction (function pointer-function pointer)
+    [ ] - Lesser (integer-integer)
+    [ ] - Lesser (integer-float)
+    [ ] - Lesser (float-float)
+    [ ] - Lesser (function pointer-integer)
+    [ ] - Lesser (function pointer-float)
+    [ ] - Lesser (function pointer-function pointer)
+    [ ] - Greater (integer-integer)
+    [ ] - Greater (integer-float)
+    [ ] - Greater (float-float)
+    [ ] - Greater (function pointer-integer)
+    [ ] - Greater (function pointer-float)
+    [ ] - Greater (function pointer-function pointer)
+    [ ] - Lesser Equal (integer-integer)
+    [ ] - Lesser Equal (integer-float)
+    [ ] - Lesser Equal (float-float)
+    [ ] - Lesser Equal (function pointer-integer)
+    [ ] - Lesser Equal (function pointer-float)
+    [ ] - Lesser Equal (function pointer-function pointer)
+    [ ] - Greater Equal (integer-integer)
+    [ ] - Greater Equal (integer-float)
+    [ ] - Greater Equal (float-float)
+    [ ] - Greater Equal (function pointer-integer)
+    [ ] - Greater Equal (function pointer-float)
+    [ ] - Greater Equal (function pointer-function pointer)
+    [ ] - Equal To (integer-integer)
+    [ ] - Equal To (integer-float)
+    [ ] - Equal To (integer-complex)
+    [ ] - Equal To (float-float)
+    [ ] - Equal To (float-complex)
+    [ ] - Equal To (complex-complex)
+    [ ] - Equal To (enum-enum literal)
+    [ ] - Equal To (enum-enum)
+    [ ] - Equal To (boolean-boolean)
+    [ ] - Equal To (pointer-pointer)
+    [ ] - Equal To (slice-slice)
+    [ ] - Equal To (array-array)
+    [ ] - Equal To (reference-reference)
+    [ ] - Equal To (function pointer-integer)
+    [ ] - Equal To (function pointer-float)
+    [ ] - Equal To (function pointer-complex)
+    [ ] - Equal To (function pointer-function pointer)
+    [ ] - Not Equal To (integer-integer)
+    [ ] - Not Equal To (integer-float)
+    [ ] - Not Equal To (integer-complex)
+    [ ] - Not Equal To (float-float)
+    [ ] - Not Equal To (float-complex)
+    [ ] - Not Equal To (complex-complex)
+    [ ] - Not Equal To (enum-enum literal)
+    [ ] - Not Equal To (enum-enum)
+    [ ] - Not Equal To (boolean-boolean)
+    [ ] - Not Equal To (pointer-pointer)
+    [ ] - Not Equal To (slice-slice)
+    [ ] - Not Equal To (array-array)
+    [ ] - Not Equal To (reference-reference)
+    [ ] - Not Equal To (function pointer-integer)
+    [ ] - Not Equal To (function pointer-float)
+    [ ] - Not Equal To (function pointer-complex)
+    [ ] - Not Equal To (function pointer-function pointer)
+    [ ] - And (integer-integer)
+    [ ] - And (boolean-boolean)
+    [ ] - And (function pointer-integer)
+    [ ] - And (function pointer-boolean)
+    [ ] - And (function pointer-function pointer)
+    [ ] - Xor (integer-integer)
+    [ ] - Xor (boolean-boolean)
+    [ ] - Xor (function pointer-function pointer)
+    [ ] - Or (integer-integer)
+    [ ] - Or (boolean-boolean)
+    [ ] - Or (function pointer-function pointer)
+    [ ] - All of the above with implicit dereferencing and all that
+
+
+Compile Time Expressions
+    [ ] - Multiplication (integer-string)
+    [ ] - Combination (enum-enum)
+    [ ] - Combination (function-function)
+    [ ]
+
+Operator Overloads
+    [ ] - Tuple call (static)
+    [ ] - Tuple call (member)
+    [ ] - Array call (static)
+    [ ] - Array call (member)
+    [ ] - Object call (static)
+    [ ] - Object call (member)
+    [ ] - Dereference
+    [ ] - Not (static)
+    [ ] - Not (member)
+    [ ] - Multiply (static)
+    [ ] - Multiply (member)
+    [ ] - Divide (static)
+    [ ] - Divide (member)
+    [ ] - Remainder (static)
+    [ ] - Remainder (member)
+    [ ] - Addition (static)
+    [ ] - Addition (member)
+    [ ] - Subtraction (static)
+    [ ] - Subtraction (member)
+    [ ] - Left Shift (static)
+    [ ] - Left Shift (member)
+    [ ] - Right Shift (static)
+    [ ] - Right Shift (member)
+    [ ] - Less than (static)
+    [ ] - Less than (member)
+    [ ] - Greater than (static)
+    [ ] - Greater than (member)
+    [ ] - Less than equal (static)
+    [ ] - Less than equal (member)
+    [ ] - Greater than equal (static)
+    [ ] - Greater than equal (member)
+    [ ] - Equal to (static)
+    [ ] - Equal to (member)
+    [ ] - Not equal to (static)
+    [ ] - Not equal to (member)
+    [ ] - And (static)
+    [ ] - And (member)
+    [ ] - Xor (static)
+    [ ] - Xor (member)
+    [ ] - Or (static)
+    [ ] - Or (member)
+    [ ] - Combination (static)
+    [ ] - Combination (member)
+    [ ] - Assignment
+    [ ] - Asssignment by sum
+    [ ] - Asssignment by difference
+    [ ] - Asssignment by multiplication
+    [ ] - Asssignment by division
+    [ ] - Asssignment by remainder
+    [ ] - Asssignment by left-shift
+    [ ] - Asssignment by right-shift
+    [ ] - Asssignment by and
+    [ ] - Asssignment by xor
+    [ ] - Asssignment by or
+
+Structs
+    [ ] - Properties
+
+
+Traits
+    [ ] - Properties
+Interfaces
+    [ ] - Function mandates
+    [ ] - Dynamicity
+    [ ] - Properties
+    [ ] - Operators
+Concepts
+
+
+Optimizations
+    [X] - Simple constant folding
+    [ ] - Destructuring optimizations
+
+
+Errors

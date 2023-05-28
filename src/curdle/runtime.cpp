@@ -230,6 +230,12 @@ namespace cheese::curdle {
                 }
             }
             WHEN_NODE_IS(parser::nodes::ValueReference, pValueReference) {
+                auto gotten = runtime->get(pValueReference->name);
+                if (!gotten.has_value()) {
+                    throw LocalizedCurdleError(
+                            "Invalid Variable Reference: " + pValueReference->name + " does not exist",
+                            pValueReference->location, error::ErrorCode::InvalidVariableReference);
+                }
                 return {gc, runtime->get(pValueReference->name)->type};
             }
             WHEN_NODE_IS(parser::nodes::IntegerLiteral, pIntegerLiteral) {

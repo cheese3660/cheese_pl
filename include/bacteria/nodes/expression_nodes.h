@@ -401,7 +401,7 @@ namespace cheese::bacteria::nodes {
         ~DivisionNode() override = default;
 
         const char *get_operator() const override {
-            return "%";
+            return "/";
         }
     };
 
