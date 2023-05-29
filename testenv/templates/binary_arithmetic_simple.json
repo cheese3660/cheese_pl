@@ -1,5 +1,5 @@
 {
-  ":insert": [
+  ":insert-array": [
     "fn main => void entry\n{let x: %TYPE_A% = 1\nlet y: %TYPE_B% = 1\n_ = x%OPERATION%y}",
     {
       "main": {

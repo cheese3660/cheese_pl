@@ -35,8 +35,6 @@ namespace cheese::tests::curdle_tests {
                 buf << curdle_tests.rdbuf();
                 generated_tests_json = nlohmann::json::parse(buf);
                 util::templatify(generated_tests_json,"./templates");
-                std::string result = generated_tests_json.dump(4);
-                std::cout << result;
             }
             TEST_SUBSECTION("curdle validation")
                 TEST_GENERATOR {

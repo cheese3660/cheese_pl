@@ -1,5 +1,5 @@
 {
-  ":insert": [
+  ":insert-array": [
     [
       "expressions: %NAME% (integer-integer)",
       {

@@ -318,7 +318,7 @@ namespace cheese::curdle {
                 std::string name;
                 if (!structure) {
                     auto ref = dynamic_cast<ReferenceType *>(subscript_type.get());
-                    if (!(structure = dynamic_cast<Structure *>(ref->child))) {
+                    if (!ref || !(structure = dynamic_cast<Structure *>(ref->child))) {
                         NOT_IMPL_FOR("Non structure subscriptions");
                     }
                 }
