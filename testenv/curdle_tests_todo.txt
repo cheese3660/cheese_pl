@@ -242,3 +242,9 @@ Optimizations
 
 
 Errors
+
+
+
+
+------------------------------------------------------------------------
+FIGURE OUT A BETTER WAY TO AUTOGEN TESTS SO BASIC TESTS CAN BE AUTOMATED

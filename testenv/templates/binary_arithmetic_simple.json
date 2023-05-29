@@ -1,0 +1,49 @@
+{
+  ":insert": [
+    "fn main => void entry\n{let x: %TYPE_A% = 1\nlet y: %TYPE_B% = 1\n_ = x%OPERATION%y}",
+    {
+      "main": {
+        "arguments": [],
+        "body": [
+          {
+            "name": "x",
+            "ty": "%TYPE_A_B%",
+            "type": "init",
+            "value": "@VALUE_A@"
+          },
+          {
+            "name": "y",
+            "ty": "%TYPE_B_B%",
+            "type": "init",
+            "value": "@VALUE_B@"
+          },
+          {
+            "lhs": {
+              ":match": "%TYPE_B_B%",
+              "%TYPE_A_B%": {
+                "name": "x",
+                "type": "value"
+              },
+              ":default": {
+                "type": "cast",
+                "ty": "%TYPE_B_B%",
+                "value": {
+                  "type": "value",
+                  "name": "x"
+                }
+              }
+            },
+            "rhs": {
+              "name": "y",
+              "type": "value"
+            },
+            "type": "%OPERATION%"
+          }
+        ],
+        "name": "main",
+        "return_type": "void",
+        "type": "function"
+      }
+    }
+  ]
+}
