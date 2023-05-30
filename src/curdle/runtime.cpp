@@ -204,6 +204,15 @@ namespace cheese::curdle {
         auto gctx = runtime->comptime->globalContext;
         auto &gc = gctx->gc;
         try {
+            auto execed = runtime->comptime->try_exec(node, runtime);
+            if (execed.has_value()) {
+                auto etype = execed.value()->type;
+                if (expected_type) {
+                    return {gc, (expected_type->compare(etype) >= 0) ? expected_type : etype};
+                } else {
+                    return {gc, etype};
+                }
+            }
 #define WHEN_NODE_IS(type, name) if (auto name = dynamic_cast<type*>(node); name)
             WHEN_NODE_IS(parser::nodes::EqualTo, pEqualTo) {
                 auto pair = get_binary_type(pEqualTo->lhs.get(), pEqualTo->rhs.get());
@@ -392,10 +401,39 @@ namespace cheese::curdle {
                 }
                 return {gc, peer_type(all_arm_types, gctx)};
             }
+            WHEN_NODE_IS(parser::nodes::AddressOf, pAddressOf) {
+                // Now we have to do a "get l-value type" function
+                auto lvalue_type = runtime->get_lvalue_type(pAddressOf->child.get());
+                // We have to ma
+                return gc.gcnew<ReferenceType>(lvalue_type.first, lvalue_type.second);
+            }
             NOT_IMPL_FOR(typeid(*node).name());
 #undef WHEN_NODE_IS
         } catch (const CurdleError &e) {
             return {gc, ErrorType::get(gctx)};
+        } catch (const NotImplementedException &notImplementedException) {
+            throw LocalizedCurdleError(notImplementedException.what(), node->location,
+                                       error::ErrorCode::GeneralCompilerError);
+        }
+    }
+
+
+    std::pair<gcref<Type>, bool> RuntimeContext::get_lvalue_type(parser::Node *node) {
+        auto gctx = comptime->globalContext;
+        auto &gc = gctx->gc;
+        try {
+#define WHEN_NODE_IS(type, name) if (auto name = dynamic_cast<type*>(node); name)
+            WHEN_NODE_IS(parser::nodes::ValueReference, pValueReference) {
+                auto val = get(pValueReference->name);
+                if (!val.has_value()) {
+                    throw LocalizedCurdleError(
+                            "Invalid Variable Reference: " + pValueReference->name + " does not exist",
+                            pValueReference->location, error::ErrorCode::InvalidVariableReference);
+                }
+                return {{gc, val.value().type}, val.value().constant};
+            }
+            NOT_IMPL_FOR(typeid(*node).name());
+#undef  WHEN_NODE_IS
         } catch (const NotImplementedException &notImplementedException) {
             throw LocalizedCurdleError(notImplementedException.what(), node->location,
                                        error::ErrorCode::GeneralCompilerError);

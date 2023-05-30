@@ -70,8 +70,7 @@ namespace cheese::tests::curdle_tests {
                                     root,
                                     cheese::curdle::ProjectType::Application
                                 }));
-                                auto fail_message = "got:\n" + bact->as_json().dump(1) + "\nin text:\n" + bact->get_textual_representation() + "\nexpected:\n" + test[2].dump(1) + "\n";
-                                TEST_ASSERT_MESSAGE(bact->compare_json(test[2]),fail_message);
+                                TEST_ASSERT_MESSAGE(bact->compare_json(test[2]),"got:\n" + bact->as_json().dump(1) + "\nin text:\n" + bact->get_textual_representation() + "\nexpected:\n" + test[2].dump(1) + "\n");
                             TEST_GEN_END
                         } catch (const std::exception& e) {
                             throw;

@@ -371,7 +371,7 @@
   ],
   [
     "expressions: Taking reference of something (mutable)",
-    "fn main => void entry\n{let x: i64 = 0\nlet y = &x}",
+    "fn main => void entry\n{let x: i64 mut = 0\nlet y = &x}",
     {}
   ],
   [

@@ -601,8 +601,8 @@ namespace cheese::curdle {
         auto peer = peer_type({bin_type.first, bin_type.second}, gctx);
         auto peer_ctx = gc.gcnew<LocalContext>(lctx, peer);
         // At some point we are going to need to respect operators which will be fun
-        auto lhs_expr = translate_expression(peer_ctx, lhs);
-        auto rhs_expr = translate_expression(peer_ctx, rhs);
+        auto lhs_expr = make_cast(peer_ctx, lhs);
+        auto rhs_expr = make_cast(peer_ctx, rhs);
         return std::make_unique<T>(location, std::move(lhs_expr),
                                    std::move(rhs_expr));
     }
@@ -621,13 +621,18 @@ namespace cheese::curdle {
         } else {
             v = {lctx->runtime->comptime->globalContext->gc, value};
         }
-#define WHEN_COMPTIME_IS(type, name) if (auto name = dynamic_cast<type*>(v.get()); name)
+        auto vv = v.get();
+#define WHEN_COMPTIME_IS(type, name) if (auto name = dynamic_cast<type*>(vv); name)
         WHEN_COMPTIME_IS(ComptimeInteger, pComptimeInteger) {
             return std::make_unique<bacteria::nodes::IntegerLiteral>(location, pComptimeInteger->value,
                                                                      result_type->get_cached_type());
         }
+        WHEN_COMPTIME_IS(ComptimeFloat, pComptimeFloat) {
+            return std::make_unique<bacteria::nodes::FloatLiteral>(location, pComptimeFloat->value,
+                                                                   result_type->get_cached_type());
+        }
 #undef WHEN_COMPTIME_IS
-        NOT_IMPL_FOR(typeid(*value).name());
+        NOT_IMPL_FOR(typeid(*vv).name());
     }
 
     bacteria::BacteriaPtr translate_expression(LocalContext *lctx, parser::NodePtr expr) {
@@ -927,6 +932,11 @@ namespace cheese::curdle {
                 return std::make_unique<bacteria::nodes::AggregrateObject>(pObjectLiteral->location,
                                                                            as_struct->get_cached_type(),
                                                                            std::move(initialized_values));
+            }
+            WHEN_EXPR_IS(parser::nodes::AddressOf, pAddressOf) {
+                //TODO: specific translation for lvalues, as lvalues are a thing
+                return std::make_unique<bacteria::nodes::ReferenceNode>(pAddressOf->location, translate_expression(
+                        gc.gcnew<LocalContext>(rctx), pAddressOf->child));
             }
 #undef WHEN_EXPR_IS
             NOT_IMPL_FOR(typeid(*true_expr).name());

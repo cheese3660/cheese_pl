@@ -129,6 +129,12 @@ namespace cheese::curdle {
             auto new_size = std::max(size, other_i->size);
             return IntegerType::get(gctx, new_sign, new_size);
         }
+        if (dynamic_cast<Float64Type *>(other)) {
+            return other;
+        }
+        if (dynamic_cast<ComptimeFloatType *>(other)) {
+            return other;
+        }
         return nullptr;
     }
 

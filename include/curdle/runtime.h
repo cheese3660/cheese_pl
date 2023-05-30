@@ -59,6 +59,8 @@ namespace cheese::curdle {
 
         std::optional<RuntimeVariableInfo> get(const std::string &name);
 
+        std::pair<gcref<Type>, bool> get_lvalue_type(parser::Node *node);
+
         gcref<Type> get_type(parser::Node *node);
 
         void mark_references() override;

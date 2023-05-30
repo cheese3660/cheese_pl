@@ -264,6 +264,21 @@ namespace cheese::bacteria::nodes {
         JSON_FUNCS("&&", { "child" }, child)
     };
 
+    struct ReferenceNode : BacteriaNode {
+        ReferenceNode(const Coordinate &location, BacteriaPtr child) : BacteriaNode(location),
+                                                                       child(std::move(child)) {}
+
+        ~ReferenceNode() override = default;
+
+        std::string get_textual_representation(int depth) override {
+            return "(&" + child->get_textual_representation(depth) + ")";
+        }
+
+        BacteriaPtr child;
+
+        JSON_FUNCS("&", { "child" }, child)
+    };
+
     struct ObjectSubscriptNode : BacteriaNode {
         ObjectSubscriptNode(const Coordinate &location, BacteriaPtr child, int index) : BacteriaNode(location),
                                                                                         child(std::move(child)),

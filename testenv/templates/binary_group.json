@@ -26,11 +26,15 @@
         "OPERATION": "%OPERATION%"
       }
     ],
-    [
-      "expressions: %NAME% (integer-complex)",
-      "fn main => void entry\n{let x: i64 = 1\nlet y: c64 = 1\n_=x+y}",
-      "@INTEGER_COMPLEX@"
-    ],
+    {
+      ":match": "%OPERATION%",
+      "%": ":remove",
+      ":default": [
+        "expressions: %NAME% (integer-complex)",
+        "fn main => void entry\n{let x: i64 = 1\nlet y: c64 = 1\n_=x+y}",
+        "@INTEGER_COMPLEX@"
+      ]
+    },
     [
       "expressions: %NAME% (float-float)",
       {
@@ -44,16 +48,24 @@
         "OPERATION": "%OPERATION%"
       }
     ],
-    [
-      "expressions: %NAME% (float-complex)",
-      "fn main => void entry\n{let x: f64 = 1\nlet y: c64 = 1\n_=x+y}",
-      "@FLOAT_COMPLEX@"
-    ],
-    [
-      "expressions: %NAME% (complex-complex)",
-      "fn main => void entry\n{let x: c64 = 1\nlet y: c64 = 1\n_=x+y}",
-      "@COMPLEX_COMPLEX@"
-    ],
+    {
+      ":match": "%OPERATION%",
+      "%": ":remove",
+      ":default": [
+        "expressions: %NAME% (float-complex)",
+        "fn main => void entry\n{let x: f64 = 1\nlet y: c64 = 1\n_=x+y}",
+        "@FLOAT_COMPLEX@"
+      ]
+    },
+    {
+      ":match": "%OPERATION%",
+      "%": ":remove",
+      ":default": [
+        "expressions: %NAME% (complex-complex)",
+        "fn main => void entry\n{let x: c64 = 1\nlet y: c64 = 1\n_=x+y}",
+        "@COMPLEX_COMPLEX@"
+      ]
+    },
     [
       "expressions: %NAME% (function pointer-integer)",
       "import function_pointers @ l\nfn main => void entry\n{let x: i64 = 1\nlet y: i64 = 1\nlet z = l.fn_pointer_integer%OPERATION%y\n_ = z(x)}",
@@ -64,11 +76,15 @@
       "import function_pointers @ l\nfn main => void entry\n{let x: f64 = 1\nlet y: f64 = 1\nlet z = l.fn_pointer_float%OPERATION%y\n_ = z(x)}",
       {}
     ],
-    [
-      "expressions: %NAME% (function pointer-complex)",
-      "import function_pointers @ l\nfn main => void entry\n{let x: c64 = 1\nlet y: c64 = 1\nlet z = l.fn_pointer_complex%OPERATION%y\n_ = z(x)}",
-      {}
-    ],
+    {
+      ":match": "%OPERATION%",
+      "%": ":remove",
+      ":default": [
+        "expressions: %NAME% (function pointer-complex)",
+        "import function_pointers @ l\nfn main => void entry\n{let x: c64 = 1\nlet y: c64 = 1\nlet z = l.fn_pointer_complex%OPERATION%y\n_ = z(x)}",
+        {}
+      ]
+    },
     [
       "expressions: %NAME% (function pointer-function_pointer)",
       "import function_pointers @ l\nfn main => void entry\n{let x: i64 = 1\nlet y: i64 = 1\nlet z = l.fn_pointer_integer%OPERATION%l.fn_pointer_integer\n_ = z(x,y)}",

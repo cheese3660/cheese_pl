@@ -37,6 +37,8 @@ namespace cheese::util {
                     replace_in_place(string, "%" + key + "%", v.get<std::string>());
                 }
             }
+            replace_in_place(string, "@\\", "@");
+            replace_in_place(string, "%\\", "%");
             return nlohmann::json::parse(string);
         } catch (const std::exception &e) {
             throw;

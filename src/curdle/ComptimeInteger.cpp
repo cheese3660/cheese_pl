@@ -62,6 +62,9 @@ namespace cheese::curdle {
             }
             return new_value(garbageCollector, new ComptimeInteger(value, pIntegerType));
         }
+        WHEN_TYPE_IS(Float64Type, pFloat64Type) {
+            return new_value(garbageCollector, new ComptimeFloat(value, pFloat64Type));
+        }
         throw CurdleError(
                 "Bad Compile Time Cast: Cannot convert value of type: " + type->to_string() + " to type: " +
                 target_type->to_string(), error::ErrorCode::BadComptimeCast);

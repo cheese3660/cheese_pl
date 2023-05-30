@@ -599,6 +599,10 @@ namespace cheese::curdle {
                     NOT_IMPL;
                 }
             }
+            WHEN_NODE_IS(parser::nodes::AddressOf, pAddressOf) {
+                throw CurdleError("Not Compile Time: Can't take address at compile time",
+                                  error::ErrorCode::NotComptime);
+            }
             NOT_IMPL_FOR(typeid(*node).name());
 #undef WHEN_NODE_IS
         } catch (const CurdleError &e) {
