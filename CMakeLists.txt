@@ -74,7 +74,7 @@ add_executable(
         src/curdle/Project.cpp
         include/curdle/Project.h
         src/curdle/curdle.cpp
-        include/curdle/Structure.h
+        include/curdle/types/Structure.h
         include/curdle/FunctionTemplate.h
         include/curdle/Type.h
         include/curdle/Mixin.h
@@ -83,7 +83,7 @@ add_executable(
         include/curdle/comptime.h
         include/memory/garbage_collection.h
         src/memory/garbage_collection.cpp
-        src/curdle/Structure.cpp
+        src/curdle/types/Structure.cpp
         src/curdle/comptime.cpp
         src/curdle/Type.cpp
         src/curdle/Mixin.cpp
@@ -111,7 +111,55 @@ add_executable(
         src/bacteria/nodes/reciever_nodes.cpp
         src/tests/curdle_tests.cpp
         src/tests/curdle_tests.cpp
-        include/curdle/ComptimeInteger.h src/curdle/ComptimeInteger.cpp include/util/json_template.h src/util/json_template.cpp)
+        include/curdle/values/ComptimeInteger.h
+        src/curdle/values/ComptimeInteger.cpp
+        include/util/json_template.h
+        src/util/json_template.cpp
+        include/curdle/values/ComptimeFloat.h
+        src/curdle/values/ComptimeFloat.cpp
+        include/curdle/values/ComptimeString.h
+        src/curdle/values/ComptimeString.cpp
+        include/curdle/values/ComptimeVoid.h
+        src/curdle/values/ComptimeVoid.cpp
+        include/curdle/values/ComptimeComplex.h
+        src/curdle/values/ComptimeComplex.cpp
+        include/curdle/values/ComptimeType.h
+        src/curdle/values/ComptimeType.cpp
+        include/curdle/values/ComptimeArray.h
+        src/curdle/values/ComptimeArray.cpp
+        include/curdle/values/ComptimeObject.h
+        src/curdle/values/ComptimeObject.cpp
+        include/curdle/values/ComptimeFunctionSet.h
+        src/curdle/values/ComptimeFunctionSet.cpp
+        include/curdle/values/BuiltinFunctionReference.h
+        src/curdle/values/BuiltinFunctionReference.cpp
+        include/curdle/types/TypeType.h
+        src/curdle/types/TypeType.cpp
+        include/curdle/types/ComptimeIntegerType.h
+        src/curdle/types/ComptimeIntegerType.cpp
+        include/curdle/types/IntegerType.h
+        src/curdle/types/IntegerType.cpp
+        include/curdle/types/ReferenceType.h
+        src/curdle/types/ReferenceType.cpp
+        include/curdle/types/VoidType.h
+        src/curdle/types/VoidType.cpp
+        include/curdle/types/NoReturnType.h
+        src/curdle/types/NoReturnType.cpp
+        include/curdle/types/AnyType.h
+        src/curdle/types/AnyType.cpp
+        include/curdle/types/BooleanType.h
+        src/curdle/types/BooleanType.cpp
+        include/curdle/types/Float64Type.h
+        src/curdle/types/Float64Type.cpp
+        include/curdle/types/ComptimeFloatType.h
+        src/curdle/types/ComptimeFloatType.cpp
+        include/curdle/types/FunctionTemplateType.h
+        src/curdle/types/FunctionTemplateType.cpp
+        include/curdle/types/BuiltinReferenceType.h
+        src/curdle/types/BuiltinReferenceType.cpp
+        include/curdle/types/ErrorType.h
+        src/curdle/types/ErrorType.cpp
+)
 if (UNIX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++ -Wall")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++ -lc++abi")

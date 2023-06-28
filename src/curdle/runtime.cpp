@@ -4,7 +4,19 @@
 #include "curdle/runtime.h"
 #include "curdle/GlobalContext.h"
 #include "curdle/curdle.h"
-#include "curdle/Structure.h"
+#include "curdle/types/Structure.h"
+#include "curdle/values/ComptimeFunctionSet.h"
+#include "curdle/values/ComptimeType.h"
+#include "curdle/types/ReferenceType.h"
+#include "curdle/types/BooleanType.h"
+#include "curdle/types/IntegerType.h"
+#include "curdle/types/ComptimeIntegerType.h"
+#include "curdle/types/Float64Type.h"
+#include "curdle/types/ComptimeFloatType.h"
+#include "curdle/types/NoReturnType.h"
+#include "curdle/types/TypeType.h"
+#include "curdle/types/VoidType.h"
+#include "curdle/types/ErrorType.h"
 
 
 namespace cheese::curdle {

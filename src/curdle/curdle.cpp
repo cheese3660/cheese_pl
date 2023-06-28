@@ -20,7 +20,19 @@
 #include "bacteria/BacteriaNode.h"
 #include "bacteria/nodes/expression_nodes.h"
 #include "curdle/builtin.h"
-#include "curdle/ComptimeInteger.h"
+#include "curdle/values/ComptimeInteger.h"
+#include "curdle/values/ComptimeType.h"
+#include "curdle/types/TypeType.h"
+#include "curdle/types/IntegerType.h"
+#include "curdle/types/BooleanType.h"
+#include "curdle/types/ReferenceType.h"
+#include "curdle/values/ComptimeFunctionSet.h"
+#include "curdle/values/ComptimeFloat.h"
+#include "curdle/types/VoidType.h"
+#include "curdle/types/NoReturnType.h"
+#include "curdle/values/ComptimeArray.h"
+#include "curdle/values/ComptimeObject.h"
+#include "curdle/types/Float64Type.h"
 
 using namespace cheese::memory::garbage_collection;
 
@@ -644,6 +656,17 @@ namespace cheese::curdle {
                 return std::make_unique<bacteria::nodes::AggregrateObject>(location, t, std::move(values));
             }
         }
+        WHEN_COMPTIME_IS(ComptimeObject, pComptimeObject) {
+            if (auto as_structure = dynamic_cast<Structure *>(pComptimeObject->type); as_structure) {
+                auto t = as_structure->get_cached_type();
+                std::vector<bacteria::BacteriaPtr> values;
+                for (auto &field: as_structure->fields) {
+                    auto lower_context = gc.gcnew<LocalContext>(lctx, field.type);
+                    values.push_back(translate_comptime(lower_context, location, pComptimeObject->fields[field.name]));
+                }
+                return std::make_unique<bacteria::nodes::AggregrateObject>(location, t, std::move(values));
+            }
+        }
 #undef WHEN_COMPTIME_IS
         NOT_IMPL_FOR(typeid(*vv).name());
     }
@@ -799,6 +822,11 @@ namespace cheese::curdle {
                 return std::make_unique<bacteria::nodes::UnaryMinusNode>(pUnaryMinus->location,
                                                                          translate_expression(lctx,
                                                                                               pUnaryMinus->child));
+            }
+            WHEN_EXPR_IS(parser::nodes::UnaryPlus, pUnaryPlus) {
+                return std::make_unique<bacteria::nodes::UnaryPlusNode>(pUnaryPlus->location,
+                                                                        translate_expression(lctx,
+                                                                                             pUnaryPlus->child));
             }
             WHEN_EXPR_IS(parser::nodes::ObjectCall, pObjectCall) {
                 return translate_object_call(lctx, pObjectCall);

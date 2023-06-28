@@ -5,15 +5,15 @@
 #ifndef CHEESE_STRUCTURE_H
 #define CHEESE_STRUCTURE_H
 
-#include "Type.h"
+#include "curdle/Type.h"
 #include <string>
 #include <vector>
 #include <map>
 #include "parser/Node.h"
-#include "Interface.h"
-#include "variables.h"
-#include "functions.h"
-#include "comptime.h"
+#include "curdle/Interface.h"
+#include "curdle/variables.h"
+#include "curdle/functions.h"
+#include "curdle/comptime.h"
 
 namespace cheese::curdle {
     struct FunctionSet;
@@ -66,6 +66,7 @@ namespace cheese::curdle {
         std::string to_string() override;
 
         memory::garbage_collection::gcref<Type> peer(Type *other, GlobalContext *gc) override;
+
     };
 }
 

@@ -1,15 +1,17 @@
 //
 // Created by Lexi Allen on 5/28/2023.
 //
-#include "curdle/ComptimeInteger.h"
+#include "curdle/values/ComptimeInteger.h"
 #include "curdle/GlobalContext.h"
 #include "NotImplementedException.h"
 #include "curdle/Type.h"
 #include "typeinfo"
 #include "stringutil.h"
-#include <iostream>
-#include "curdle/builtin.h"
 #include "curdle/curdle.h"
+#include "curdle/values/ComptimeFloat.h"
+#include "curdle/types/ComptimeIntegerType.h"
+#include "curdle/types/IntegerType.h"
+#include "curdle/types/Float64Type.h"
 
 namespace cheese::curdle {
     void ComptimeInteger::mark_value() {

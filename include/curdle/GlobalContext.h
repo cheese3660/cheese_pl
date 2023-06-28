@@ -8,7 +8,7 @@
 #include <utility>
 
 #include "Project.h"
-#include "Structure.h"
+#include "curdle/types/Structure.h"
 #include "memory/garbage_collection.h"
 #include "error.h"
 #include "functions.h"

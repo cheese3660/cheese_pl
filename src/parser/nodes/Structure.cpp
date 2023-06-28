@@ -3,7 +3,7 @@
 //
 #include "parser/nodes/other_nodes.h"
 #include "NotImplementedException.h"
-#include "curdle/Structure.h"
+#include "curdle/types/Structure.h"
 
 namespace cheese::parser::nodes {
 

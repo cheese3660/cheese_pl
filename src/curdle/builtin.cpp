@@ -4,6 +4,7 @@
 
 #include "curdle/builtin.h"
 #include "curdle/curdle.h"
+#include "curdle/values/ComptimeType.h"
 
 namespace cheese::curdle {
 

@@ -10,7 +10,20 @@
 #include <iostream>
 #include "curdle/builtin.h"
 #include "curdle/curdle.h"
-#include "curdle/ComptimeInteger.h"
+#include "curdle/values/ComptimeInteger.h"
+#include "curdle/values/ComptimeFloat.h"
+#include "curdle/values/ComptimeString.h"
+#include "curdle/values/ComptimeType.h"
+#include "curdle/values/ComptimeArray.h"
+#include "curdle/values/ComptimeObject.h"
+#include "curdle/values/ComptimeFunctionSet.h"
+#include "curdle/values/BuiltinFunctionReference.h"
+#include "curdle/types/IntegerType.h"
+#include "curdle/types/VoidType.h"
+#include "curdle/types/AnyType.h"
+#include "curdle/types/Float64Type.h"
+#include "curdle/types/ComptimeIntegerType.h"
+#include "curdle/types/ComptimeFloatType.h"
 
 
 namespace cheese::curdle {
@@ -134,236 +147,6 @@ namespace cheese::curdle {
     }
 
 
-    void ComptimeString::mark_value() {
-
-    }
-
-    bool ComptimeString::is_same_as(ComptimeValue *other) {
-        if (other->type->compare(type) != 0) return false;
-        if (auto as_string = dynamic_cast<ComptimeString *>(other); as_string) {
-            return value == as_string->value;
-        } else {
-            return false;
-        }
-    }
-
-    std::string ComptimeString::to_string() {
-        return '"' + stringutil::escape(value) + '"';
-    }
-
-    gcref<ComptimeValue> ComptimeString::cast(Type *target_type, garbage_collector &garbageCollector) {
-        NOT_IMPL;
-    }
-
-    void ComptimeVoid::mark_value() {
-
-    }
-
-    bool ComptimeVoid::is_same_as(ComptimeValue *other) {
-        if (other->type->compare(type) != 0) return false;
-        if (auto as_void = dynamic_cast<ComptimeVoid *>(other); as_void) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    std::string ComptimeVoid::to_string() {
-        return "void";
-    }
-
-    gcref<ComptimeValue> ComptimeVoid::cast(Type *target_type, garbage_collector &garbageCollector) {
-        throw InvalidCastError("Invalid cast: cannot cast value of type void");
-    }
-
-    void ComptimeFloat::mark_value() {
-
-    }
-
-    bool ComptimeFloat::is_same_as(ComptimeValue *other) {
-        if (other->type->compare(type) != 0) return false;
-        if (auto as_float = dynamic_cast<ComptimeFloat *>(other); as_float) {
-            return value == as_float->value;
-        } else {
-            return false;
-        }
-    }
-
-    std::string ComptimeFloat::to_string() {
-        return std::to_string(value);
-    }
-
-    gcref<ComptimeValue> ComptimeFloat::cast(Type *target_type, garbage_collector &garbageCollector) {
-        if (type->compare(target_type) == 0) return gcref{garbageCollector, this};
-        if (auto as_f64 = dynamic_cast<Float64Type *>(target_type); as_f64) {
-            return garbageCollector.gcnew<ComptimeFloat>(value, target_type);
-        }
-        throw CurdleError{"Cannot cast " + type->to_string() + " to " + target_type->to_string() + " at compile time",
-                          error::ErrorCode::InvalidCast};
-    }
-
-    void ComptimeComplex::mark_value() {
-
-    }
-
-    bool ComptimeComplex::is_same_as(ComptimeValue *other) {
-        if (other->type->compare(type) != 0) return false;
-        if (auto as_complex = dynamic_cast<ComptimeComplex *>(other); as_complex) {
-            return a == as_complex->a && b == as_complex->b;
-        } else {
-            return false;
-        }
-    }
-
-    std::string ComptimeComplex::to_string() {
-        return std::to_string(a) + "+" + std::to_string(b) + "i";
-    }
-
-    gcref<ComptimeValue> ComptimeComplex::cast(Type *target_type, garbage_collector &garbageCollector) {
-        NOT_IMPL;
-    }
-
-    void ComptimeType::mark_value() {
-        typeValue->mark();
-    }
-
-    ComptimeType::ComptimeType(GlobalContext *gctx, Type *pType) {
-        type = TypeType::get(gctx);
-        typeValue = pType;
-    }
-
-    bool ComptimeType::is_same_as(ComptimeValue *other) {
-        if (auto as_type = dynamic_cast<ComptimeType *>(other); as_type) {
-            return typeValue->compare(as_type->typeValue) == 0;
-        } else {
-            return false;
-        }
-    }
-
-    std::string ComptimeType::to_string() {
-        return typeValue->to_string();
-    }
-
-    gcref<ComptimeValue> ComptimeType::cast(Type *target_type, garbage_collector &garbageCollector) {
-        NOT_IMPL;
-    }
-
-    void ComptimeArray::mark_value() {
-        for (auto value: values) {
-            value->mark();
-        }
-    }
-
-    bool ComptimeArray::is_same_as(ComptimeValue *other) {
-        if (other->type->compare(type) != 0) return false;
-        if (auto as_array = dynamic_cast<ComptimeArray *>(other); as_array) {
-            if (as_array->values.size() != values.size()) return false;
-            for (int i = 0; i < values.size(); i++) {
-                if (!values[i]->is_same_as(as_array->values[i])) return false;
-            }
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    gcref<ComptimeValue> ComptimeArray::cast(Type *target_type, garbage_collector &garbageCollector) {
-        if (auto cur_struct = dynamic_cast<Structure *>(type); cur_struct) {
-            if (auto other_struct = dynamic_cast<Structure *>(target_type); other_struct) {
-                if (cur_struct->is_tuple == other_struct->is_tuple) {
-                    if (cur_struct->is_tuple) {
-                        auto new_values = std::vector<ComptimeValue *>();
-                        auto refs = std::vector<gcref<ComptimeValue>>();
-                        for (int i = 0; i < values.size(); i++) {
-                            auto value = values[i]->cast(other_struct->fields[i].type, garbageCollector);
-                            new_values.push_back(value);
-                            refs.push_back(std::move(value));
-                        }
-                        return garbageCollector.gcnew<ComptimeArray>(target_type, std::move(new_values));
-                    } else {
-                        NOT_IMPL_FOR("struct casting");
-                    }
-                } else {
-                    throw CurdleError(
-                            "Cannot cast " + type->to_string() + " to " + target_type->to_string() + " at compile time",
-                            error::ErrorCode::InvalidCast);
-                }
-            } else {
-                throw CurdleError(
-                        "Cannot cast " + type->to_string() + " to " + target_type->to_string() + " at compile time",
-                        error::ErrorCode::InvalidCast);
-            }
-        }
-    }
-
-    std::string ComptimeArray::to_string() {
-        std::string result = type->to_string();
-        char end = ']';
-        if (auto as_structure = dynamic_cast<Structure *>(type); as_structure) {
-            result += '(';
-            end = ')';
-        } else {
-            result += '[';
-        }
-        for (int i = 0; i < values.size(); i++) {
-            result += values[i]->to_string();
-            if (i != values.size() - 1) {
-                result += ',';
-            }
-        }
-        result += end;
-        return result;
-    }
-
-    void ComptimeObject::mark_value() {
-        for (auto value: fields) {
-            value.second->mark();
-        }
-    }
-
-    bool ComptimeObject::is_same_as(ComptimeValue *other) {
-        if (other->type->compare(type) != 0) return false;
-        if (auto as_object = dynamic_cast<ComptimeObject *>(other); as_object) {
-            if (as_object->fields.size() != fields.size()) return false;
-            for (auto &kv: fields) {
-                if (!as_object->fields.contains(kv.first)) return false;
-                if (!as_object->fields[kv.first]->is_same_as(kv.second)) return false;
-            }
-        } else {
-            return false;
-        }
-        return false;
-    }
-
-    gcref<ComptimeValue> ComptimeObject::cast(Type *target_type, garbage_collector &garbageCollector) {
-        NOT_IMPL;
-    }
-
-
-    void ComptimeFunctionSet::mark_value() {
-        set->mark();
-    }
-
-    bool ComptimeFunctionSet::is_same_as(ComptimeValue *other) {
-        if (auto as_set = dynamic_cast<ComptimeFunctionSet *>(other); as_set) {
-            return as_set->set == set;
-        } else {
-            return false;
-        }
-    }
-
-    std::string ComptimeFunctionSet::to_string() {
-        return std::to_string((size_t) set);
-    }
-
-    ComptimeFunctionSet::ComptimeFunctionSet(FunctionSet *set, GlobalContext *gctx) : set(set) {
-        type = FunctionTemplateType::get(gctx);
-    }
-
-    gcref<ComptimeValue> ComptimeFunctionSet::cast(Type *target_type, garbage_collector &garbageCollector) {
-        NOT_IMPL;
-    }
-
     template<typename T>
     requires std::is_base_of_v<Type, T>
     static gcref<ComptimeValue> create_from_type(GlobalContext *gctx, T *ref) {
@@ -425,6 +208,15 @@ namespace cheese::curdle {
             WHEN_NODE_IS(parser::nodes::Void, pVoid) {
                 return create_from_type(globalContext, VoidType::get(globalContext));
             }
+            WHEN_NODE_IS(parser::nodes::AnyType, pAnyType) {
+                return create_from_type(globalContext, AnyType::get(globalContext));
+            }
+            WHEN_NODE_IS(parser::nodes::Float64, pFloat64) {
+                return create_from_type(globalContext, Float64Type::get(globalContext));
+            }
+            WHEN_NODE_IS(parser::nodes::Structure, pStructure) {
+                return create_from_type(globalContext, translate_structure(this, pStructure).get());
+            }
             WHEN_NODE_IS(parser::nodes::ValueReference, pValueReference) {
                 // Do the same as below but throw errors on an invalid value reference
                 auto gotten = get(pValueReference->name);
@@ -435,13 +227,6 @@ namespace cheese::curdle {
                             "Compile Time Execution Error: referencing a non-extant compile time variable: " +
                             pValueReference->name, pValueReference->location, error::ErrorCode::NotComptime);
                 }
-            }
-            WHEN_NODE_IS(parser::nodes::AnyType, pAnyType) {
-                return create_from_type(globalContext, AnyType::get(globalContext));
-            }
-            // Ah fun, tuple calling at compile time this is going to be fun
-            WHEN_NODE_IS(parser::nodes::TupleCall, pTupleCall) {
-                return exec_tuple_call(pTupleCall, rtime);
             }
             WHEN_NODE_IS(parser::nodes::BuiltinReference, pBuiltinReference) {
                 if (builtins.contains(pBuiltinReference->builtin)) {
@@ -456,12 +241,6 @@ namespace cheese::curdle {
                             "Bad Builtin Call: Builtin does not exist: " + pBuiltinReference->builtin,
                             pBuiltinReference->location, error::ErrorCode::BadBuiltinCall);
                 }
-            }
-            WHEN_NODE_IS(parser::nodes::Structure, pStructure) {
-                return create_from_type(globalContext, translate_structure(this, pStructure).get());
-            }
-            WHEN_NODE_IS(parser::nodes::Float64, pFloat64) {
-                return create_from_type(globalContext, Float64Type::get(globalContext));
             }
             WHEN_NODE_IS(parser::nodes::IntegerLiteral, pIntegerLiteral) {
                 return gc.gcnew<ComptimeInteger>(pIntegerLiteral->value, ComptimeIntegerType::get(globalContext));
@@ -673,6 +452,10 @@ namespace cheese::curdle {
                 }
                 return gc.gcnew<ComptimeArray>(ty, std::move(actual));
             }
+            // Ah fun, tuple calling at compile time this is going to be fun
+            WHEN_NODE_IS(parser::nodes::TupleCall, pTupleCall) {
+                return exec_tuple_call(pTupleCall, rtime);
+            }
             WHEN_NODE_IS(parser::nodes::ObjectCall, pObjectCall) {
                 throw CurdleError("TESTING",
                                   error::ErrorCode::NotComptime);
@@ -682,8 +465,20 @@ namespace cheese::curdle {
                                   error::ErrorCode::NotComptime);
             }
             WHEN_NODE_IS(parser::nodes::ObjectLiteral, pObjectLiteral) {
-                throw CurdleError("TESTING",
-                                  error::ErrorCode::NotComptime);
+                auto ty = gc.gcnew<Structure>(globalContext->verify_name("::lit"), this, gc);
+                ty->implicit_type = true;
+                auto val = gc.gcnew<ComptimeObject>(ty);
+                for (auto &child: pObjectLiteral->children) {
+                    auto as_field = dynamic_cast<parser::nodes::FieldLiteral *>(child.get());
+                    auto v = exec(as_field->value, rtime);
+                    val->fields[as_field->name] = v;
+                    ty->fields.push_back(StructureField{
+                            as_field->name,
+                            v->type,
+                            true
+                    });
+                }
+                return val;
             }
             WHEN_NODE_IS(parser::nodes::Return, pReturn) {
                 throw CurdleError("Not Compile Time: Can't return at compile time",
@@ -695,41 +490,6 @@ namespace cheese::curdle {
             throw LocalizedCurdleError(e.what(), node->location, e.code);
         }
     }
-
-//    std::optional<gcref<ComptimeValue>>
-//    ComptimeContext::try_exec_tuple_call(parser::nodes::TupleCall *call, RuntimeContext *rtime) {
-//        auto function = exec(call->object.get(), rtime);
-//        auto fptr = function.get();
-//#define WHEN_FUNCTION_IS(type, name) if (auto name = dynamic_cast<type*>(fptr); name)
-//        WHEN_FUNCTION_IS(ComptimeFunctionSet, pComptimeFunctionSet) {
-//            std::vector<PassedFunctionArgument> arguments;
-//            // Store all the references so they will be deallocated at the *correct* time
-//            std::vector<gcref<ComptimeValue>> value_refs;
-//            for (const auto &node: call->args) {
-//                auto arg = try_exec(node.get(), rtime);
-//                if (!arg.has_value()) {
-//                    return {};
-//                }
-//                arguments.push_back(
-//                        PassedFunctionArgument{false, arg.value(), arg.value()->type});
-//                value_refs.push_back(std::move(arg.value()));
-//            }
-//            NOT_IMPL_FOR("Functions");
-//        }
-//        WHEN_FUNCTION_IS(BuiltinFunctionReference, pBuiltinFunctionReference) {
-//            if (pBuiltinFunctionReference->builtin->comptime) {
-//                std::vector<parser::Node *> arguments;
-//                for (auto &arg: call->args) {
-//                    arguments.push_back(arg.get());
-//                }
-//                return pBuiltinFunctionReference->builtin->exec(call->location, arguments, this, rtime);
-//            } else {
-//                return {};
-//            }
-//        }
-//        NOT_IMPL_FOR(typeid(*fptr).name());
-//#undef WHEN_FUNCTION_IS
-//    }
 
     std::optional<gcref<ComptimeValue>> ComptimeContext::try_exec(parser::Node *node, RuntimeContext *rtime) {
         try {

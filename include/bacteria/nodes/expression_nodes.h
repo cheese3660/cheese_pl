@@ -249,6 +249,22 @@ namespace cheese::bacteria::nodes {
     };
 
 
+    struct UnaryPlusNode : BacteriaNode {
+        UnaryPlusNode(const Coordinate &location, BacteriaPtr child) : BacteriaNode(location),
+                                                                       child(std::move(child)) {}
+
+        ~UnaryPlusNode() override = default;
+
+        std::string get_textual_representation(int depth) override {
+            return "(+" + child->get_textual_representation(depth) + ")";
+        }
+
+        BacteriaPtr child;
+
+        JSON_FUNCS("unary +", { "child" }, child)
+    };
+
+
     struct ImplicitReferenceNode : BacteriaNode {
         ImplicitReferenceNode(const Coordinate &location, BacteriaPtr child) : BacteriaNode(location),
                                                                                child(std::move(child)) {}

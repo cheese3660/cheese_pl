@@ -437,32 +437,296 @@
   [
     "expressions: Subscription (tuple, value)",
     "fn main => void entry\n{let x: struct(i64,i64,i64) = .(1,2,3)\nlet y = x.0}",
-    {}
+    {
+      "main": {
+        "arguments": [],
+        "body": [
+          {
+            "name": "x",
+            "ty": "{i64,i64,i64}",
+            "type": "init",
+            "value": {
+              "ty": "{i64,i64,i64}",
+              "type": "object",
+              "values": [
+                {
+                  "ty": "i64",
+                  "type": "integer",
+                  "value": 1
+                },
+                {
+                  "ty": "i64",
+                  "type": "integer",
+                  "value": 2
+                },
+                {
+                  "ty": "i64",
+                  "type": "integer",
+                  "value": 3
+                }
+              ]
+            }
+          },
+          {
+            "name": "y",
+            "ty": "i64",
+            "type": "init",
+            "value": {
+              "child": {
+                "name": "x",
+                "type": "value"
+              },
+              "type": "."
+            }
+          }
+        ],
+        "name": "main",
+        "return_type": "void",
+        "type": "function"
+      }
+    }
   ],
   [
     "expressions: Subscription (tuple, reference)",
     "fn main => void entry\n{let x: struct(i64,i64,i64) = .(1,2,3)\nlet y = &x\nlet z = y.0}",
-    {}
+    {
+      "main": {
+        "arguments": [],
+        "body": [
+          {
+            "name": "x",
+            "ty": "{i64,i64,i64}",
+            "type": "init",
+            "value": {
+              "ty": "{i64,i64,i64}",
+              "type": "object",
+              "values": [
+                {
+                  "ty": "i64",
+                  "type": "integer",
+                  "value": 1
+                },
+                {
+                  "ty": "i64",
+                  "type": "integer",
+                  "value": 2
+                },
+                {
+                  "ty": "i64",
+                  "type": "integer",
+                  "value": 3
+                }
+              ]
+            }
+          },
+          {
+            "name": "y",
+            "ty": "*{i64,i64,i64}",
+            "type": "init",
+            "value": {
+              "child": {
+                "name": "x",
+                "type": "value"
+              },
+              "type": "&"
+            }
+          },
+          {
+            "name": "z",
+            "ty": "i64",
+            "type": "init",
+            "value": {
+              "child": {
+                "name": "y",
+                "type": "value"
+              },
+              "type": "->"
+            }
+          }
+        ],
+        "name": "main",
+        "return_type": "void",
+        "type": "function"
+      }
+    }
   ],
   [
     "expressions: Subscription (structure, value)",
     "fn main => void entry\n{let x: struct{a:i64\nb:i64\nc:i64} = .{a:1,b:2,c:3}\nlet y = x.a}",
-    {}
+    {
+      "main": {
+        "arguments": [],
+        "body": [
+          {
+            "name": "x",
+            "ty": "{i64,i64,i64}",
+            "type": "init",
+            "value": {
+              "ty": "{i64,i64,i64}",
+              "type": "object",
+              "values": [
+                {
+                  "ty": "i64",
+                  "type": "integer",
+                  "value": 1
+                },
+                {
+                  "ty": "i64",
+                  "type": "integer",
+                  "value": 2
+                },
+                {
+                  "ty": "i64",
+                  "type": "integer",
+                  "value": 3
+                }
+              ]
+            }
+          },
+          {
+            "name": "y",
+            "ty": "i64",
+            "type": "init",
+            "value": {
+              "child": {
+                "name": "x",
+                "type": "value"
+              },
+              "type": "."
+            }
+          }
+        ],
+        "name": "main",
+        "return_type": "void",
+        "type": "function"
+      }
+    }
   ],
   [
     "expressions: Subscription (structure, reference)",
     "fn main => void entry\n{let x: struct{a:i64\nb:i64\nc:i64} = .{a:1,b:2,c:3}\nlet y = &x\nlet z = y.a}",
-    {}
+    {
+      "main": {
+        "arguments": [],
+        "body": [
+          {
+            "name": "x",
+            "ty": "{i64,i64,i64}",
+            "type": "init",
+            "value": {
+              "ty": "{i64,i64,i64}",
+              "type": "object",
+              "values": [
+                {
+                  "ty": "i64",
+                  "type": "integer",
+                  "value": 1
+                },
+                {
+                  "ty": "i64",
+                  "type": "integer",
+                  "value": 2
+                },
+                {
+                  "ty": "i64",
+                  "type": "integer",
+                  "value": 3
+                }
+              ]
+            }
+          },
+          {
+            "name": "y",
+            "ty": "*{i64,i64,i64}",
+            "type": "init",
+            "value": {
+              "child": {
+                "name": "x",
+                "type": "value"
+              },
+              "type": "&"
+            }
+          },
+          {
+            "name": "z",
+            "ty": "i64",
+            "type": "init",
+            "value": {
+              "child": {
+                "name": "y",
+                "type": "value"
+              },
+              "type": "->"
+            }
+          }
+        ],
+        "name": "main",
+        "return_type": "void",
+        "type": "function"
+      }
+    }
   ],
   [
     "expressions: Unary plus (integers)",
     "fn main => void entry\n{let x: i64 = 1\n_ = +x}",
-    {}
+    {
+      "main": {
+        "arguments": [],
+        "body": [
+          {
+            "name": "x",
+            "ty": "i64",
+            "type": "init",
+            "value": {
+              "ty": "i64",
+              "type": "integer",
+              "value": 1
+            }
+          },
+          {
+            "child": {
+              "name": "x",
+              "type": "value"
+            },
+            "type": "unary +"
+          }
+        ],
+        "name": "main",
+        "return_type": "void",
+        "type": "function"
+      }
+    }
   ],
   [
     "expressions: Unary plus (floats)",
     "fn main => void entry\n{let x: f64 = 1\n_ = +x}",
-    {}
+    {
+      "main": {
+        "arguments": [],
+        "body": [
+          {
+            "name": "x",
+            "ty": "f64",
+            "type": "init",
+            "value": {
+              "ty": "f64",
+              "type": "float",
+              "value": 1.0
+            }
+          },
+          {
+            "child": {
+              "name": "x",
+              "type": "value"
+            },
+            "type": "unary +"
+          }
+        ],
+        "name": "main",
+        "return_type": "void",
+        "type": "function"
+      }
+    }
   ],
   [
     "expressions: Unary plus (complex numbers)",

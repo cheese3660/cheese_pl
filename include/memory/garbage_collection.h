@@ -146,13 +146,13 @@ namespace cheese::memory::garbage_collection {
     requires std::is_base_of_v<managed_object, T>
     gcref<T> garbage_collector::gcnew(Args &&... args) {
         auto obj = new T(std::forward<Args>(args)...);
-//        std::cout << "Creating a: " << typeid(*obj).name() << "\n";
-        managed_objects.push_back(obj);
-        auto ref = gcref{*this, obj};
+        // Mark and sweep before adding the object to the pool, should prevent weird race conditions
         if (++allocations_since_last_sweep >= frequency) {
             mark_and_sweep();
             allocations_since_last_sweep = 0;
         }
+        managed_objects.push_back(obj);
+        auto ref = gcref{*this, obj};
         return ref;
     }
 

@@ -2,11 +2,15 @@
 // Created by Lexi Allen on 3/30/2023.
 //
 
-#include "curdle/Structure.h"
+#include "curdle/types/Structure.h"
 #include "curdle/GlobalContext.h"
 #include "curdle/Type.h"
 #include "sstream"
 #include "curdle/builtin.h"
+#include "curdle/types/TypeType.h"
+#include "curdle/values/ComptimeType.h"
+#include "curdle/types/AnyType.h"
+#include "curdle/curdle.h"
 
 namespace cheese::curdle {
 
@@ -71,8 +75,7 @@ namespace cheese::curdle {
     }
 
     void Structure::mark_type_references() {
-        if (containedContext)
-            containedContext->mark();
+        containedContext->mark();
         for (auto &field: fields) {
             field.type->mark();
         }
@@ -301,7 +304,6 @@ namespace cheese::curdle {
     }
 
     Structure::Structure(std::string name, ComptimeContext *ctx, garbage_collector &gc) : name(name) {
-        containedContext = nullptr; // Don't remove this line, it breaks the garbage collector in certain cases!
         containedContext = gc.gcnew<ComptimeContext>(ctx, this);
     }
 }

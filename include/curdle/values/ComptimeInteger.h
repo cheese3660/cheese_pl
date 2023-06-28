@@ -5,7 +5,7 @@
 #ifndef CHEESE_COMPTIMEINTEGER_H
 #define CHEESE_COMPTIMEINTEGER_H
 
-#include "comptime.h"
+#include "curdle/comptime.h"
 
 namespace cheese::curdle {
 // An integer of any integral type
