@@ -8,7 +8,7 @@ let HSL=struct{
     h:f64
     s:f64
     l:f64
-    fn to_rgb ~self=>RGB public{
+    fn to_rgb ~self=>RGB public {
         let c = (1 - abs(2.0 * self.l - 1.0)) * self.s
         let x =c * (1 - abs((self.h / 60.0) % 2.0 - 1.0))
         let m = self.l - c/2.0
@@ -16,17 +16,17 @@ let HSL=struct{
         let(rprime, gprime, bprime)=match h60
         {
             0 =>
-                .(c,x,0.0 @ f64)
+                .(c,x,0.0)
             1 =>
-                .(x,c,0.0 @ f64)
+                .(x,c,0.0)
             2 =>
-                .(0.0 @ f64,x,c)
+                .(0.0,x,c)
             3 =>
-                .(x,0.0 @ f64,c)
+                .(x,0.0,c)
             4 =>
-                .(c,0.0 @ f64,x)
+                .(c,0.0,x)
             _ =>
-                .(0.0 @ f64,0.0 @ f64,0.0 @ f64)
+                .(0.0,0.0,0.0)
         }
         ==>.{
                 r: ((rprime+m)*255)@u8

@@ -367,12 +367,72 @@
   [
     "expressions: Taking reference of something (immutable)",
     "fn main => void entry\n{let x: i64 = 0\nlet y = &x}",
-    {}
+    {
+      "main": {
+        "arguments": [],
+        "body": [
+          {
+            "name": "x",
+            "ty": "i64",
+            "type": "init",
+            "value": {
+              "ty": "i64",
+              "type": "integer"
+            }
+          },
+          {
+            "name": "y",
+            "ty": "*i64",
+            "type": "init",
+            "value": {
+              "child": {
+                "name": "x",
+                "type": "value"
+              },
+              "type": "&"
+            }
+          }
+        ],
+        "name": "main",
+        "return_type": "void",
+        "type": "function"
+      }
+    }
   ],
   [
     "expressions: Taking reference of something (mutable)",
     "fn main => void entry\n{let x: i64 mut = 0\nlet y = &x}",
-    {}
+    {
+      "main": {
+        "arguments": [],
+        "body": [
+          {
+            "name": "x",
+            "ty": "i64",
+            "type": "init",
+            "value": {
+              "ty": "i64",
+              "type": "integer"
+            }
+          },
+          {
+            "name": "y",
+            "ty": "*i64",
+            "type": "init",
+            "value": {
+              "child": {
+                "name": "x",
+                "type": "value"
+              },
+              "type": "&"
+            }
+          }
+        ],
+        "name": "main",
+        "return_type": "void",
+        "type": "function"
+      }
+    }
   ],
   [
     "expressions: Subscription (tuple, value)",
@@ -448,7 +508,31 @@
   [
     "expressions: Unary minus (floats)",
     "fn main => void entry\n{let x: f64 = 1\n_ = -x}",
-    {}
+    {
+      "main": {
+        "arguments": [],
+        "body": [
+          {
+            "name": "x",
+            "ty": "f64",
+            "type": "init",
+            "value": {
+              ":template": "float_one"
+            }
+          },
+          {
+            "child": {
+              "name": "x",
+              "type": "value"
+            },
+            "type": "unary -"
+          }
+        ],
+        "name": "main",
+        "return_type": "void",
+        "type": "function"
+      }
+    }
   ],
   [
     "expressions: Unary minus (complex numbers)",

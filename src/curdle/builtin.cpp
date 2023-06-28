@@ -49,7 +49,7 @@ namespace cheese::curdle {
             }
             local_references.push_back(std::move(type_value));
         }
-        return create_from_type(cctx->globalContext, peer_type(all_types, cctx->globalContext));
+        return create_from_type(cctx->globalContext, peer_type(all_types, cctx->globalContext).value);
     }
 
     BUILTIN("Peer", peer_builtin)

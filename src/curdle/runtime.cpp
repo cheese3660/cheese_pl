@@ -335,7 +335,7 @@ namespace cheese::curdle {
                     auto integer = dynamic_cast<parser::nodes::IntegerLiteral *>(pSubscription->rhs.get());
                     if (integer) {
                         if (structure->is_tuple) {
-                            name = static_cast<std::string>(integer->value);
+                            name = "_" + static_cast<std::string>(integer->value);
                         } else {
                             throw LocalizedCurdleError(
                                     "Invalid Subscript: Attempting to tuple index a non-tuple structure",
@@ -366,6 +366,7 @@ namespace cheese::curdle {
                 } else {
                     auto structure = gc.gcnew<Structure>(runtime->comptime->globalContext->verify_name("::anon"),
                                                          runtime->comptime, gc);
+                    structure->implicit_type = true;
                     for (auto &value: pObjectLiteral->children) {
                         auto lit = (parser::nodes::FieldLiteral *) (value.get());
                         structure->fields.push_back({lit->name, runtime->get_type(lit), true});
@@ -380,9 +381,10 @@ namespace cheese::curdle {
                     auto structure = gc.gcnew<Structure>(runtime->comptime->globalContext->verify_name("::anon_tuple"),
                                                          runtime->comptime, gc);
                     structure->is_tuple = true;
+                    structure->implicit_type = true;
                     int i = 0;
                     for (auto &value: pTupleLiteral->children) {
-                        structure->fields.push_back({std::to_string(i++), runtime->get_type(value.get()), true});
+                        structure->fields.push_back({"_" + std::to_string(i++), runtime->get_type(value.get()), true});
                     }
                     return structure;
                 }

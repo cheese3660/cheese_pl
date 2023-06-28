@@ -30,7 +30,7 @@ namespace cheese::curdle {
         // This should be done in a way that the other type is *always* concrete and not an "any"
         virtual std::int32_t compare(Type *other, bool implicit = true) = 0;
 
-        virtual Type *peer(Type *other, GlobalContext *gc) = 0;
+        virtual memory::garbage_collection::gcref<Type> peer(Type *other, GlobalContext *gc) = 0;
 
         virtual std::string to_string() = 0;
 
@@ -63,7 +63,7 @@ namespace cheese::curdle {
 
         std::string to_string() override;
 
-        Type *peer(Type *other, GlobalContext *gctx) override;
+        memory::garbage_collection::gcref<Type> peer(Type *other, GlobalContext *gctx) override;
 
     private:
 
@@ -87,7 +87,7 @@ namespace cheese::curdle {
 
         std::string to_string() override;
 
-        Type *peer(Type *other, GlobalContext *gctx) override;
+        memory::garbage_collection::gcref<Type> peer(Type *other, GlobalContext *gctx) override;
 
     private:
 
@@ -115,7 +115,7 @@ namespace cheese::curdle {
 
         std::string to_string() override;
 
-        Type *peer(Type *other, GlobalContext *gctx) override;
+        memory::garbage_collection::gcref<Type> peer(Type *other, GlobalContext *gctx) override;
 
     private:
 
@@ -138,7 +138,7 @@ namespace cheese::curdle {
 
         std::string to_string() override;
 
-        Type *peer(Type *other, GlobalContext *gctx) override;
+        memory::garbage_collection::gcref<Type> peer(Type *other, GlobalContext *gctx) override;
 
         Type *child;
         bool constant; //Whether this is a constant reference type
@@ -162,7 +162,7 @@ namespace cheese::curdle {
 
         std::string to_string() override;
 
-        Type *peer(Type *other, GlobalContext *gctx) override;
+        memory::garbage_collection::gcref<Type> peer(Type *other, GlobalContext *gctx) override;
 
     private:
 
@@ -184,7 +184,7 @@ namespace cheese::curdle {
 
         std::string to_string() override;
 
-        Type *peer(Type *other, GlobalContext *gctx) override;
+        memory::garbage_collection::gcref<Type> peer(Type *other, GlobalContext *gctx) override;
 
         static NoReturnType *get(GlobalContext *gctx);
 
@@ -209,7 +209,7 @@ namespace cheese::curdle {
 
         std::string to_string() override;
 
-        Type *peer(Type *other, GlobalContext *gctx) override;
+        memory::garbage_collection::gcref<Type> peer(Type *other, GlobalContext *gctx) override;
 
     private:
 
@@ -233,7 +233,7 @@ namespace cheese::curdle {
 
         std::string to_string() override;
 
-        Type *peer(Type *other, GlobalContext *gctx) override;
+        memory::garbage_collection::gcref<Type> peer(Type *other, GlobalContext *gctx) override;
 
     private:
 
@@ -258,7 +258,7 @@ namespace cheese::curdle {
 
         std::string to_string() override;
 
-        Type *peer(Type *other, GlobalContext *gctx) override;
+        memory::garbage_collection::gcref<Type> peer(Type *other, GlobalContext *gctx) override;
 
     private:
 
@@ -283,7 +283,7 @@ namespace cheese::curdle {
 
         std::string to_string() override;
 
-        Type *peer(Type *other, GlobalContext *gctx) override;
+        memory::garbage_collection::gcref<Type> peer(Type *other, GlobalContext *gctx) override;
 
     private:
 
@@ -307,7 +307,7 @@ namespace cheese::curdle {
 
         std::string to_string() override;
 
-        Type *peer(Type *other, GlobalContext *gctx) override;
+        memory::garbage_collection::gcref<Type> peer(Type *other, GlobalContext *gctx) override;
 
     private:
         FunctionTemplateType() = default;
@@ -330,7 +330,7 @@ namespace cheese::curdle {
 
         std::string to_string() override;
 
-        Type *peer(Type *other, GlobalContext *gctx) override;
+        memory::garbage_collection::gcref<Type> peer(Type *other, GlobalContext *gctx) override;
 
     private:
         BuiltinReferenceType() = default;
@@ -353,7 +353,7 @@ namespace cheese::curdle {
 
         std::string to_string() override;
 
-        Type *peer(Type *other, GlobalContext *gctx) override;
+        memory::garbage_collection::gcref<Type> peer(Type *other, GlobalContext *gctx) override;
 
     private:
         ErrorType() = default;
@@ -369,7 +369,7 @@ namespace cheese::curdle {
 
     };
 
-    Type *peer_type(std::vector<Type *> types, GlobalContext *gctx);
+    memory::garbage_collection::gcref<Type> peer_type(std::vector<Type *> types, GlobalContext *gctx);
 
     bool trivial_arithmetic_type(Type *type);
 }

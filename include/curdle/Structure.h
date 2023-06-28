@@ -44,6 +44,7 @@ namespace cheese::curdle {
         // It does not have its interfaces attached to it as that is part of the main type
         // If the type of the structure is a tuple, then the names of the fields will be 0, 1, 2, 3, 4, 5, etc...
         bool is_tuple{false};
+        bool implicit_type{false}; // If it is an implicit type, then it should compare to any other type
         std::vector<StructureField> fields;
         std::map<std::string, TopLevelVariableInfo> top_level_variables;
         std::map<std::string, ComptimeVariableInfo> comptime_variables;
@@ -64,7 +65,7 @@ namespace cheese::curdle {
 
         std::string to_string() override;
 
-        Type *peer(Type *other, GlobalContext *gc) override;
+        memory::garbage_collection::gcref<Type> peer(Type *other, GlobalContext *gc) override;
     };
 }
 

@@ -57,6 +57,7 @@ namespace cheese::error {
         ExpectedMatchBodySpecifier,
         ExpectedSliceClose,
         UnknownOperator,
+        NoBacteriaType,
 
         // Lowering errors next
         ExpectedType = lowering_error_start,

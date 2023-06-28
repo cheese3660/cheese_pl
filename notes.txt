@@ -32,3 +32,19 @@ ROADMAP:
 [ ] LLVM Shit
     [X] Linking LLVM
 
+
+Error Handling Thoughts:
+Have the error type as error(T,[E]) which looks like a function call but is in fact an error type
+Return .error(E) or .error stores where it was called as an address (for later printout by the standard library)
+try
+{
+    /* multiple functions that return an error(T,E) */
+    /* if I add an errdefer in this scope, then errdefer goes to the end of here instead of the function
+} catch E -> name
+{
+
+} catch void -> name
+{
+    /* this is where there is no wrapped value */
+}
+Any Type of error not caught by a catch statement gets returned and passed upwards yet again

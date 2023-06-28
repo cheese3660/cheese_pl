@@ -609,6 +609,7 @@ namespace cheese::curdle {
 
 
     bacteria::BacteriaPtr translate_comptime(LocalContext *lctx, Coordinate location, ComptimeValue *value) {
+        auto &gc = lctx->runtime->comptime->globalContext->gc;
         auto result_type = lctx->expected_type ? lctx->expected_type : value->type;
         if (result_type->get_comptimeness() == Comptimeness::Comptime) {
             throw CurdleError(
@@ -630,6 +631,18 @@ namespace cheese::curdle {
         WHEN_COMPTIME_IS(ComptimeFloat, pComptimeFloat) {
             return std::make_unique<bacteria::nodes::FloatLiteral>(location, pComptimeFloat->value,
                                                                    result_type->get_cached_type());
+        }
+        WHEN_COMPTIME_IS(ComptimeArray, pComptimeArray) {
+            if (auto as_structure = dynamic_cast<Structure *>(pComptimeArray->type); as_structure) {
+                auto t = as_structure->get_cached_type();
+                std::vector<bacteria::BacteriaPtr> values;
+                for (int i = 0; i < pComptimeArray->values.size(); i++) {
+                    auto field = pComptimeArray->values[i];
+                    auto lower_context = gc.gcnew<LocalContext>(lctx, as_structure->fields[i].type);
+                    values.push_back(translate_comptime(lower_context, location, field));
+                }
+                return std::make_unique<bacteria::nodes::AggregrateObject>(location, t, std::move(values));
+            }
         }
 #undef WHEN_COMPTIME_IS
         NOT_IMPL_FOR(typeid(*vv).name());
@@ -818,7 +831,7 @@ namespace cheese::curdle {
                     auto integer = dynamic_cast<parser::nodes::IntegerLiteral *>(pSubscription->rhs.get());
                     if (integer) {
                         if (structure->is_tuple) {
-                            name = static_cast<std::string>(integer->value);
+                            name = "_" + static_cast<std::string>(integer->value);
                         } else {
                             throw LocalizedCurdleError(
                                     "Invalid Subscript: Attempting to tuple index a non-tuple structure",

@@ -196,6 +196,12 @@ namespace cheese::curdle {
         bool is_same_as(ComptimeValue *other) override;
 
         gcref<ComptimeValue> cast(Type *target_type, garbage_collector &garbageCollector) override;
+
+        explicit ComptimeArray(Type *type, std::vector<ComptimeValue *> values) : values(std::move(values)) {
+            this->type = type;
+        }
+
+        std::string to_string() override;
     };
 
     struct ComptimeObject : ComptimeValue {

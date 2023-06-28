@@ -10,7 +10,10 @@
 #include "curdle/GlobalContext.h"
 
 namespace cheese::curdle {
-#define PEER_TYPE_CATCH_ANY() if (dynamic_cast<AnyType*>(other)) return this
+#define PEER_TYPE_CATCH_ANY() if (dynamic_cast<AnyType*>(other)) return gcref{gctx->gc,this}
+#define NO_PEER gcref<Type>{gctx->gc,nullptr}
+#define REF(X) gcref{gctx->gc,X}
+#define NO_BACTERIA_TYPE(name) throw cheese::curdle::CurdleError{"No bacteria type for " # name, error::ErrorCode::NoBacteriaType};
 
     bacteria::TypePtr TypeType::get_bacteria_type() {
         // This should actually throw an error if attempting to convert this to a runtime (bacteria) type
@@ -43,9 +46,9 @@ namespace cheese::curdle {
         return "type";
     }
 
-    Type *TypeType::peer(Type *other, GlobalContext *gctx) {
+    gcref<Type> TypeType::peer(Type *other, GlobalContext *gctx) {
         PEER_TYPE_CATCH_ANY();
-        return nullptr;
+        return NO_PEER;
     }
 
     void Type::mark_references() {
@@ -118,24 +121,24 @@ namespace cheese::curdle {
         return (sign ? "i" : "u") + std::to_string(size);
     }
 
-    Type *IntegerType::peer(Type *other, GlobalContext *gctx) {
-        if (other == this) return this;
+    gcref<Type> IntegerType::peer(Type *other, GlobalContext *gctx) {
+        if (other == this) return REF(this);
         PEER_TYPE_CATCH_ANY();
         if (auto other_c = dynamic_cast<ComptimeIntegerType *>(other); other_c) {
-            return this;
+            return REF(this);
         }
         if (auto other_i = dynamic_cast<IntegerType *>(other); other_i) {
             auto new_sign = sign || other_i->sign;
             auto new_size = std::max(size, other_i->size);
-            return IntegerType::get(gctx, new_sign, new_size);
+            return REF(IntegerType::get(gctx, new_sign, new_size));
         }
         if (dynamic_cast<Float64Type *>(other)) {
-            return other;
+            return REF(other);
         }
         if (dynamic_cast<ComptimeFloatType *>(other)) {
-            return other;
+            return REF(other);
         }
-        return nullptr;
+        return NO_PEER;
     }
 
     bacteria::TypePtr ReferenceType::get_bacteria_type() {
@@ -170,10 +173,10 @@ namespace cheese::curdle {
         return (constant ? "*~" : "*") + child->to_string();
     }
 
-    Type *ReferenceType::peer(Type *other, GlobalContext *gctx) {
-        if (compare(other) == 0) return this;
+    gcref<Type> ReferenceType::peer(Type *other, GlobalContext *gctx) {
+        if (compare(other) == 0) return REF(this);
         PEER_TYPE_CATCH_ANY();
-        return nullptr;
+        return NO_PEER;
     }
 
     bacteria::TypePtr VoidType::get_bacteria_type() {
@@ -207,12 +210,12 @@ namespace cheese::curdle {
         return "void";
     }
 
-    Type *VoidType::peer(Type *other, GlobalContext *gctx) {
+    gcref<Type> VoidType::peer(Type *other, GlobalContext *gctx) {
         PEER_TYPE_CATCH_ANY();
     }
 
     bacteria::TypePtr AnyType::get_bacteria_type() {
-        return cheese::bacteria::TypePtr();
+        NO_BACTERIA_TYPE(any);
     }
 
     void AnyType::mark_type_references() {
@@ -241,8 +244,8 @@ namespace cheese::curdle {
         return "any";
     }
 
-    Type *AnyType::peer(Type *other, GlobalContext *gctx) {
-        return other;
+    gcref<Type> AnyType::peer(Type *other, GlobalContext *gctx) {
+        return REF(other);
     }
 
     bacteria::TypePtr FunctionTemplateType::get_bacteria_type() {
@@ -274,14 +277,14 @@ namespace cheese::curdle {
         return "$FunctionSet";
     }
 
-    Type *FunctionTemplateType::peer(Type *other, GlobalContext *gctx) {
-        if (other == this) return this;
+    gcref<Type> FunctionTemplateType::peer(Type *other, GlobalContext *gctx) {
+        if (other == this) return REF(this);
         PEER_TYPE_CATCH_ANY();
-        return other;
+        return REF(other);
     }
 
     bacteria::TypePtr ComptimeIntegerType::get_bacteria_type() {
-        return cheese::bacteria::TypePtr();
+        NO_BACTERIA_TYPE(comptime_int);
     }
 
     static ComptimeIntegerType *cit_instance;
@@ -323,14 +326,14 @@ namespace cheese::curdle {
         return "comptime_int";
     }
 
-    Type *ComptimeIntegerType::peer(Type *other, GlobalContext *gctx) {
-        if (other == this) return this;
+    gcref<Type> ComptimeIntegerType::peer(Type *other, GlobalContext *gctx) {
+        if (other == this) return REF(this);
         if (auto other_i = dynamic_cast<IntegerType *>(other); other_i) {
-            return other_i;
+            return REF(other_i);
         } else if (auto other_f = dynamic_cast<Float64Type *>(other); other_f) {
-            return other_f;
+            return REF(other_f);
         } else {
-            return nullptr;
+            return NO_PEER;
         }
     }
 
@@ -364,15 +367,15 @@ namespace cheese::curdle {
         return "bool";
     }
 
-    Type *BooleanType::peer(Type *other, GlobalContext *gctx) {
-        if (other == this) return this;
+    gcref<Type> BooleanType::peer(Type *other, GlobalContext *gctx) {
+        if (other == this) return REF(this);
         PEER_TYPE_CATCH_ANY();
-        return nullptr;
+        return NO_PEER;
     }
 
 
     bacteria::TypePtr BuiltinReferenceType::get_bacteria_type() {
-        return cheese::bacteria::TypePtr();
+        NO_BACTERIA_TYPE(builtin_reference);
     }
 
     void BuiltinReferenceType::mark_type_references() {
@@ -402,10 +405,10 @@ namespace cheese::curdle {
         return "$BuiltinReference";
     }
 
-    Type *BuiltinReferenceType::peer(Type *other, GlobalContext *gctx) {
-        if (other == this) return this;
+    gcref<Type> BuiltinReferenceType::peer(Type *other, GlobalContext *gctx) {
+        if (other == this) return REF(this);
         PEER_TYPE_CATCH_ANY();
-        return nullptr;
+        return NO_PEER;
     }
 
     NoReturnType *NoReturnType::get(GlobalContext *gctx) {
@@ -418,7 +421,7 @@ namespace cheese::curdle {
     }
 
     bacteria::TypePtr NoReturnType::get_bacteria_type() {
-        return cheese::bacteria::TypePtr();
+        NO_BACTERIA_TYPE(noreturn);
     }
 
     void NoReturnType::mark_type_references() {
@@ -437,10 +440,10 @@ namespace cheese::curdle {
         return "noreturn";
     }
 
-    Type *NoReturnType::peer(Type *other, GlobalContext *gctx) {
-        if (other == this) return this;
+    gcref<Type> NoReturnType::peer(Type *other, GlobalContext *gctx) {
+        if (other == this) return REF(this);
         PEER_TYPE_CATCH_ANY();
-        return other;
+        return REF(other);
     }
 
     bacteria::TypePtr Float64Type::get_bacteria_type() {
@@ -482,18 +485,18 @@ namespace cheese::curdle {
         return "f64";
     }
 
-    Type *Float64Type::peer(Type *other, GlobalContext *gctx) {
-        if (other == this) return this;
+    gcref<Type> Float64Type::peer(Type *other, GlobalContext *gctx) {
+        if (other == this) return REF(this);
         PEER_TYPE_CATCH_ANY();
         if (dynamic_cast<IntegerType *>(other) || dynamic_cast<ComptimeIntegerType *>(other) ||
             dynamic_cast<ComptimeFloatType *>(other)) {
-            return this;
+            return REF(this);
         }
-        return nullptr;
+        return NO_PEER;
     }
 
     bacteria::TypePtr ComptimeFloatType::get_bacteria_type() {
-        return cheese::bacteria::TypePtr();
+        NO_BACTERIA_TYPE(comptime_float);
     }
 
 
@@ -534,21 +537,21 @@ namespace cheese::curdle {
     }
 
 
-    Type *ComptimeFloatType::peer(Type *other, GlobalContext *gctx) {
-        if (other == this) return this;
+    gcref<Type> ComptimeFloatType::peer(Type *other, GlobalContext *gctx) {
+        if (other == this) return REF(this);
         PEER_TYPE_CATCH_ANY();
         if (dynamic_cast<ComptimeIntegerType *>(other)) {
-            return this;
+            return REF(this);
         }
         if (dynamic_cast<Float64Type *>(other) || dynamic_cast<IntegerType *>(other)) {
-            return other;
+            return REF(other);
         }
-        return nullptr;
+        return NO_PEER;
     }
 
 
     bacteria::TypePtr ErrorType::get_bacteria_type() {
-        return cheese::bacteria::TypePtr();
+        NO_BACTERIA_TYPE(error_type);
     }
 
     void ErrorType::mark_type_references() {
@@ -566,10 +569,10 @@ namespace cheese::curdle {
     }
 
     // Lets always coalesce error types w/ peer types
-    Type *ErrorType::peer(Type *other, GlobalContext *gctx) {
-        if (other == this) return this;
+    gcref<Type> ErrorType::peer(Type *other, GlobalContext *gctx) {
+        if (other == this) return REF(this);
         PEER_TYPE_CATCH_ANY();
-        return other;
+        return NO_PEER;
     }
 
     std::string ErrorType::to_string() {
@@ -601,16 +604,16 @@ namespace cheese::curdle {
         return ss.str();
     }
 
-    Type *peer_type(std::vector<Type *> types, GlobalContext *gctx) {
+    gcref<Type> peer_type(std::vector<Type *> types, GlobalContext *gctx) {
         if (types.empty()) {
             throw CurdleError{"No Peer Type: cannot find a peer type w/o any types to find a peer between",
                               error::ErrorCode::NoPeerType};
         }
-        auto base_type = types[0];
+        auto base_type = gcref{gctx->gc, types[0]};
         for (int i = 1; i < types.size(); i++) {
             if (types[i] != base_type)
                 base_type = base_type->peer(types[i], gctx);
-            if (base_type == nullptr) {
+            if (base_type.value == nullptr) {
                 throw CurdleError{
                         "No Peer Type: cannot find a peer type between " + get_peer_type_list(types),
                         error::ErrorCode::NoPeerType,

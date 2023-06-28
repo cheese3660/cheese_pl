@@ -194,7 +194,12 @@ namespace cheese::curdle {
     }
 
     gcref<ComptimeValue> ComptimeFloat::cast(Type *target_type, garbage_collector &garbageCollector) {
-        NOT_IMPL;
+        if (type->compare(target_type) == 0) return gcref{garbageCollector, this};
+        if (auto as_f64 = dynamic_cast<Float64Type *>(target_type); as_f64) {
+            return garbageCollector.gcnew<ComptimeFloat>(value, target_type);
+        }
+        throw CurdleError{"Cannot cast " + type->to_string() + " to " + target_type->to_string() + " at compile time",
+                          error::ErrorCode::InvalidCast};
     }
 
     void ComptimeComplex::mark_value() {
@@ -263,7 +268,51 @@ namespace cheese::curdle {
     }
 
     gcref<ComptimeValue> ComptimeArray::cast(Type *target_type, garbage_collector &garbageCollector) {
-        NOT_IMPL;
+        if (auto cur_struct = dynamic_cast<Structure *>(type); cur_struct) {
+            if (auto other_struct = dynamic_cast<Structure *>(target_type); other_struct) {
+                if (cur_struct->is_tuple == other_struct->is_tuple) {
+                    if (cur_struct->is_tuple) {
+                        auto new_values = std::vector<ComptimeValue *>();
+                        auto refs = std::vector<gcref<ComptimeValue>>();
+                        for (int i = 0; i < values.size(); i++) {
+                            auto value = values[i]->cast(other_struct->fields[i].type, garbageCollector);
+                            new_values.push_back(value);
+                            refs.push_back(std::move(value));
+                        }
+                        return garbageCollector.gcnew<ComptimeArray>(target_type, std::move(new_values));
+                    } else {
+                        NOT_IMPL_FOR("struct casting");
+                    }
+                } else {
+                    throw CurdleError(
+                            "Cannot cast " + type->to_string() + " to " + target_type->to_string() + " at compile time",
+                            error::ErrorCode::InvalidCast);
+                }
+            } else {
+                throw CurdleError(
+                        "Cannot cast " + type->to_string() + " to " + target_type->to_string() + " at compile time",
+                        error::ErrorCode::InvalidCast);
+            }
+        }
+    }
+
+    std::string ComptimeArray::to_string() {
+        std::string result = type->to_string();
+        char end = ']';
+        if (auto as_structure = dynamic_cast<Structure *>(type); as_structure) {
+            result += '(';
+            end = ')';
+        } else {
+            result += '[';
+        }
+        for (int i = 0; i < values.size(); i++) {
+            result += values[i]->to_string();
+            if (i != values.size() - 1) {
+                result += ',';
+            }
+        }
+        result += end;
+        return result;
     }
 
     void ComptimeObject::mark_value() {
@@ -601,6 +650,43 @@ namespace cheese::curdle {
             }
             WHEN_NODE_IS(parser::nodes::AddressOf, pAddressOf) {
                 throw CurdleError("Not Compile Time: Can't take address at compile time",
+                                  error::ErrorCode::NotComptime);
+            }
+            WHEN_NODE_IS(parser::nodes::TupleLiteral, pTupleLiteral) {
+                // Here we should have an implied type specifier inside the structure object, as that makes conversion easier
+                auto vec = std::vector<gcref<ComptimeValue>>();
+                auto actual = std::vector<ComptimeValue *>();
+                auto ty = gc.gcnew<Structure>(globalContext->verify_name("::lit"), this, gc);
+                ty->is_tuple = true;
+                ty->implicit_type = true;
+                size_t i = 0;
+                for (auto &child: pTupleLiteral->children) {
+                    auto value = exec(child, rtime);
+                    actual.push_back(value);
+                    ty->fields.push_back(StructureField{
+                            "_" + std::to_string(i),
+                            value->type,
+                            true
+                    });
+                    vec.push_back(std::move(value));
+                    i++;
+                }
+                return gc.gcnew<ComptimeArray>(ty, std::move(actual));
+            }
+            WHEN_NODE_IS(parser::nodes::ObjectCall, pObjectCall) {
+                throw CurdleError("TESTING",
+                                  error::ErrorCode::NotComptime);
+            }
+            WHEN_NODE_IS(parser::nodes::Match, pMatch) {
+                throw CurdleError("TESTING",
+                                  error::ErrorCode::NotComptime);
+            }
+            WHEN_NODE_IS(parser::nodes::ObjectLiteral, pObjectLiteral) {
+                throw CurdleError("TESTING",
+                                  error::ErrorCode::NotComptime);
+            }
+            WHEN_NODE_IS(parser::nodes::Return, pReturn) {
+                throw CurdleError("Not Compile Time: Can't return at compile time",
                                   error::ErrorCode::NotComptime);
             }
             NOT_IMPL_FOR(typeid(*node).name());

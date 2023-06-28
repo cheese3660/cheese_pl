@@ -71,7 +71,8 @@ namespace cheese::curdle {
     }
 
     void Structure::mark_type_references() {
-        containedContext->mark();
+        if (containedContext)
+            containedContext->mark();
         for (auto &field: fields) {
             field.type->mark();
         }
@@ -210,12 +211,24 @@ namespace cheese::curdle {
 
     int32_t Structure::compare(Type *other, bool implicit) {
         if (other == this) return 0;
-        if (auto s = dynamic_cast<Structure *>(other); s && is_tuple && s->is_tuple &&
-                                                       fields.size() == s->fields.size()) {
-            for (int i = 0; i < fields.size(); i++) {
-                if (fields[i].type->compare(s->fields[i].type) != 0) return -1;
+        if (auto s = dynamic_cast<Structure *>(other); s && fields.size() == s->fields.size()) {
+            if (implicit_type || s->implicit_type) {
+                auto result = 0;
+                for (int i = 0; i < fields.size(); i++) {
+                    if (fields[i].name != s->fields[i].name) return -1;
+                    // As implicit stuff should be more loosely compared
+                    auto comp = s->fields[i].type->compare(fields[i].type);
+                    if (comp == -1) return -1;
+                    result += comp;
+                }
+                return result;
             }
-            return 0;
+            if (is_tuple && s->is_tuple) {
+                for (int i = 0; i < fields.size(); i++) {
+                    if (fields[i].type->compare(s->fields[i].type) != 0) return -1;
+                }
+                return 0;
+            }
         }
         return -1;
     }
@@ -245,13 +258,50 @@ namespace cheese::curdle {
         }
     }
 
-    Type *Structure::peer(Type *other, GlobalContext *gctx) {
-        if (compare(other) == 0) return this;
-        if (dynamic_cast<AnyType *>(other)) return this;
-        return nullptr;
+    gcref<Type> Structure::peer(Type *other, GlobalContext *gctx) {
+        if (other == this) return gcref{gctx->gc, this};
+        if (dynamic_cast<AnyType *>(other)) return gcref{gctx->gc, this};
+        auto &gc = gctx->gc;
+
+        if (auto s = dynamic_cast<Structure *>(other); s && fields.size() == s->fields.size()) {
+            if (implicit_type || s->implicit_type) {
+                if (implicit_type && !s->implicit_type) return gcref{gc, this};
+                if (s->implicit_type && !implicit_type) return gcref{gc, other};
+                auto ty = gc.gcnew<Structure>(gctx->verify_name("::peer"), this->containedContext, gc);
+                ty->is_tuple = is_tuple;
+                ty->implicit_type = true;
+                for (int i = 0; i < fields.size(); i++) {
+                    if (fields[i].name != s->fields[i].name) return gcref<Type>{gc, nullptr};
+                    // As implicit stuff should be more loosely compared
+                    if (s->fields[i].type->compare(fields[i].type) == -1) return gcref<Type>{gc, nullptr};
+                    ty->fields.push_back(StructureField{
+                            "_" + std::to_string(i),
+                            fields[i].type->peer(s->fields[i].type, gctx),
+                            true
+                    });
+                }
+                return ty;
+            }
+            if (is_tuple && s->is_tuple) {
+                auto ty = gc.gcnew<Structure>(gctx->verify_name("::peer"), this->containedContext, gc);
+                ty->is_tuple = true;
+                ty->implicit_type = true;
+                for (int i = 0; i < fields.size(); i++) {
+                    if (fields[i].type->compare(s->fields[i].type) == -1) return gcref<Type>{gc, nullptr};
+                    ty->fields.push_back(StructureField{
+                            "_" + std::to_string(i),
+                            fields[i].type->peer(s->fields[i].type, gctx),
+                            true
+                    });
+                }
+                return ty;
+            }
+        }
+        return gcref<Type>{gc, nullptr};
     }
 
     Structure::Structure(std::string name, ComptimeContext *ctx, garbage_collector &gc) : name(name) {
+        containedContext = nullptr; // Don't remove this line, it breaks the garbage collector in certain cases!
         containedContext = gc.gcnew<ComptimeContext>(ctx, this);
     }
 }
