@@ -8,7 +8,6 @@
 #include "curdle/types/ComptimeIntegerType.h"
 #include "curdle/types/ComptimeFloatType.h"
 #include "curdle/types/Complex64Type.h"
-#include "GlobalContext.h"
 
 
 namespace cheese::curdle {

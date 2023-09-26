@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 #include <map>
-#include "parser/Node.h"
+#include "parser/node.h"
 #include "curdle/Interface.h"
 #include "curdle/variables.h"
 #include "curdle/functions.h"

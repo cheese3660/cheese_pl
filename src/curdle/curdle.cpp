@@ -34,7 +34,6 @@
 #include "curdle/values/ComptimeObject.h"
 #include "curdle/types/Float64Type.h"
 #include "curdle/values/ComptimeComplex.h"
-#include "GlobalContext.h"
 
 using namespace cheese::memory::garbage_collection;
 

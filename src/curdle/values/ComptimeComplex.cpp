@@ -9,7 +9,6 @@
 #include "project/GlobalContext.h"
 #include "curdle/values/ComptimeInteger.h"
 #include "curdle/values/ComptimeFloat.h"
-#include "GlobalContext.h"
 
 namespace cheese::curdle {
     void ComptimeComplex::mark_value() {

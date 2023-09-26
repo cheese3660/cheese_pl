@@ -10,7 +10,6 @@
 #include "curdle/types/ComptimeComplexType.h"
 #include "curdle/types/Complex64Type.h"
 #include "curdle/types/ComptimeFloatType.h"
-#include "GlobalContext.h"
 
 namespace cheese::curdle {
 

@@ -11,7 +11,6 @@
 #include "curdle/values/ComptimeType.h"
 #include "curdle/types/AnyType.h"
 #include "curdle/curdle.h"
-#include "GlobalContext.h"
 
 namespace cheese::curdle {
 

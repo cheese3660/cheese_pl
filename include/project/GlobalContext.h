@@ -25,7 +25,7 @@ namespace cheese::project {
 
         GlobalContext(const Project &project, garbage_collector &collector, const Machine &machine)
                 : project(project), root_structure(nullptr),
-                  gc(collector), entry_function(nullptr), machine(machine) {
+                  gc(collector), entry_function(nullptr), machine(machine), llvm_context(llvm::LLVMContext()) {
             global_reciever = std::make_unique<bacteria::nodes::BacteriaProgram>(project.root_file->location);
         }
 
@@ -33,6 +33,7 @@ namespace cheese::project {
 
         const Project &project;
         const Machine &machine;
+        llvm::LLVMContext llvm_context;
         Structure *root_structure;
         FunctionTemplate *entry_function;
         garbage_collector &gc;

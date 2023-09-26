@@ -8,7 +8,10 @@
 #include "bacteria/BacteriaType.h"
 #include "Mixin.h"
 #include "memory/garbage_collection.h"
-#include "project/GlobalContext.h"
+//#include "project/GlobalContext.h"
+namespace cheese::project {
+    struct GlobalContext;
+}
 
 namespace cheese::curdle {
 #define PEER_TYPE_CATCH_ANY() if (dynamic_cast<AnyType*>(other)) return gcref{gctx->gc,this}
@@ -36,10 +39,10 @@ namespace cheese::curdle {
         // So basically, its comparison in terms of casting *to*
         virtual std::int32_t compare(Type *other, bool implicit = true) = 0;
 
-        virtual memory::garbage_collection::gcref<Type> peer(Type *other, GlobalContext *gctx) = 0;
+        virtual memory::garbage_collection::gcref<Type> peer(Type *other, cheese::project::GlobalContext *gctx) = 0;
 
         virtual memory::garbage_collection::gcref<ComptimeValue>
-        get_child_comptime(std::string key, GlobalContext *gctx) = 0;
+        get_child_comptime(std::string key, cheese::project::GlobalContext *gctx) = 0;
 
         virtual std::string to_string() = 0;
 
@@ -56,7 +59,7 @@ namespace cheese::curdle {
     };
 
 
-    memory::garbage_collection::gcref<Type> peer_type(std::vector<Type *> types, GlobalContext *gctx);
+    memory::garbage_collection::gcref<Type> peer_type(std::vector<Type *> types, cheese::project::GlobalContext *gctx);
 
     bool trivial_arithmetic_type(Type *type);
 }

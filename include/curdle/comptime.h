@@ -24,6 +24,9 @@
 using namespace cheese::project;
 //#include "builtin.h"
 
+namespace cheese::project {
+    struct GlobalContext;
+}
 
 namespace cheese::curdle {
     struct FunctionSet;
@@ -31,7 +34,6 @@ namespace cheese::curdle {
     using namespace memory::garbage_collection;
     namespace fs = std::filesystem;
     // Have to forward declare these for some reason?
-    struct GlobalContext;
     struct Structure;
 
     struct BadComptimeCastError : std::runtime_error {
@@ -140,10 +142,11 @@ namespace cheese::curdle {
         fs::path path;
         fs::path project_dir; // This is $newProjectDir in the reference
 
-        ComptimeContext(cheese::project::GlobalContex *gc, fs::path p, fs::path d) : globalContext(gc), parent(nullptr),
-                                                                                     currentStructure(nullptr),
-                                                                                     path(std::move(p)),
-                                                                                     project_dir(std::move(d)) {
+        ComptimeContext(cheese::project::GlobalContext *gc, fs::path p, fs::path d) : globalContext(gc),
+                                                                                      parent(nullptr),
+                                                                                      currentStructure(nullptr),
+                                                                                      path(std::move(p)),
+                                                                                      project_dir(std::move(d)) {
 
         }
 

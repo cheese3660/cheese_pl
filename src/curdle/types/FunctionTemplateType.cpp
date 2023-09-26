@@ -4,7 +4,6 @@
 #include "curdle/types/FunctionTemplateType.h"
 #include "curdle/types/AnyType.h"
 #include "project/GlobalContext.h"
-#include "GlobalContext.h"
 
 namespace cheese::curdle {
     bacteria::TypePtr FunctionTemplateType::get_bacteria_type() {

@@ -12,6 +12,7 @@
 #include <variant>
 #include <llvm/IR/Type.h>
 #include "project/Machine.h"
+#include "project/GlobalContext.h"
 
 namespace cheese::bacteria {
     struct BacteriaType {
@@ -55,7 +56,12 @@ namespace cheese::bacteria {
 
         std::string to_string();
 
-        llvm::Type *get_llvm_type(const curdle::Machine &machine);
+        llvm::Type *get_llvm_type(cheese::project::GlobalContext *ctx);
+
+        size_t get_llvm_size(cheese::project::GlobalContext *ctx);
+
+    private:
+        llvm::Type *cached_llvm_type;
     };
 
     typedef std::shared_ptr<BacteriaType> TypePtr;

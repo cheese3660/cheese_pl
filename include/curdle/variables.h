@@ -8,10 +8,10 @@
 #include <vector>
 #include <string>
 #include "comptime.h"
-#include "Type.h"
 
 namespace cheese::curdle {
     struct ComptimeValue;
+    struct Type;
     struct TopLevelVariableInfo {
         bool constant;
         bool pub; //Vi

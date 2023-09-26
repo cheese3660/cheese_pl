@@ -6,7 +6,6 @@
 #include "curdle/curdle.h"
 #include "project/GlobalContext.h"
 #include "curdle/values/ComptimeString.h"
-#include "GlobalContext.h"
 
 namespace cheese::curdle {
     bacteria::TypePtr BuiltinReferenceType::get_bacteria_type() {

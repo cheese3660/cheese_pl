@@ -5,7 +5,6 @@
 #include "curdle/values/ComptimeString.h"
 #include "project/GlobalContext.h"
 #include "curdle/curdle.h"
-#include "GlobalContext.h"
 
 namespace cheese::curdle {
     bacteria::TypePtr AnyType::get_bacteria_type() {

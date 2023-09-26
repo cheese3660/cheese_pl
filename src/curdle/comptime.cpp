@@ -27,7 +27,6 @@
 #include "curdle/types/Complex64Type.h"
 #include "curdle/values/ComptimeComplex.h"
 #include "curdle/types/ComptimeComplexType.h"
-#include "GlobalContext.h"
 
 
 namespace cheese::curdle {

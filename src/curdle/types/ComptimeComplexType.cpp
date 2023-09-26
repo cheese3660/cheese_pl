@@ -13,7 +13,6 @@
 #include "curdle/types/Float64Type.h"
 #include "curdle/curdle.h"
 #include "curdle/types/Complex64Type.h"
-#include "GlobalContext.h"
 
 
 namespace cheese::curdle {

@@ -28,10 +28,10 @@ namespace cheese::curdle {
 
         std::string to_string() override;
 
-        memory::garbage_collection::gcref<Type> peer(Type *other, GlobalContext *gctx) override;
+        memory::garbage_collection::gcref<Type> peer(Type *other, cheese::project::GlobalContext *gctx) override;
 
         memory::garbage_collection::gcref<ComptimeValue>
-        get_child_comptime(std::string key, GlobalContext *gctx) override;
+        get_child_comptime(std::string key, cheese::project::GlobalContext *gctx) override;
 
     private:
 

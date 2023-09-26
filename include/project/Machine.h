@@ -26,7 +26,9 @@ namespace cheese::curdle {
         util::Endianness endianness;
         llvm::Align stack_alignment;
         std::size_t function_pointer_size;
+        std::size_t function_pointer_addr;
         std::size_t data_pointer_size;
+        std::size_t data_pointer_addr;
         llvm::DataLayout layout = llvm::DataLayout{""};
 
         Machine(std::string in_triple = llvm::sys::getDefaultTargetTriple(), std::string cpu = "generic",
@@ -47,8 +49,10 @@ namespace cheese::curdle {
             layout = machine->createDataLayout();
             stack_alignment = layout.getStackAlignment();
             auto programAddressSpace = layout.getProgramAddressSpace();
+            function_pointer_addr = programAddressSpace;
             function_pointer_size = layout.getPointerSize(programAddressSpace);
             auto globalAddressSpace = layout.getDefaultGlobalsAddressSpace();
+            data_pointer_addr = globalAddressSpace;
             data_pointer_size = layout.getPointerSize(globalAddressSpace);
             endianness = layout.isBigEndian() ? util::Endianness::Big : util::Endianness::Little;
         }

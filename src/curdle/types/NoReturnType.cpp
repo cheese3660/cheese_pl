@@ -4,7 +4,6 @@
 #include "curdle/types/NoReturnType.h"
 #include "project/GlobalContext.h"
 #include "curdle/curdle.h"
-#include "GlobalContext.h"
 
 namespace cheese::curdle {
     NoReturnType *NoReturnType::get(cheese::project::GlobalContext *gctx) {

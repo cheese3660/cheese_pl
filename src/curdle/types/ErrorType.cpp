@@ -5,7 +5,6 @@
 #include "curdle/types/AnyType.h"
 #include "project/GlobalContext.h"
 #include "curdle/curdle.h"
-#include "GlobalContext.h"
 
 namespace cheese::curdle {
     bacteria::TypePtr ErrorType::get_bacteria_type() {

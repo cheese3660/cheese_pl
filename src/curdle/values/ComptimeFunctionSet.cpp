@@ -3,7 +3,6 @@
 //
 #include "curdle/values/ComptimeFunctionSet.h"
 #include "curdle/types/FunctionTemplateType.h"
-#include "GlobalContext.h"
 
 namespace cheese::curdle {
 

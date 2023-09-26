@@ -4,7 +4,6 @@
 #include "curdle/types/ReferenceType.h"
 #include "project/GlobalContext.h"
 #include "curdle/types/AnyType.h"
-#include "GlobalContext.h"
 
 namespace cheese::curdle {
     bacteria::TypePtr ReferenceType::get_bacteria_type() {

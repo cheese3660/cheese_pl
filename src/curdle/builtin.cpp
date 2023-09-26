@@ -5,7 +5,7 @@
 #include "curdle/builtin.h"
 #include "curdle/curdle.h"
 #include "curdle/values/ComptimeType.h"
-#include "GlobalContext.h"
+#include "project/GlobalContext.h"
 
 namespace cheese::curdle {
 

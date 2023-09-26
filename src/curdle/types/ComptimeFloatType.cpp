@@ -10,7 +10,6 @@
 #include "curdle/types/Float64Type.h"
 #include "curdle/types/ComptimeComplexType.h"
 #include "curdle/types/Complex64Type.h"
-#include "GlobalContext.h"
 
 namespace cheese::curdle {
     bacteria::TypePtr ComptimeFloatType::get_bacteria_type() {

@@ -9,7 +9,6 @@
 #include "curdle/types/ComptimeFloatType.h"
 #include "curdle/types/ComptimeComplexType.h"
 #include "curdle/types/Complex64Type.h"
-#include "GlobalContext.h"
 
 namespace cheese::curdle {
     IntegerType *IntegerType::get(cheese::project::GlobalContext *gctx, bool sign, std::uint16_t size) {

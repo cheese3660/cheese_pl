@@ -3,7 +3,6 @@
 //
 #include "curdle/types/VoidType.h"
 #include "project/GlobalContext.h"
-#include "GlobalContext.h"
 
 namespace cheese::curdle {
     bacteria::TypePtr VoidType::get_bacteria_type() {

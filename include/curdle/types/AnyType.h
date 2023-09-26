@@ -15,7 +15,7 @@ namespace cheese::curdle {
         friend class cheese::memory::garbage_collection::garbage_collector;
 
         memory::garbage_collection::gcref<ComptimeValue>
-        get_child_comptime(std::string key, GlobalContext *gc) override;
+        get_child_comptime(std::string key, cheese::project::GlobalContext *gc) override;
 
         bacteria::TypePtr get_bacteria_type() override;
 
@@ -23,7 +23,7 @@ namespace cheese::curdle {
 
         ~AnyType() override = default;
 
-        static AnyType *get(GlobalContext *gctx);
+        static AnyType *get(cheese::project::GlobalContext *gctx);
 
         Comptimeness get_comptimeness() override;
 
@@ -31,7 +31,7 @@ namespace cheese::curdle {
 
         std::string to_string() override;
 
-        memory::garbage_collection::gcref<Type> peer(Type *other, GlobalContext *gctx) override;
+        memory::garbage_collection::gcref<Type> peer(Type *other, cheese::project::GlobalContext *gctx) override;
 
     private:
 
