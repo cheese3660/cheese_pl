@@ -6,6 +6,9 @@
 #define CHEESE_BOOLEANTYPE_H
 
 #include "curdle/Type.h"
+#include "project/GlobalContext.h"
+
+using namespace cheese::project;
 
 namespace cheese::curdle {
     struct BooleanType : Type {
@@ -17,7 +20,7 @@ namespace cheese::curdle {
 
         ~BooleanType() override = default;
 
-        static BooleanType *get(GlobalContext *gctx);
+        static BooleanType *get(cheese::project::GlobalContext *gctx);
 
         Comptimeness get_comptimeness() override;
 
@@ -26,6 +29,9 @@ namespace cheese::curdle {
         std::string to_string() override;
 
         memory::garbage_collection::gcref<Type> peer(Type *other, GlobalContext *gctx) override;
+
+        memory::garbage_collection::gcref<ComptimeValue>
+        get_child_comptime(std::string key, GlobalContext *gctx) override;
 
     private:
 

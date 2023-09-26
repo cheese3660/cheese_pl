@@ -11,23 +11,28 @@
 #include "curdle/types/Structure.h"
 #include "memory/garbage_collection.h"
 #include "error.h"
-#include "functions.h"
+#include "curdle/functions.h"
 #include "bacteria/BacteriaNode.h"
 #include "bacteria/BacteriaReciever.h"
 #include "bacteria/nodes/reciever_nodes.h"
+#include "Machine.h"
 #include <set>
 
-namespace cheese::curdle {
+namespace cheese::project {
+    using namespace cheese::curdle;
+
     struct GlobalContext : managed_object {
 
-        GlobalContext(const Project &project, garbage_collector &collector) : project(project), root_structure(nullptr),
-                                                                              gc(collector), entry_function(nullptr) {
+        GlobalContext(const Project &project, garbage_collector &collector, const Machine &machine)
+                : project(project), root_structure(nullptr),
+                  gc(collector), entry_function(nullptr), machine(machine) {
             global_reciever = std::make_unique<bacteria::nodes::BacteriaProgram>(project.root_file->location);
         }
 
         bacteria::Reciever global_reciever;
 
         const Project &project;
+        const Machine &machine;
         Structure *root_structure;
         FunctionTemplate *entry_function;
         garbage_collector &gc;
@@ -56,6 +61,8 @@ namespace cheese::curdle {
 
         // This is a lookup for cached objects
         std::unordered_map<std::string, managed_object *> cached_objects;
+
+        bool try_get_cached_object(std::string key, managed_object *&out_value);
 
     };
 }

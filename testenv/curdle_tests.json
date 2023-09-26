@@ -730,8 +730,35 @@
   ],
   [
     "expressions: Unary plus (complex numbers)",
-    "fn main => void entry\n{let x: c64 = 1+2I\n_ = +x}",
-    {}
+    "fn main => void entry\n{let x: c64 = 1.0+2I\n_ = +x}",
+    {
+      "main": {
+        "arguments": [],
+        "body": [
+          {
+            "name": "x",
+            "ty": "c64",
+            "type": "init",
+            "value": {
+              "a": 1.0,
+              "b": 2.0,
+              "ty": "c64",
+              "type": "complex"
+            }
+          },
+          {
+            "child": {
+              "name": "x",
+              "type": "value"
+            },
+            "type": "unary +"
+          }
+        ],
+        "name": "main",
+        "return_type": "void",
+        "type": "function"
+      }
+    }
   ],
   [
     "expressions: Unary plus (function pointers)",

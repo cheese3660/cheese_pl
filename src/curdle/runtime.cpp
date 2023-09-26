@@ -2,7 +2,7 @@
 // Created by Lexi Allen on 4/6/2023.
 //
 #include "curdle/runtime.h"
-#include "curdle/GlobalContext.h"
+#include "project/GlobalContext.h"
 #include "curdle/curdle.h"
 #include "curdle/types/Structure.h"
 #include "curdle/values/ComptimeFunctionSet.h"

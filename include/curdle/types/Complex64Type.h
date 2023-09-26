@@ -1,29 +1,27 @@
 //
-// Created by Lexi Allen on 6/28/2023.
+// Created by Lexi Allen on 6/29/2023.
 //
 
-#ifndef CHEESE_ANYTYPE_H
-#define CHEESE_ANYTYPE_H
+#ifndef CHEESE_COMPLEX64TYPE_H
+#define CHEESE_COMPLEX64TYPE_H
 
 #include "curdle/Type.h"
 #include "project/GlobalContext.h"
 
 using namespace cheese::project;
+
 namespace cheese::curdle {
+    struct Complex64Type : Type {
 
-    struct AnyType : Type {
         friend class cheese::memory::garbage_collection::garbage_collector;
-
-        memory::garbage_collection::gcref<ComptimeValue>
-        get_child_comptime(std::string key, GlobalContext *gc) override;
 
         bacteria::TypePtr get_bacteria_type() override;
 
         void mark_type_references() override;
 
-        ~AnyType() override = default;
+        ~Complex64Type() override = default;
 
-        static AnyType *get(GlobalContext *gctx);
+        static Complex64Type *get(GlobalContext *gctx);
 
         Comptimeness get_comptimeness() override;
 
@@ -33,9 +31,12 @@ namespace cheese::curdle {
 
         memory::garbage_collection::gcref<Type> peer(Type *other, GlobalContext *gctx) override;
 
+        memory::garbage_collection::gcref<ComptimeValue>
+        get_child_comptime(std::string key, GlobalContext *gctx) override;
+
     private:
 
-        AnyType() = default;
+        Complex64Type() = default;
     };
 }
-#endif //CHEESE_ANYTYPE_H
+#endif //CHEESE_COMPLEX64TYPE_H

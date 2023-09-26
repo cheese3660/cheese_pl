@@ -71,14 +71,14 @@ add_executable(
         src/bacteria/BacteriaNode.cpp
         include/bacteria/BacteriaNode.h
         include/bacteria/BacteriaType.h
-        src/curdle/Project.cpp
-        include/curdle/Project.h
+        src/project/Project.cpp
+        include/project/Project.h
         src/curdle/curdle.cpp
         include/curdle/types/Structure.h
         include/curdle/FunctionTemplate.h
         include/curdle/Type.h
         include/curdle/Mixin.h
-        include/curdle/GlobalContext.h
+        include/project/GlobalContext.h
         include/curdle/variables.h
         include/curdle/comptime.h
         include/memory/garbage_collection.h
@@ -93,7 +93,7 @@ add_executable(
         src/curdle/functions.cpp
         src/tools/translate.cpp
         include/tools/translate.h
-        src/curdle/GlobalContext.cpp
+        src/project/GlobalContext.cpp
         include/bacteria/BacteriaReciever.h
         include/bacteria/nodes/reciever_nodes.h
         include/curdle/runtime.h
@@ -159,7 +159,7 @@ add_executable(
         src/curdle/types/BuiltinReferenceType.cpp
         include/curdle/types/ErrorType.h
         src/curdle/types/ErrorType.cpp
-)
+        include/curdle/types/Complex64Type.h src/curdle/types/Complex64Type.cpp include/curdle/types/ComptimeComplexType.h src/curdle/types/ComptimeComplexType.cpp include/project/Machine.h include/util/llvm_utils.h src/util/llvm_utils.cpp include/util/Endianness.h)
 if (UNIX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++ -Wall")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++ -lc++abi")

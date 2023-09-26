@@ -3,10 +3,12 @@
 //
 #include "curdle/types/Float64Type.h"
 #include "curdle/types/AnyType.h"
-#include "curdle/GlobalContext.h"
+#include "project/GlobalContext.h"
 #include "curdle/types/IntegerType.h"
 #include "curdle/types/ComptimeIntegerType.h"
 #include "curdle/types/ComptimeFloatType.h"
+#include "curdle/types/Complex64Type.h"
+#include "GlobalContext.h"
 
 
 namespace cheese::curdle {
@@ -19,7 +21,7 @@ namespace cheese::curdle {
 
     }
 
-    Float64Type *Float64Type::get(GlobalContext *gctx) {
+    Float64Type *Float64Type::get(cheese::project::GlobalContext *gctx) {
         if (!gctx->cached_objects.contains("type: f64")) {
             auto ref = gctx->gc.gcnew<Float64Type>();
             gctx->cached_objects["type: f64"] = ref;
@@ -50,10 +52,14 @@ namespace cheese::curdle {
         return "f64";
     }
 
-    gcref<Type> Float64Type::peer(Type *other, GlobalContext *gctx) {
+    gcref<Type> Float64Type::peer(Type *other, cheese::project::GlobalContext *gctx) {
         if (other == this) return REF(this);
         PEER_TYPE_CATCH_ANY();
-        if (dynamic_cast<IntegerType *>(other) != nullptr || dynamic_cast<ComptimeIntegerType *>(other) != nullptr ||
+        if (dynamic_cast<Complex64Type *>(other) != nullptr) {
+            return REF(other);
+        }
+        if (dynamic_cast<IntegerType *>(other) != nullptr ||
+            dynamic_cast<ComptimeIntegerType *>(other) != nullptr ||
             dynamic_cast<ComptimeFloatType *>(other) != nullptr) {
             return REF(this);
         }

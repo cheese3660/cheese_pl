@@ -3,6 +3,7 @@
 //
 #include "curdle/values/ComptimeType.h"
 #include "curdle/types/TypeType.h"
+#include "GlobalContext.h"
 
 namespace cheese::curdle {
     void ComptimeType::mark_value() {

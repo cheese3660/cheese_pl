@@ -6,6 +6,9 @@
 #define CHEESE_BUILTINREFERENCETYPE_H
 
 #include "curdle/Type.h"
+#include "project/GlobalContext.h"
+
+using namespace cheese::project;
 
 namespace cheese::curdle {
     struct BuiltinReferenceType : Type {
@@ -26,6 +29,9 @@ namespace cheese::curdle {
         std::string to_string() override;
 
         memory::garbage_collection::gcref<Type> peer(Type *other, GlobalContext *gctx) override;
+
+        memory::garbage_collection::gcref<ComptimeValue>
+        get_child_comptime(std::string key, GlobalContext *gctx) override;
 
     private:
         BuiltinReferenceType() = default;

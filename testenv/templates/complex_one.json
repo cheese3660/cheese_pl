@@ -1,16 +1,6 @@
 {
-    "type": "object",
-    "ty": "{f64,f64}",
-    "values": [
-        {
-            "type":"float",
-            "ty":"f64",
-            "value":1
-        },
-        {
-            "type":"float",
-            "ty":"f64",
-            "value":0
-        }
-    ]
+  "type": "complex",
+  "ty": "c64",
+  "a": 1.0,
+  "b": 0.0
 }

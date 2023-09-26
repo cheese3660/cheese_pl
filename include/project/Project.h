@@ -8,7 +8,7 @@
 #include <filesystem>
 #include "parser/parser.h"
 
-namespace cheese::curdle {
+namespace cheese::project {
     namespace fs = std::filesystem;
     enum class ProjectType {
         Application, // Default, and going to be the first target to test with

@@ -10,6 +10,8 @@
 #include <string>
 #include <vector>
 #include <variant>
+#include <llvm/IR/Type.h>
+#include "project/Machine.h"
 
 namespace cheese::bacteria {
     struct BacteriaType {
@@ -53,6 +55,7 @@ namespace cheese::bacteria {
 
         std::string to_string();
 
+        llvm::Type *get_llvm_type(const curdle::Machine &machine);
     };
 
     typedef std::shared_ptr<BacteriaType> TypePtr;

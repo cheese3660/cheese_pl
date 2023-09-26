@@ -76,4 +76,8 @@ namespace cheese::bacteria {
                                const std::weak_ptr<BacteriaType> &weak_reference) : type(type), integer_size(
             integerSize), subtype(subtype), array_dimensions(arrayDimensions), child_types(childTypes),
                                                                                     weak_reference(weak_reference) {}
+
+    std::unique_ptr<llvm::Type> BacteriaType::get_llvm_type(const curdle::Machine &machine) {
+
+    }
 }

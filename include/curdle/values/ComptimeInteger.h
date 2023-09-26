@@ -6,6 +6,9 @@
 #define CHEESE_COMPTIMEINTEGER_H
 
 #include "curdle/comptime.h"
+#include "project/GlobalContext.h"
+
+using namespace cheese::project;
 
 namespace cheese::curdle {
 // An integer of any integral type

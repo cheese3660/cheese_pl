@@ -6,7 +6,9 @@
 #define CHEESE_FUNCTIONTEMPLATETYPE_H
 
 #include "curdle/Type.h"
+#include "project/GlobalContext.h"
 
+using namespace cheese::project;
 namespace cheese::curdle {
     struct FunctionTemplateType : Type {
         friend class cheese::memory::garbage_collection::garbage_collector;

@@ -14,6 +14,9 @@
 #include "curdle/variables.h"
 #include "curdle/functions.h"
 #include "curdle/comptime.h"
+#include "project/GlobalContext.h"
+
+using namespace cheese::project;
 
 namespace cheese::curdle {
     struct FunctionSet;

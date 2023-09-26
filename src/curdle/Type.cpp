@@ -7,11 +7,14 @@
 #include "error.h"
 #include "curdle/curdle.h"
 #include <typeinfo>
-#include "curdle/GlobalContext.h"
+#include "project/GlobalContext.h"
 #include "curdle/types/ComptimeIntegerType.h"
 #include "curdle/types/IntegerType.h"
 #include "curdle/types/ComptimeFloatType.h"
 #include "curdle/types/Float64Type.h"
+#include "curdle/types/ComptimeComplexType.h"
+#include "curdle/types/Complex64Type.h"
+#include "GlobalContext.h"
 
 namespace cheese::curdle {
 
@@ -47,7 +50,7 @@ namespace cheese::curdle {
         return ss.str();
     }
 
-    gcref<Type> peer_type(std::vector<Type *> types, GlobalContext *gctx) {
+    gcref<Type> peer_type(std::vector<Type *> types, cheese::project::GlobalContext *gctx) {
         if (types.empty()) {
             throw CurdleError{"No Peer Type: cannot find a peer type w/o any types to find a peer between",
                               error::ErrorCode::NoPeerType};
@@ -72,6 +75,8 @@ namespace cheese::curdle {
         TRIVIAL(ComptimeIntegerType);
         TRIVIAL(Float64Type);
         TRIVIAL(ComptimeFloatType);
+        TRIVIAL(ComptimeComplexType);
+        TRIVIAL(Complex64Type);
 #undef TRIVIAL
         return false;
     }

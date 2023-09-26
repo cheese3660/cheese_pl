@@ -2,7 +2,7 @@
 // Created by Lexi Allen on 5/28/2023.
 //
 #include "curdle/values/ComptimeInteger.h"
-#include "curdle/GlobalContext.h"
+#include "project/GlobalContext.h"
 #include "NotImplementedException.h"
 #include "curdle/Type.h"
 #include "typeinfo"
@@ -12,6 +12,9 @@
 #include "curdle/types/ComptimeIntegerType.h"
 #include "curdle/types/IntegerType.h"
 #include "curdle/types/Float64Type.h"
+#include "curdle/values/ComptimeComplex.h"
+#include "curdle/types/Complex64Type.h"
+#include "GlobalContext.h"
 
 namespace cheese::curdle {
     void ComptimeInteger::mark_value() {
@@ -44,6 +47,10 @@ namespace cheese::curdle {
 #define WHEN_TYPE_IS(type, name) if (auto name = dynamic_cast<type*>(target_type); name)
         WHEN_TYPE_IS(ComptimeIntegerType, pComptimeIntegerType) {
             return new_value(garbageCollector, new ComptimeInteger(value, pComptimeIntegerType));
+        }
+
+        if (auto as_complex = dynamic_cast<Complex64Type *>(target_type); as_complex) {
+            return garbageCollector.gcnew<ComptimeComplex>(value, 0.0, target_type);
         }
         WHEN_TYPE_IS(IntegerType, pIntegerType) {
             // Now we must check if the value fits in that range
@@ -116,11 +123,11 @@ namespace cheese::curdle {
     }
 
 
-    gcref<ComptimeValue> ComptimeInteger::op_unary_plus(GlobalContext *gctx) {
+    gcref<ComptimeValue> ComptimeInteger::op_unary_plus(cheese::project::GlobalContext *gctx) {
         return gctx->gc.gcnew<ComptimeInteger>(value, type);
     }
 
-    gcref<ComptimeValue> ComptimeInteger::op_unary_minus(GlobalContext *gctx) {
+    gcref<ComptimeValue> ComptimeInteger::op_unary_minus(cheese::project::GlobalContext *gctx) {
         // How de we assert the value is in range and can be signed
         if (!is_signed(type)) {
             throw CurdleError(
@@ -132,7 +139,7 @@ namespace cheese::curdle {
         return gctx->gc.gcnew<ComptimeInteger>(new_value, type);
     }
 
-    gcref<ComptimeValue> ComptimeInteger::op_not(GlobalContext *gctx) {
+    gcref<ComptimeValue> ComptimeInteger::op_not(cheese::project::GlobalContext *gctx) {
         math::BigInteger result;
         if (is_signed(type)) {
             // -x = (not x) + 1
@@ -174,7 +181,11 @@ else rhs = {gctx->gc,other};                                              \
 ComptimeInteger* rhsi = dynamic_cast<ComptimeInteger*>(rhs.get());        \
 if (rhsi == nullptr) throw CurdleError("Invalid Comptime Operation: Cannot " #name " a value of type " + type->to_string() + " and a value of type " + rhs->to_string(),error::ErrorCode::InvalidComptimeOperation)
 
-    gcref<ComptimeValue> ComptimeInteger::op_multiply(GlobalContext *gctx, ComptimeValue *other) {
+
+    gcref<ComptimeValue> ComptimeInteger::op_multiply(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
+        if (auto as_complex = dynamic_cast<ComptimeComplex *>(other); as_complex) {
+            return other->op_multiply(gctx, this);
+        }
         PUSH_PEER(multiply);
         // So now we assume we are both of the same type
         auto result = value * rhsi->value;
@@ -182,7 +193,7 @@ if (rhsi == nullptr) throw CurdleError("Invalid Comptime Operation: Cannot " #na
         return gctx->gc.gcnew<ComptimeInteger>(result, peer);
     }
 
-    gcref<ComptimeValue> ComptimeInteger::op_divide(GlobalContext *gctx, ComptimeValue *other) {
+    gcref<ComptimeValue> ComptimeInteger::op_divide(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
         PUSH_PEER(divide);
         // So now we assume we are both of the same type
         auto result = value / rhsi->value;
@@ -190,7 +201,7 @@ if (rhsi == nullptr) throw CurdleError("Invalid Comptime Operation: Cannot " #na
         return gctx->gc.gcnew<ComptimeInteger>(result, peer);
     }
 
-    gcref<ComptimeValue> ComptimeInteger::op_remainder(GlobalContext *gctx, ComptimeValue *other) {
+    gcref<ComptimeValue> ComptimeInteger::op_remainder(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
         PUSH_PEER(remainder);
         // So now we assume we are both of the same type
         auto result = value % rhsi->value;
@@ -198,7 +209,7 @@ if (rhsi == nullptr) throw CurdleError("Invalid Comptime Operation: Cannot " #na
         return gctx->gc.gcnew<ComptimeInteger>(result, peer);
     }
 
-    gcref<ComptimeValue> ComptimeInteger::op_add(GlobalContext *gctx, ComptimeValue *other) {
+    gcref<ComptimeValue> ComptimeInteger::op_add(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
         PUSH_PEER(add);
         // So now we assume we are both of the same type
         auto result = value + rhsi->value;
@@ -206,7 +217,7 @@ if (rhsi == nullptr) throw CurdleError("Invalid Comptime Operation: Cannot " #na
         return gctx->gc.gcnew<ComptimeInteger>(result, peer);
     }
 
-    gcref<ComptimeValue> ComptimeInteger::op_subtract(GlobalContext *gctx, ComptimeValue *other) {
+    gcref<ComptimeValue> ComptimeInteger::op_subtract(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
         PUSH_PEER(subtract);
         // So now we assume we are both of the same type
         auto result = value - rhsi->value;
@@ -214,7 +225,7 @@ if (rhsi == nullptr) throw CurdleError("Invalid Comptime Operation: Cannot " #na
         return gctx->gc.gcnew<ComptimeInteger>(result, peer);
     }
 
-    gcref<ComptimeValue> ComptimeInteger::op_left_shift(GlobalContext *gctx, ComptimeValue *other) {
+    gcref<ComptimeValue> ComptimeInteger::op_left_shift(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
         PUSH_PEER(left_shift);
         // So now we assume we are both of the same type
         auto result = value << rhsi->value;
@@ -241,7 +252,7 @@ if (rhsi == nullptr) throw CurdleError("Invalid Comptime Operation: Cannot " #na
         return gctx->gc.gcnew<ComptimeInteger>(result, peer);
     }
 
-    gcref<ComptimeValue> ComptimeInteger::op_right_shift(GlobalContext *gctx, ComptimeValue *other) {
+    gcref<ComptimeValue> ComptimeInteger::op_right_shift(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
         PUSH_PEER(right_shift);
         // So now we assume we are both of the same type
         // This should automatically do a right shift correctly w/ sign extension if necessary
@@ -249,47 +260,49 @@ if (rhsi == nullptr) throw CurdleError("Invalid Comptime Operation: Cannot " #na
         return gctx->gc.gcnew<ComptimeInteger>(result, peer);
     }
 
-    gcref<ComptimeValue> ComptimeInteger::op_lesser_than(GlobalContext *gctx, ComptimeValue *other) {
+    gcref<ComptimeValue> ComptimeInteger::op_lesser_than(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
         PUSH_PEER(lesser_than);
         NOT_IMPL;
     }
 
-    gcref<ComptimeValue> ComptimeInteger::op_greater_than(GlobalContext *gctx, ComptimeValue *other) {
+    gcref<ComptimeValue> ComptimeInteger::op_greater_than(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
         PUSH_PEER(greater_than);
         NOT_IMPL;
     }
 
-    gcref<ComptimeValue> ComptimeInteger::op_lesser_than_equal(GlobalContext *gctx, ComptimeValue *other) {
+    gcref<ComptimeValue>
+    ComptimeInteger::op_lesser_than_equal(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
         PUSH_PEER(lesser_than_equal);
         NOT_IMPL;
     }
 
-    gcref<ComptimeValue> ComptimeInteger::op_greater_than_equal(GlobalContext *gctx, ComptimeValue *other) {
+    gcref<ComptimeValue>
+    ComptimeInteger::op_greater_than_equal(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
         PUSH_PEER(greater_than_equal);
         NOT_IMPL;
     }
 
-    gcref<ComptimeValue> ComptimeInteger::op_equal(GlobalContext *gctx, ComptimeValue *other) {
+    gcref<ComptimeValue> ComptimeInteger::op_equal(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
         PUSH_PEER(equal);
         NOT_IMPL;
     }
 
-    gcref<ComptimeValue> ComptimeInteger::op_not_equal(GlobalContext *gctx, ComptimeValue *other) {
+    gcref<ComptimeValue> ComptimeInteger::op_not_equal(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
         PUSH_PEER(not_equal);
         NOT_IMPL;
     }
 
-    gcref<ComptimeValue> ComptimeInteger::op_and(GlobalContext *gctx, ComptimeValue *other) {
+    gcref<ComptimeValue> ComptimeInteger::op_and(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
         PUSH_PEER(and);
         return gctx->gc.gcnew<ComptimeInteger>(value & rhsi->value, peer);
     }
 
-    gcref<ComptimeValue> ComptimeInteger::op_xor(GlobalContext *gctx, ComptimeValue *other) {
+    gcref<ComptimeValue> ComptimeInteger::op_xor(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
         PUSH_PEER(or);
         return gctx->gc.gcnew<ComptimeInteger>(value ^ rhsi->value, peer);
     }
 
-    gcref<ComptimeValue> ComptimeInteger::op_or(GlobalContext *gctx, ComptimeValue *other) {
+    gcref<ComptimeValue> ComptimeInteger::op_or(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
         PUSH_PEER(xor);
         return gctx->gc.gcnew<ComptimeInteger>(value | rhsi->value, peer);
     }

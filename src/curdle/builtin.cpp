@@ -5,6 +5,7 @@
 #include "curdle/builtin.h"
 #include "curdle/curdle.h"
 #include "curdle/values/ComptimeType.h"
+#include "GlobalContext.h"
 
 namespace cheese::curdle {
 
@@ -12,7 +13,7 @@ namespace cheese::curdle {
 
     template<typename T>
     requires std::is_base_of_v<Type, T>
-    static gcref<ComptimeValue> create_from_type(GlobalContext *gctx, T *ref) {
+    static gcref<ComptimeValue> create_from_type(cheese::project::GlobalContext *gctx, T *ref) {
         auto type = new ComptimeType{gctx, static_cast<Type *>(ref)};
         return {gctx->gc, type};
     }

@@ -3,7 +3,8 @@
 //
 #include "curdle/types/FunctionTemplateType.h"
 #include "curdle/types/AnyType.h"
-#include "curdle/GlobalContext.h"
+#include "project/GlobalContext.h"
+#include "GlobalContext.h"
 
 namespace cheese::curdle {
     bacteria::TypePtr FunctionTemplateType::get_bacteria_type() {
@@ -14,7 +15,7 @@ namespace cheese::curdle {
     }
 
 
-    FunctionTemplateType *FunctionTemplateType::get(GlobalContext *gctx) {
+    FunctionTemplateType *FunctionTemplateType::get(cheese::project::GlobalContext *gctx) {
         if (!gctx->cached_objects.contains("type: function_template")) {
             auto ref = gctx->gc.gcnew<FunctionTemplateType>();
             gctx->cached_objects["type: function_template"] = ref;
@@ -35,7 +36,7 @@ namespace cheese::curdle {
         return "$FunctionSet";
     }
 
-    gcref<Type> FunctionTemplateType::peer(Type *other, GlobalContext *gctx) {
+    gcref<Type> FunctionTemplateType::peer(Type *other, cheese::project::GlobalContext *gctx) {
         if (other == this) return REF(this);
         PEER_TYPE_CATCH_ANY();
         return REF(other);

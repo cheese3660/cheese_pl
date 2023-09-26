@@ -6,6 +6,9 @@
 #define CHEESE_VOIDTYPE_H
 
 #include "curdle/Type.h"
+#include "project/GlobalContext.h"
+
+using namespace cheese::project;
 
 namespace cheese::curdle {
     struct VoidType : Type {

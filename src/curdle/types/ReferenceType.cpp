@@ -2,8 +2,9 @@
 // Created by Lexi Allen on 6/28/2023.
 //
 #include "curdle/types/ReferenceType.h"
-#include "curdle/GlobalContext.h"
+#include "project/GlobalContext.h"
 #include "curdle/types/AnyType.h"
+#include "GlobalContext.h"
 
 namespace cheese::curdle {
     bacteria::TypePtr ReferenceType::get_bacteria_type() {
@@ -38,7 +39,7 @@ namespace cheese::curdle {
         return (constant ? "*~" : "*") + child->to_string();
     }
 
-    gcref<Type> ReferenceType::peer(Type *other, GlobalContext *gctx) {
+    gcref<Type> ReferenceType::peer(Type *other, cheese::project::GlobalContext *gctx) {
         if (compare(other) == 0) return REF(this);
         PEER_TYPE_CATCH_ANY();
         return NO_PEER;

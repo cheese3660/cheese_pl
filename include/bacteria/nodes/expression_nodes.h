@@ -129,6 +129,26 @@ namespace cheese::bacteria::nodes {
         JSON_FUNCS("float", { "value", "ty" }, value, (type->to_string()));
     };
 
+    struct ComplexLiteral : BacteriaNode {
+        ComplexLiteral(const Coordinate &location, double a, double b, TypePtr type) : BacteriaNode(
+                location), a(a), b(b), type(std::move(type)) {
+        }
+
+        double a;
+        double b;
+        TypePtr type;
+
+        ~ComplexLiteral() override = default;
+
+        std::string get_textual_representation(int depth) override {
+            std::stringstream ss{};
+            ss << '(' << a << "+" << b << "I @ " << type->to_string() << ')';
+            return ss.str();
+        }
+
+        JSON_FUNCS("complex", { "a", "b", "ty" }, a, b, (type->to_string()));
+    };
+
     struct ValueReference : BacteriaNode {
 
         std::string name;

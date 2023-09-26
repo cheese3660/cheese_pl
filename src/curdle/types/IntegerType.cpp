@@ -2,14 +2,17 @@
 // Created by Lexi Allen on 6/28/2023.
 //
 #include "curdle/types/IntegerType.h"
-#include "curdle/GlobalContext.h"
+#include "project/GlobalContext.h"
 #include "curdle/types/ComptimeIntegerType.h"
 #include "curdle/types/AnyType.h"
 #include "curdle/types/Float64Type.h"
 #include "curdle/types/ComptimeFloatType.h"
+#include "curdle/types/ComptimeComplexType.h"
+#include "curdle/types/Complex64Type.h"
+#include "GlobalContext.h"
 
 namespace cheese::curdle {
-    IntegerType *IntegerType::get(GlobalContext *gctx, bool sign, std::uint16_t size) {
+    IntegerType *IntegerType::get(cheese::project::GlobalContext *gctx, bool sign, std::uint16_t size) {
         std::string name = std::string("type: ") + (sign ? "i" : "u") + std::to_string(size);
         if (!gctx->cached_objects.contains(name)) {
             auto ref = gctx->gc.gcnew<IntegerType>(sign, size);
@@ -55,6 +58,10 @@ namespace cheese::curdle {
             if (auto other_f = dynamic_cast<ComptimeFloatType *>(other); other_f) {
                 return 1;
             }
+            if (dynamic_cast<ComptimeComplexType *>(other) != nullptr ||
+                dynamic_cast<Complex64Type *>(other) != nullptr) {
+                return 1;
+            }
         }
         return -1;
     }
@@ -63,7 +70,7 @@ namespace cheese::curdle {
         return (sign ? "i" : "u") + std::to_string(size);
     }
 
-    gcref<Type> IntegerType::peer(Type *other, GlobalContext *gctx) {
+    gcref<Type> IntegerType::peer(Type *other, cheese::project::GlobalContext *gctx) {
         if (other == this) return REF(this);
         PEER_TYPE_CATCH_ANY();
         if (auto other_c = dynamic_cast<ComptimeIntegerType *>(other); other_c) {
@@ -78,7 +85,9 @@ namespace cheese::curdle {
             return REF(other);
         }
         if (dynamic_cast<ComptimeFloatType *>(other) != nullptr) {
-            return REF(other);
+            return REF(Float64Type::get(gctx));
+        } else if (dynamic_cast<ComptimeComplexType *>(other) != nullptr || dynamic_cast<Complex64Type *>(other)) {
+            return REF(Complex64Type::get(gctx));
         }
         return NO_PEER;
     }

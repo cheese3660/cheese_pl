@@ -2,11 +2,12 @@
 // Created by Lexi Allen on 6/28/2023.
 //
 #include "curdle/types/NoReturnType.h"
-#include "curdle/GlobalContext.h"
+#include "project/GlobalContext.h"
 #include "curdle/curdle.h"
+#include "GlobalContext.h"
 
 namespace cheese::curdle {
-    NoReturnType *NoReturnType::get(GlobalContext *gctx) {
+    NoReturnType *NoReturnType::get(cheese::project::GlobalContext *gctx) {
         if (!gctx->cached_objects.contains("type: noreturn")) {
             auto ref = gctx->gc.gcnew<NoReturnType>();
             gctx->cached_objects["type: noreturn"] = ref;
@@ -36,7 +37,7 @@ namespace cheese::curdle {
         return "noreturn";
     }
 
-    gcref<Type> NoReturnType::peer(Type *other, GlobalContext *gctx) {
+    gcref<Type> NoReturnType::peer(Type *other, cheese::project::GlobalContext *gctx) {
         if (other == this) return REF(this);
         return REF(other);
     }

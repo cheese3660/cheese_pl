@@ -6,7 +6,7 @@
 #include <utility>
 
 #include "curdle/functions.h"
-#include "curdle/GlobalContext.h"
+#include "project/GlobalContext.h"
 #include "curdle/runtime.h"
 #include <typeinfo>
 #include "curdle/names.h"

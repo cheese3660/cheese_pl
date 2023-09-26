@@ -2,6 +2,8 @@
 // Created by Lexi Allen on 6/28/2023.
 //
 
+#include <utility>
+
 #include "curdle/values/ComptimeString.h"
 #include "curdle/curdle.h"
 #include "stringutil.h"
@@ -27,4 +29,6 @@ namespace cheese::curdle {
     gcref<ComptimeValue> ComptimeString::cast(Type *target_type, garbage_collector &garbageCollector) {
         NOT_IMPL;
     }
+
+    ComptimeString::ComptimeString(std::string value) : value(std::move(value)) {}
 }

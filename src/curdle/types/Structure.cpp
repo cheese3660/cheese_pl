@@ -3,7 +3,7 @@
 //
 
 #include "curdle/types/Structure.h"
-#include "curdle/GlobalContext.h"
+#include "project/GlobalContext.h"
 #include "curdle/Type.h"
 #include "sstream"
 #include "curdle/builtin.h"
@@ -11,6 +11,7 @@
 #include "curdle/values/ComptimeType.h"
 #include "curdle/types/AnyType.h"
 #include "curdle/curdle.h"
+#include "GlobalContext.h"
 
 namespace cheese::curdle {
 
@@ -128,7 +129,7 @@ namespace cheese::curdle {
 
     template<typename T>
     requires std::is_base_of_v<Type, T>
-    static gcref<ComptimeValue> create_from_type(GlobalContext *gctx, T *ref) {
+    static gcref<ComptimeValue> create_from_type(cheese::project::GlobalContext *gctx, T *ref) {
         auto type = new ComptimeType{gctx, static_cast<Type *>(ref)};
         return {gctx->gc, type};
     }
@@ -261,7 +262,7 @@ namespace cheese::curdle {
         }
     }
 
-    gcref<Type> Structure::peer(Type *other, GlobalContext *gctx) {
+    gcref<Type> Structure::peer(Type *other, cheese::project::GlobalContext *gctx) {
         if (other == this) return gcref{gctx->gc, this};
         if (dynamic_cast<AnyType *>(other)) return gcref{gctx->gc, this};
         auto &gc = gctx->gc;

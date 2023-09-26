@@ -6,7 +6,7 @@
 #define CHEESE_CURDLE_H
 
 #include "bacteria/BacteriaNode.h"
-#include "curdle/Project.h"
+#include "project/Project.h"
 #include "parser/nodes/other_nodes.h"
 #include "parser/nodes/single_member_nodes.h"
 #include "parser/nodes/terminal_nodes.h"
@@ -14,10 +14,14 @@
 #include "curdle/comptime.h"
 #include "curdle/runtime.h"
 #include "error.h"
+#include "project/Machine.h"
+#include "project/GlobalContext.h"
+
+using namespace cheese::project;
 // This
 
 namespace cheese::curdle {
-    std::unique_ptr<bacteria::BacteriaNode> curdle(const Project &project);
+    std::unique_ptr<bacteria::BacteriaNode> curdle(gcref<cheese::project::GlobalContext> gctx);
 
     gcref<Structure>
     translate_structure(ComptimeContext *ctx, parser::nodes::Structure *structure_node);

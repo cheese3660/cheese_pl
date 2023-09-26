@@ -12,7 +12,9 @@
 #include "curdle/runtime.h"
 #include "curdle/comptime.h"
 #include "bacteria/nodes/expression_nodes.h"
-#include "curdle/GlobalContext.h"
+#include "project/GlobalContext.h"
+
+using namespace cheese::project;
 
 namespace cheese::curdle {
 

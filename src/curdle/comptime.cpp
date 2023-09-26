@@ -2,7 +2,7 @@
 // Created by Lexi Allen on 3/31/2023.
 //
 #include "curdle/comptime.h"
-#include "curdle/GlobalContext.h"
+#include "project/GlobalContext.h"
 #include "NotImplementedException.h"
 #include "curdle/Type.h"
 #include "typeinfo"
@@ -24,6 +24,10 @@
 #include "curdle/types/Float64Type.h"
 #include "curdle/types/ComptimeIntegerType.h"
 #include "curdle/types/ComptimeFloatType.h"
+#include "curdle/types/Complex64Type.h"
+#include "curdle/values/ComptimeComplex.h"
+#include "curdle/types/ComptimeComplexType.h"
+#include "GlobalContext.h"
 
 
 namespace cheese::curdle {
@@ -34,96 +38,101 @@ namespace cheese::curdle {
 
 #define OPERATOR_NOT_DEFINED_FOR(operator_name) throw CurdleError("Invalid Comptime Operation: " operator_name " cannot be used on a value of type " + type->to_string() + " at compile time", error::ErrorCode::NotComptime)
 
-    gcref<ComptimeValue> ComptimeValue::op_tuple_call(GlobalContext *gctx, std::vector<ComptimeValue *> values) {
+    gcref<ComptimeValue>
+    ComptimeValue::op_tuple_call(cheese::project::GlobalContext *gctx, std::vector<ComptimeValue *> values) {
         OPERATOR_NOT_DEFINED_FOR("()");
     }
 
-    gcref<ComptimeValue> ComptimeValue::op_array_call(GlobalContext *gctx, std::vector<ComptimeValue *> values) {
+    gcref<ComptimeValue>
+    ComptimeValue::op_array_call(cheese::project::GlobalContext *gctx, std::vector<ComptimeValue *> values) {
         OPERATOR_NOT_DEFINED_FOR("[]");
     }
 
     gcref<ComptimeValue>
-    ComptimeValue::op_object_call(GlobalContext *gctx, std::unordered_map<std::string, ComptimeValue *> values) {
+    ComptimeValue::op_object_call(cheese::project::GlobalContext *gctx,
+                                  std::unordered_map<std::string, ComptimeValue *> values) {
         OPERATOR_NOT_DEFINED_FOR("{}");
     }
 
-    gcref<ComptimeValue> ComptimeValue::op_unary_plus(GlobalContext *gctx) {
+    gcref<ComptimeValue> ComptimeValue::op_unary_plus(cheese::project::GlobalContext *gctx) {
         OPERATOR_NOT_DEFINED_FOR("unary+");
     }
 
-    gcref<ComptimeValue> ComptimeValue::op_unary_minus(GlobalContext *gctx) {
+    gcref<ComptimeValue> ComptimeValue::op_unary_minus(cheese::project::GlobalContext *gctx) {
         OPERATOR_NOT_DEFINED_FOR("unary-");
     }
 
-    gcref<ComptimeValue> ComptimeValue::op_not(GlobalContext *gctx) {
+    gcref<ComptimeValue> ComptimeValue::op_not(cheese::project::GlobalContext *gctx) {
         OPERATOR_NOT_DEFINED_FOR("not");
     }
 
-    gcref<ComptimeValue> ComptimeValue::op_multiply(GlobalContext *gctx, ComptimeValue *other) {
+    gcref<ComptimeValue> ComptimeValue::op_multiply(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
         OPERATOR_NOT_DEFINED_FOR("*");
     }
 
-    gcref<ComptimeValue> ComptimeValue::op_divide(GlobalContext *gctx, ComptimeValue *other) {
+    gcref<ComptimeValue> ComptimeValue::op_divide(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
         OPERATOR_NOT_DEFINED_FOR("*");
     }
 
-    gcref<ComptimeValue> ComptimeValue::op_remainder(GlobalContext *gctx, ComptimeValue *other) {
+    gcref<ComptimeValue> ComptimeValue::op_remainder(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
         OPERATOR_NOT_DEFINED_FOR("%");
     }
 
-    gcref<ComptimeValue> ComptimeValue::op_add(GlobalContext *gctx, ComptimeValue *other) {
+    gcref<ComptimeValue> ComptimeValue::op_add(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
         OPERATOR_NOT_DEFINED_FOR("+");
     }
 
-    gcref<ComptimeValue> ComptimeValue::op_subtract(GlobalContext *gctx, ComptimeValue *other) {
+    gcref<ComptimeValue> ComptimeValue::op_subtract(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
         OPERATOR_NOT_DEFINED_FOR("-");
     }
 
-    gcref<ComptimeValue> ComptimeValue::op_left_shift(GlobalContext *gctx, ComptimeValue *other) {
+    gcref<ComptimeValue> ComptimeValue::op_left_shift(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
         OPERATOR_NOT_DEFINED_FOR("<<");
     }
 
-    gcref<ComptimeValue> ComptimeValue::op_right_shift(GlobalContext *gctx, ComptimeValue *other) {
+    gcref<ComptimeValue> ComptimeValue::op_right_shift(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
         OPERATOR_NOT_DEFINED_FOR(">>");
     }
 
-    gcref<ComptimeValue> ComptimeValue::op_lesser_than(GlobalContext *gctx, ComptimeValue *other) {
+    gcref<ComptimeValue> ComptimeValue::op_lesser_than(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
         OPERATOR_NOT_DEFINED_FOR("<");
     }
 
-    gcref<ComptimeValue> ComptimeValue::op_greater_than(GlobalContext *gctx, ComptimeValue *other) {
+    gcref<ComptimeValue> ComptimeValue::op_greater_than(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
         OPERATOR_NOT_DEFINED_FOR(">");
     }
 
-    gcref<ComptimeValue> ComptimeValue::op_lesser_than_equal(GlobalContext *gctx, ComptimeValue *other) {
+    gcref<ComptimeValue>
+    ComptimeValue::op_lesser_than_equal(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
         OPERATOR_NOT_DEFINED_FOR("<=");
     }
 
-    gcref<ComptimeValue> ComptimeValue::op_greater_than_equal(GlobalContext *gctx, ComptimeValue *other) {
+    gcref<ComptimeValue>
+    ComptimeValue::op_greater_than_equal(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
         OPERATOR_NOT_DEFINED_FOR(">=");
     }
 
-    gcref<ComptimeValue> ComptimeValue::op_equal(GlobalContext *gctx, ComptimeValue *other) {
+    gcref<ComptimeValue> ComptimeValue::op_equal(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
         OPERATOR_NOT_DEFINED_FOR("==");
     }
 
-    gcref<ComptimeValue> ComptimeValue::op_not_equal(GlobalContext *gctx, ComptimeValue *other) {
+    gcref<ComptimeValue> ComptimeValue::op_not_equal(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
         OPERATOR_NOT_DEFINED_FOR("!=");
     }
 
-    gcref<ComptimeValue> ComptimeValue::op_and(GlobalContext *gctx, ComptimeValue *other) {
+    gcref<ComptimeValue> ComptimeValue::op_and(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
         OPERATOR_NOT_DEFINED_FOR("and");
     }
 
-    gcref<ComptimeValue> ComptimeValue::op_xor(GlobalContext *gctx, ComptimeValue *other) {
+    gcref<ComptimeValue> ComptimeValue::op_xor(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
         OPERATOR_NOT_DEFINED_FOR("xor");
     }
 
-    gcref<ComptimeValue> ComptimeValue::op_or(GlobalContext *gctx, ComptimeValue *other) {
+    gcref<ComptimeValue> ComptimeValue::op_or(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
         OPERATOR_NOT_DEFINED_FOR("or");
     }
 
-    gcref<ComptimeValue> ComptimeValue::op_combine(GlobalContext *gctx, ComptimeValue *other) {
+    gcref<ComptimeValue> ComptimeValue::op_combine(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
         OPERATOR_NOT_DEFINED_FOR("&");
     }
 
@@ -149,7 +158,7 @@ namespace cheese::curdle {
 
     template<typename T>
     requires std::is_base_of_v<Type, T>
-    static gcref<ComptimeValue> create_from_type(GlobalContext *gctx, T *ref) {
+    static gcref<ComptimeValue> create_from_type(cheese::project::GlobalContext *gctx, T *ref) {
         auto type = new ComptimeType{gctx, static_cast<Type *>(ref)};
         return {gctx->gc, type};
     }
@@ -195,6 +204,19 @@ namespace cheese::curdle {
 #undef WHEN_FUNCTION_IS
     }
 
+    gcref<ComptimeValue> ComptimeContext::exec_object_call(parser::nodes::ObjectCall *call, RuntimeContext *rtime) {
+        auto function = exec(call->object.get(), rtime);
+        std::unordered_map<std::string, ComptimeValue *> arguments;
+        std::vector<gcref<ComptimeValue>> arg_refs;
+        for (const auto &node: call->args) {
+            auto actual_arg = (parser::nodes::FieldLiteral *) node.get();
+            auto arg = exec(actual_arg->value, rtime);
+            arguments[actual_arg->name] = arg.get();
+            arg_refs.push_back(std::move(arg));
+        }
+        return function->op_object_call(globalContext, arguments);
+    }
+
     gcref<ComptimeValue> ComptimeContext::exec(parser::Node *node, RuntimeContext *rtime) {
         try {
 #define WHEN_NODE_IS(type, name) if (auto name = dynamic_cast<type*>(node); name)
@@ -213,6 +235,9 @@ namespace cheese::curdle {
             }
             WHEN_NODE_IS(parser::nodes::Float64, pFloat64) {
                 return create_from_type(globalContext, Float64Type::get(globalContext));
+            }
+            WHEN_NODE_IS(parser::nodes::Complex64, pComplex64) {
+                return create_from_type(globalContext, Complex64Type::get(globalContext));
             }
             WHEN_NODE_IS(parser::nodes::Structure, pStructure) {
                 return create_from_type(globalContext, translate_structure(this, pStructure).get());
@@ -248,6 +273,10 @@ namespace cheese::curdle {
 
             WHEN_NODE_IS(parser::nodes::FloatLiteral, pFloatLiteral) {
                 return gc.gcnew<ComptimeFloat>(pFloatLiteral->value, ComptimeFloatType::get(globalContext));
+            }
+
+            WHEN_NODE_IS(parser::nodes::ImaginaryLiteral, pImaginaryLiteral) {
+                return gc.gcnew<ComptimeComplex>(0, pImaginaryLiteral->value, ComptimeComplexType::get(globalContext));
             }
 
 #define BIN_OP(name) return lhs->op_##name(globalContext,rhs)
@@ -374,8 +403,10 @@ namespace cheese::curdle {
                         } else {
                             return {gc, as_object->fields[pValueReference->name]};
                         }
+                    } else if (auto as_type = dynamic_cast<ComptimeType *>(lhs.get()); as_type) {
+                        return as_type->typeValue->get_child_comptime(pValueReference->name, globalContext);
                     } else {
-                        NOT_IMPL_FOR("Non-objects");
+                        NOT_IMPL_FOR("Non-objects (" + typeid(*lhs.get()).name() + ")");
                     }
                 }
                 WHEN_RHS_IS(parser::nodes::IntegerLiteral, pIntegerLiteral) {
@@ -410,8 +441,8 @@ namespace cheese::curdle {
                 if (pIf->unwrap.has_value()) {
                     // This is where we do a wierd translation for optionals, which are going to be a builtin type
                     // But essentially it becomes
-                    // named_block: {
-                    //     let tmp = condition;
+                    // :(named_block) {
+                    //     let tmp = condition
                     //     <==(named_block) if tmp has value
                     //         inner_named_block: {
                     //             let unwrap = value of tmp
@@ -457,12 +488,11 @@ namespace cheese::curdle {
                 return exec_tuple_call(pTupleCall, rtime);
             }
             WHEN_NODE_IS(parser::nodes::ObjectCall, pObjectCall) {
-                throw CurdleError("TESTING",
-                                  error::ErrorCode::NotComptime);
+                return exec_object_call(pObjectCall, rtime);
             }
             WHEN_NODE_IS(parser::nodes::Match, pMatch) {
-                throw CurdleError("TESTING",
-                                  error::ErrorCode::NotComptime);
+                auto match_value = exec(pMatch->value, rtime);
+                NOT_IMPL;
             }
             WHEN_NODE_IS(parser::nodes::ObjectLiteral, pObjectLiteral) {
                 auto ty = gc.gcnew<Structure>(globalContext->verify_name("::lit"), this, gc);

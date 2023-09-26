@@ -6,6 +6,9 @@
 #define CHEESE_COMPTIMETYPE_H
 
 #include "curdle/comptime.h"
+#include "project/GlobalContext.h"
+
+using namespace cheese::project;
 
 namespace cheese::curdle {
     struct ComptimeType : ComptimeValue {

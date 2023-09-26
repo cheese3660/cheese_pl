@@ -31,7 +31,7 @@
       "%": ":remove",
       ":default": [
         "expressions: %NAME% (integer-complex)",
-        "fn main => void entry\n{let x: i64 = 1\nlet y: c64 = 1\n_=x%OPERATION%y}",
+        "fn main => void entry\n{let x: i64 = 1\nlet y: c64 = 1.0\n_=x%OPERATION%y}",
         "@INTEGER_COMPLEX@"
       ]
     },
@@ -53,7 +53,7 @@
       "%": ":remove",
       ":default": [
         "expressions: %NAME% (float-complex)",
-        "fn main => void entry\n{let x: f64 = 1\nlet y: c64 = 1\n_=x%OPERATION%y}",
+        "fn main => void entry\n{let x: f64 = 1.0\nlet y: c64 = 1.0\n_=x%OPERATION%y}",
         "@FLOAT_COMPLEX@"
       ]
     },
@@ -62,7 +62,7 @@
       "%": ":remove",
       ":default": [
         "expressions: %NAME% (complex-complex)",
-        "fn main => void entry\n{let x: c64 = 1\nlet y: c64 = 1\n_=x%OPERATION%y}",
+        "fn main => void entry\n{let x: c64 = 1.0\nlet y: c64 = 1.0\n_=x%OPERATION%y}",
         "@COMPLEX_COMPLEX@"
       ]
     },
@@ -73,7 +73,7 @@
     ],
     [
       "expressions: %NAME% (function pointer-float)",
-      "import function_pointers @ l\nfn main => void entry\n{let x: f64 = 1\nlet y: f64 = 1\nlet z = l.fn_pointer_float%OPERATION%y\n_ = z(x)}",
+      "import function_pointers @ l\nfn main => void entry\n{let x: f64 = 1.0\nlet y: f64 = 1.0\nlet z = l.fn_pointer_float%OPERATION%y\n_ = z(x)}",
       {}
     ],
     {
@@ -81,7 +81,7 @@
       "%": ":remove",
       ":default": [
         "expressions: %NAME% (function pointer-complex)",
-        "import function_pointers @ l\nfn main => void entry\n{let x: c64 = 1\nlet y: c64 = 1\nlet z = l.fn_pointer_complex%OPERATION%y\n_ = z(x)}",
+        "import function_pointers @ l\nfn main => void entry\n{let x: c64 = 1.0\nlet y: c64 = 1.0\nlet z = l.fn_pointer_complex%OPERATION%y\n_ = z(x)}",
         {}
       ]
     },

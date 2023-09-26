@@ -7,6 +7,9 @@
 
 #include "curdle/comptime.h"
 #include "curdle/types/BuiltinReferenceType.h"
+#include "project/GlobalContext.h"
+
+using namespace cheese::project;
 
 namespace cheese::curdle {
     struct BuiltinFunctionReference : ComptimeValue {

@@ -1,7 +1,7 @@
 //
 // Created by Lexi Allen on 4/1/2023.
 //
-#include "curdle/GlobalContext.h"
+#include "project/GlobalContext.h"
 #include <algorithm>
 #include "curdle/curdle.h"
 #include <fstream>
@@ -10,7 +10,7 @@
 
 namespace cheese::curdle {
 
-    void GlobalContext::mark_references() {
+    void cheese::project::GlobalContext::mark_references() {
         if (entry_function != nullptr) {
             entry_function->mark();
         }
@@ -25,7 +25,8 @@ namespace cheese::curdle {
         }
     }
 
-    Structure *GlobalContext::import_structure(Coordinate location, std::string path, fs::path dir, fs::path pdir) {
+    Structure *cheese::project::GlobalContext::import_structure(Coordinate location, std::string path, fs::path dir,
+                                                                fs::path pdir) {
 #ifdef WIN32
         std::replace(path.begin(), path.end(), '/', '\\');
 #endif
@@ -119,7 +120,7 @@ namespace cheese::curdle {
                                    error::ErrorCode::UnresolvedImport);
     }
 
-    std::string GlobalContext::verify_name(std::string struct_name) {
+    std::string cheese::project::GlobalContext::verify_name(std::string struct_name) {
         while (all_struct_names.contains(struct_name)) {
             // Now time to figure out if it ends in a number and instead just choose a new number or add a number to it, then reverify
             if (auto last_name = struct_name.rfind("::"); last_name != std::string::npos) {
@@ -138,5 +139,14 @@ namespace cheese::curdle {
         }
         all_struct_names.insert(struct_name);
         return struct_name;
+    }
+
+    bool cheese::project::GlobalContext::try_get_cached_object(std::string key, managed_object *&out_value) {
+        out_value = nullptr;
+        if (cached_objects.contains(key)) {
+            out_value = cached_objects[key];
+            return true;
+        }
+        return false;
     }
 }

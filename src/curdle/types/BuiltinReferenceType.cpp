@@ -4,7 +4,9 @@
 #include "curdle/types/BuiltinReferenceType.h"
 #include "curdle/types/AnyType.h"
 #include "curdle/curdle.h"
-#include "curdle/GlobalContext.h"
+#include "project/GlobalContext.h"
+#include "curdle/values/ComptimeString.h"
+#include "GlobalContext.h"
 
 namespace cheese::curdle {
     bacteria::TypePtr BuiltinReferenceType::get_bacteria_type() {
@@ -15,7 +17,7 @@ namespace cheese::curdle {
 
     }
 
-    BuiltinReferenceType *BuiltinReferenceType::get(GlobalContext *gctx) {
+    BuiltinReferenceType *BuiltinReferenceType::get(cheese::project::GlobalContext *gctx) {
         if (!gctx->cached_objects.contains("type: builtin_reference")) {
             auto ref = gctx->gc.gcnew<BuiltinReferenceType>();
             gctx->cached_objects["type: builtin_reference"] = ref;
@@ -38,9 +40,18 @@ namespace cheese::curdle {
         return "$BuiltinReference";
     }
 
-    gcref<Type> BuiltinReferenceType::peer(Type *other, GlobalContext *gctx) {
+    gcref<Type> BuiltinReferenceType::peer(Type *other, cheese::project::GlobalContext *gctx) {
         if (other == this) return REF(this);
         PEER_TYPE_CATCH_ANY();
         return NO_PEER;
+    }
+
+    gcref<ComptimeValue>
+    BuiltinReferenceType::get_child_comptime(std::string key, cheese::project::GlobalContext *gctx) {
+        if (key == "__name__") {
+            return gctx->gc.gcnew<ComptimeString>("builtin_reference");
+        }
+        throw CurdleError("key not a comptime child of type builtin_reference: " + key,
+                          error::ErrorCode::InvalidSubscript);
     }
 }

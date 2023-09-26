@@ -10,7 +10,8 @@
 #include <string_view>
 #include "parser/parser.h"
 #include "curdle/curdle.h"
-#include "curdle/Project.h"
+#include "project/Project.h"
+#include "project/Machine.h"
 #include <filesystem>
 
 namespace cheese::tools {
@@ -43,7 +44,8 @@ namespace cheese::tools {
                     parsed,
                     curdle::ProjectType::Application
             };
-            auto node = curdle::curdle(project);
+            auto machine = curdle::Machine{};
+            auto node = curdle::curdle(project, machine);
             std::cout << node->get_textual_representation();
             return 0;
         } catch (std::exception &e) {

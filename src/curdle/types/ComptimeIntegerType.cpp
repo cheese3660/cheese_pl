@@ -3,10 +3,14 @@
 //
 #include "curdle/types/ComptimeIntegerType.h"
 #include "curdle/values/ComptimeFloat.h"
-#include "curdle/GlobalContext.h"
+#include "project/GlobalContext.h"
 #include "curdle/curdle.h"
 #include "curdle/types/IntegerType.h"
 #include "curdle/types/Float64Type.h"
+#include "curdle/types/ComptimeComplexType.h"
+#include "curdle/types/Complex64Type.h"
+#include "curdle/types/ComptimeFloatType.h"
+#include "GlobalContext.h"
 
 namespace cheese::curdle {
 
@@ -14,7 +18,7 @@ namespace cheese::curdle {
 
     }
 
-    ComptimeIntegerType *ComptimeIntegerType::get(GlobalContext *gctx) {
+    ComptimeIntegerType *ComptimeIntegerType::get(cheese::project::GlobalContext *gctx) {
         if (!gctx->cached_objects.contains("type: comptime_int")) {
             auto ref = gctx->gc.gcnew<ComptimeIntegerType>();
             gctx->cached_objects["type: comptime_int"] = ref;
@@ -39,6 +43,10 @@ namespace cheese::curdle {
             if (auto other_f = dynamic_cast<Float64Type *>(other); other_f) {
                 return 1;
             }
+            if (dynamic_cast<ComptimeComplexType *>(other) != nullptr ||
+                dynamic_cast<Complex64Type *>(other) != nullptr) {
+                return 1;
+            }
         }
         return -1;
     }
@@ -47,12 +55,16 @@ namespace cheese::curdle {
         return "comptime_int";
     }
 
-    gcref<Type> ComptimeIntegerType::peer(Type *other, GlobalContext *gctx) {
+    gcref<Type> ComptimeIntegerType::peer(Type *other, cheese::project::GlobalContext *gctx) {
         if (other == this) return REF(this);
-        if (auto other_i = dynamic_cast<IntegerType *>(other); other_i) {
+        if (dynamic_cast<ComptimeFloatType *>(other) != nullptr) {
+            return REF(other);
+        } else if (auto other_i = dynamic_cast<IntegerType *>(other); other_i) {
             return REF(other_i);
         } else if (auto other_f = dynamic_cast<Float64Type *>(other); other_f) {
             return REF(other_f);
+        } else if (dynamic_cast<ComptimeComplexType *>(other) != nullptr || dynamic_cast<Complex64Type *>(other)) {
+            return REF(other);
         } else {
             return NO_PEER;
         }

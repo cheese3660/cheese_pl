@@ -3,8 +3,9 @@
 //
 #include "curdle/types/ErrorType.h"
 #include "curdle/types/AnyType.h"
-#include "curdle/GlobalContext.h"
+#include "project/GlobalContext.h"
 #include "curdle/curdle.h"
+#include "GlobalContext.h"
 
 namespace cheese::curdle {
     bacteria::TypePtr ErrorType::get_bacteria_type() {
@@ -26,7 +27,7 @@ namespace cheese::curdle {
     }
 
     // Lets always coalesce error types w/ peer types
-    gcref<Type> ErrorType::peer(Type *other, GlobalContext *gctx) {
+    gcref<Type> ErrorType::peer(Type *other, cheese::project::GlobalContext *gctx) {
         if (other == this) return REF(this);
         PEER_TYPE_CATCH_ANY();
         return NO_PEER;
@@ -37,7 +38,7 @@ namespace cheese::curdle {
     }
 
 
-    ErrorType *ErrorType::get(GlobalContext *gctx) {
+    ErrorType *ErrorType::get(cheese::project::GlobalContext *gctx) {
         if (!gctx->cached_objects.contains("type: error")) {
             auto ref = gctx->gc.gcnew<ErrorType>();
             gctx->cached_objects["type: error"] = ref;

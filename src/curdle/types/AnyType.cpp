@@ -2,8 +2,10 @@
 // Created by Lexi Allen on 6/28/2023.
 //
 #include "curdle/types/AnyType.h"
-#include "curdle/GlobalContext.h"
+#include "curdle/values/ComptimeString.h"
+#include "project/GlobalContext.h"
 #include "curdle/curdle.h"
+#include "GlobalContext.h"
 
 namespace cheese::curdle {
     bacteria::TypePtr AnyType::get_bacteria_type() {
@@ -15,7 +17,7 @@ namespace cheese::curdle {
     }
 
 
-    AnyType *AnyType::get(GlobalContext *gctx) {
+    AnyType *AnyType::get(cheese::project::GlobalContext *gctx) {
         if (!gctx->cached_objects.contains("type: any")) {
             auto ref = gctx->gc.gcnew<AnyType>();
             gctx->cached_objects["type: any"] = ref;
@@ -36,7 +38,16 @@ namespace cheese::curdle {
         return "any";
     }
 
-    gcref<Type> AnyType::peer(Type *other, GlobalContext *gctx) {
+    gcref<Type> AnyType::peer(Type *other, cheese::project::GlobalContext *gctx) {
         return REF(other);
+    }
+
+    gcref<ComptimeValue> AnyType::get_child_comptime(std::string key, cheese::project::GlobalContext *gctx) {
+        if (key == "__name__") {
+            auto str = gctx->gc.gcnew<ComptimeString>("any");
+            return str;
+        }
+
+        throw CurdleError("key not a comptime child of type any: " + key, error::ErrorCode::InvalidSubscript);
     }
 }

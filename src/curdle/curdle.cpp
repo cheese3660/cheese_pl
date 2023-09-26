@@ -5,7 +5,7 @@
 
 #include "curdle/curdle.h"
 
-#include "curdle/GlobalContext.h"
+#include "project/GlobalContext.h"
 
 #include "parser/parser.h"
 
@@ -33,6 +33,8 @@
 #include "curdle/values/ComptimeArray.h"
 #include "curdle/values/ComptimeObject.h"
 #include "curdle/types/Float64Type.h"
+#include "curdle/values/ComptimeComplex.h"
+#include "GlobalContext.h"
 
 using namespace cheese::memory::garbage_collection;
 
@@ -172,7 +174,7 @@ namespace cheese::curdle {
         return structure_ref;
     }
 
-    void setup_root_structure(GlobalContext *ctx, const parser::NodePtr &ast_node) {
+    void setup_root_structure(cheese::project::GlobalContext *ctx, const parser::NodePtr &ast_node) {
         garbage_collector &gc = ctx->gc;
         auto newContext = gc.gcnew<ComptimeContext>(ctx, ctx->project.root_path, ctx->project.folder);
         auto translated = translate_structure(newContext,
@@ -182,22 +184,19 @@ namespace cheese::curdle {
     }
 
 
-    std::unique_ptr<bacteria::BacteriaNode> curdle(const Project &project) {
+    std::unique_ptr<bacteria::BacteriaNode> curdle(gcref<cheese::project::GlobalContext> gctx) {
         // First off create a structure for the main project file
-        auto gc = garbage_collector{64}; // Lets do it every 64 iterations
-        auto ctx = gc.gcnew<GlobalContext>(project, gc);
-        gc.add_root_object(ctx);
-        setup_root_structure(ctx, project.root_file);
-        if (project.type == ProjectType::Application) {
+        setup_root_structure(gctx, gctx->project.root_file);
+        if (gctx->project.type == ProjectType::Application) {
             // We do a depth first search to find the entry point
-            ctx->root_structure->search_entry();
-            if (ctx->entry_function == nullptr) {
-                error::raise_exiting_error("curdle", "no entrypoint found", project.root_file->location,
+            gctx->root_structure->search_entry();
+            if (gctx->entry_function == nullptr) {
+                error::raise_exiting_error("curdle", "no entrypoint found", gctx->project.root_file->location,
                                            error::ErrorCode::NoEntryPoint);
             }
-            ctx->entry_function->get({});
+            gctx->entry_function->get({});
         }
-        return ctx->global_reciever.release()->get();
+        return gctx->global_reciever.release()->get();
     }
 
     bacteria::BacteriaPtr translate_expression(LocalContext *lctx, parser::NodePtr expr);
@@ -290,6 +289,7 @@ namespace cheese::curdle {
                                                        arg_nodes);
             return generate_call(lctx, function2, arg_nodes, call->location);
         } else {
+            // Here is where we need to grab a function pointer and call the function pointer
             NOT_IMPL_FOR("non compile time deductible functions");
         }
     }
@@ -667,6 +667,11 @@ namespace cheese::curdle {
                 return std::make_unique<bacteria::nodes::AggregrateObject>(location, t, std::move(values));
             }
         }
+        WHEN_COMPTIME_IS(ComptimeComplex, pComptimeComplex) {
+            return std::make_unique<bacteria::nodes::ComplexLiteral>(location, pComptimeComplex->a, pComptimeComplex->b,
+                                                                     result_type->get_cached_type());
+        }
+
 #undef WHEN_COMPTIME_IS
         NOT_IMPL_FOR(typeid(*vv).name());
     }

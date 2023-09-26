@@ -8,14 +8,14 @@
 #include "bacteria/BacteriaType.h"
 #include "Mixin.h"
 #include "memory/garbage_collection.h"
-
+#include "project/GlobalContext.h"
 
 namespace cheese::curdle {
 #define PEER_TYPE_CATCH_ANY() if (dynamic_cast<AnyType*>(other)) return gcref{gctx->gc,this}
 #define NO_PEER gcref<Type>{gctx->gc,nullptr}
 #define REF(X) gcref{gctx->gc,X}
 #define NO_BACTERIA_TYPE(name) throw cheese::curdle::CurdleError{"No bacteria type for " # name, error::ErrorCode::NoBacteriaType};
-    struct GlobalContext;
+    struct ComptimeValue;
     enum class Comptimeness {
         Comptime,
         ArgumentDepending, //For "any" types
@@ -33,9 +33,13 @@ namespace cheese::curdle {
         virtual Comptimeness get_comptimeness() = 0;
 
         // This should be done in a way that the other type is *always* concrete and not an "any"
+        // So basically, its comparison in terms of casting *to*
         virtual std::int32_t compare(Type *other, bool implicit = true) = 0;
 
-        virtual memory::garbage_collection::gcref<Type> peer(Type *other, GlobalContext *gc) = 0;
+        virtual memory::garbage_collection::gcref<Type> peer(Type *other, GlobalContext *gctx) = 0;
+
+        virtual memory::garbage_collection::gcref<ComptimeValue>
+        get_child_comptime(std::string key, GlobalContext *gctx) = 0;
 
         virtual std::string to_string() = 0;
 

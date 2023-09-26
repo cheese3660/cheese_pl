@@ -19,6 +19,9 @@
 
 #include "parser/nodes/terminal_nodes.h"
 #include "curdle/runtime.h"
+#include "project/GlobalContext.h"
+
+using namespace cheese::project;
 //#include "builtin.h"
 
 
@@ -129,7 +132,7 @@ namespace cheese::curdle {
 
         Structure *currentStructure;
         ComptimeContext *parent;
-        GlobalContext *globalContext;
+        cheese::project::GlobalContext *globalContext;
         std::unordered_map<std::string, ComptimeVariable *> comptimeVariables;
         std::vector<std::string> structure_name_stack;
         size_t next_offset_for_structure_name = 0;
@@ -137,9 +140,10 @@ namespace cheese::curdle {
         fs::path path;
         fs::path project_dir; // This is $newProjectDir in the reference
 
-        ComptimeContext(GlobalContext *gc, fs::path p, fs::path d) : globalContext(gc), parent(nullptr),
-                                                                     currentStructure(nullptr), path(std::move(p)),
-                                                                     project_dir(std::move(d)) {
+        ComptimeContext(cheese::project::GlobalContex *gc, fs::path p, fs::path d) : globalContext(gc), parent(nullptr),
+                                                                                     currentStructure(nullptr),
+                                                                                     path(std::move(p)),
+                                                                                     project_dir(std::move(d)) {
 
         }
 
@@ -177,6 +181,8 @@ namespace cheese::curdle {
         void push_structure_name(std::string);
 
         void pop_structure_name();
+
+        gcref<ComptimeValue> exec_object_call(parser::nodes::ObjectCall *call, RuntimeContext *rtime);
     };
 }
 #endif //CHEESE_COMPTIME_H
