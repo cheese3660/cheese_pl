@@ -37,15 +37,17 @@ namespace cheese::tools {
             std::string sv = buffer.str();
             auto lexed = lexer::lex(sv, file);
             auto parsed = parser::parse(lexed);
-            auto project = curdle::Project{
+            auto project = cheese::project::Project{
                     fs::path{file}.parent_path(),
                     program.get<std::vector<fs::path>>("--library"),
                     fs::path{file},
                     parsed,
-                    curdle::ProjectType::Application
+                    project::ProjectType::Application
             };
-            auto machine = curdle::Machine{};
-            auto node = curdle::curdle(project, machine);
+            auto machine = cheese::project::Machine{};
+            auto gc = cheese::memory::garbage_collection::garbage_collector{64};
+            auto ctx = gc.gcnew<cheese::project::GlobalContext>(project, gc, machine);
+            auto node = curdle::curdle(ctx);
             std::cout << node->get_textual_representation();
             return 0;
         } catch (std::exception &e) {

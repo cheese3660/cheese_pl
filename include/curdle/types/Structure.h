@@ -5,7 +5,6 @@
 #ifndef CHEESE_STRUCTURE_H
 #define CHEESE_STRUCTURE_H
 
-#include "curdle/Type.h"
 #include <string>
 #include <vector>
 #include <map>
@@ -15,6 +14,7 @@
 #include "curdle/functions.h"
 #include "curdle/comptime.h"
 #include "project/GlobalContext.h"
+#include "curdle/Type.h"
 
 using namespace cheese::project;
 

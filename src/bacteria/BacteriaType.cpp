@@ -2,6 +2,7 @@
 // Created by Lexi Allen on 4/23/2023.
 //
 #include "bacteria/BacteriaType.h"
+#include "project/GlobalContext.h"
 #include <sstream>
 
 namespace cheese::bacteria {
@@ -66,6 +67,8 @@ namespace cheese::bacteria {
                 return "[*]cyclic";
             case Type::WeakSlice:
                 return "<>cyclic";
+            default:
+                return "unknown";
         }
     }
 

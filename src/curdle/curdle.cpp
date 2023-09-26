@@ -183,7 +183,7 @@ namespace cheese::curdle {
     }
 
 
-    std::unique_ptr<bacteria::BacteriaNode> curdle(gcref<cheese::project::GlobalContext> gctx) {
+    std::unique_ptr<bacteria::BacteriaNode> curdle(cheese::project::GlobalContext *gctx) {
         // First off create a structure for the main project file
         setup_root_structure(gctx, gctx->project.root_file);
         if (gctx->project.type == ProjectType::Application) {

@@ -8,10 +8,7 @@
 #include "bacteria/BacteriaType.h"
 #include "Mixin.h"
 #include "memory/garbage_collection.h"
-//#include "project/GlobalContext.h"
-namespace cheese::project {
-    struct GlobalContext;
-}
+#include "project/GlobalContext.h"
 
 namespace cheese::curdle {
 #define PEER_TYPE_CATCH_ANY() if (dynamic_cast<AnyType*>(other)) return gcref{gctx->gc,this}

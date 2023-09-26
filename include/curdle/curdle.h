@@ -21,7 +21,7 @@ using namespace cheese::project;
 // This
 
 namespace cheese::curdle {
-    std::unique_ptr<bacteria::BacteriaNode> curdle(gcref<cheese::project::GlobalContext> gctx);
+    std::unique_ptr<bacteria::BacteriaNode> curdle(cheese::project::GlobalContext *gctx);
 
     gcref<Structure>
     translate_structure(ComptimeContext *ctx, parser::nodes::Structure *structure_node);

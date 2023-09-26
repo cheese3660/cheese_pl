@@ -11,8 +11,10 @@
 #include <vector>
 #include <variant>
 #include <llvm/IR/Type.h>
-#include "project/Machine.h"
-#include "project/GlobalContext.h"
+
+namespace cheese::project {
+    struct GlobalContext;
+}
 
 namespace cheese::bacteria {
     struct BacteriaType {

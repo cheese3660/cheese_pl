@@ -48,7 +48,8 @@ namespace cheese::curdle {
 
     gcref<ComptimeValue> BooleanType::get_child_comptime(std::string key, cheese::project::GlobalContext *gctx) {
         if (key == "__size__") {
-            return gctx->gc.gcnew<ComptimeInteger>(1, ComptimeIntegerType::get(gctx));
+            return gctx->gc.gcnew<ComptimeInteger>(get_cached_type()->get_llvm_size(gctx),
+                                                   ComptimeIntegerType::get(gctx));
         }
         if (key == "__name__") {
             return gctx->gc.gcnew<ComptimeString>("bool");
