@@ -72,4 +72,10 @@ namespace cheese::curdle {
     bacteria::TypePtr ComptimeIntegerType::get_bacteria_type() {
         NO_BACTERIA_TYPE(comptime_int);
     }
+
+    gcref<ComptimeValue>
+    ComptimeIntegerType::get_child_comptime(std::string key, cheese::project::GlobalContext *gctx) {
+        CATCH_DUNDER_NAME;
+        INVALID_CHILD;
+    }
 }

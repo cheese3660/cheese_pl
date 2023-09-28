@@ -47,16 +47,14 @@ namespace cheese::curdle {
     }
 
     gcref<ComptimeValue> BooleanType::get_child_comptime(std::string key, cheese::project::GlobalContext *gctx) {
-        if (key == "__size__") {
-            return gctx->gc.gcnew<ComptimeInteger>(get_cached_type()->get_llvm_size(gctx),
-                                                   ComptimeIntegerType::get(gctx));
-        }
-        if (key == "__name__") {
-            return gctx->gc.gcnew<ComptimeString>("bool");
-        }
-        if (key == "operator &") {
+        CATCH_DUNDER_NAME;
+        CATCH_DUNDER_SIZE;
+        if (key == "operator and") {
             // Generating the functions for operators and such, will be hell
+            // Well ... actually ... we can just have a special operator type that functions as a macro,
+            // And implements the functional concept
+            // such that when passed in as a template,
         }
-        throw CurdleError("key not a comptime child of type bool: " + key, error::ErrorCode::InvalidSubscript);
+        INVALID_CHILD;
     }
 }

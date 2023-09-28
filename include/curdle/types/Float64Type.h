@@ -31,6 +31,9 @@ namespace cheese::curdle {
 
         memory::garbage_collection::gcref<Type> peer(Type *other, GlobalContext *gctx) override;
 
+        memory::garbage_collection::gcref<ComptimeValue>
+        get_child_comptime(std::string key, cheese::project::GlobalContext *gctx) override;
+
     private:
 
         Float64Type() = default;

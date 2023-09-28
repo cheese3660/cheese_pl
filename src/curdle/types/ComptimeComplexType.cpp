@@ -13,6 +13,7 @@
 #include "curdle/types/Float64Type.h"
 #include "curdle/curdle.h"
 #include "curdle/types/Complex64Type.h"
+#include "curdle/values/ComptimeString.h"
 
 
 namespace cheese::curdle {
@@ -74,5 +75,11 @@ namespace cheese::curdle {
             return REF(Complex64Type::get(gctx));
         }
         return NO_PEER;
+    }
+
+    gcref<ComptimeValue>
+    ComptimeComplexType::get_child_comptime(std::string key, cheese::project::GlobalContext *gctx) {
+        CATCH_DUNDER_NAME;
+        INVALID_CHILD;
     }
 }

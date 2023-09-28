@@ -47,10 +47,7 @@ namespace cheese::curdle {
 
     gcref<ComptimeValue>
     BuiltinReferenceType::get_child_comptime(std::string key, cheese::project::GlobalContext *gctx) {
-        if (key == "__name__") {
-            return gctx->gc.gcnew<ComptimeString>("builtin_reference");
-        }
-        throw CurdleError("key not a comptime child of type builtin_reference: " + key,
-                          error::ErrorCode::InvalidSubscript);
+        CATCH_DUNDER_NAME;
+        INVALID_CHILD;
     }
 }

@@ -8,18 +8,24 @@
 #include <utility>
 
 #include "Project.h"
-#include "curdle/types/Structure.h"
+//#include "curdle/types/Structure.h"
 #include "memory/garbage_collection.h"
 #include "error.h"
-#include "curdle/functions.h"
+//#include "curdle/functions.h"
 #include "bacteria/BacteriaNode.h"
 #include "bacteria/BacteriaReciever.h"
 #include "bacteria/nodes/reciever_nodes.h"
 #include "Machine.h"
 #include <set>
 
+namespace cheese::curdle {
+    struct Structure;
+    struct FunctionTemplate;
+}
+
 namespace cheese::project {
     using namespace cheese::curdle;
+    using namespace cheese::memory::garbage_collection;
 
     struct GlobalContext : managed_object {
 

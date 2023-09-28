@@ -40,4 +40,10 @@ namespace cheese::curdle {
         PEER_TYPE_CATCH_ANY();
         return REF(other);
     }
+
+    memory::garbage_collection::gcref<ComptimeValue>
+    FunctionTemplateType::get_child_comptime(std::string key, cheese::project::GlobalContext *gctx) {
+        CATCH_DUNDER_NAME;
+        INVALID_CHILD;
+    }
 }

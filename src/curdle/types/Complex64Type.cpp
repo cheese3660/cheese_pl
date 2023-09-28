@@ -13,6 +13,7 @@
 #include "curdle/values/ComptimeString.h"
 #include "curdle/values/ComptimeInteger.h"
 #include "GlobalContext.h"
+#include "curdle/values/ComptimeComplex.h"
 #include <llvm/IR/Type.h>
 
 
@@ -75,15 +76,11 @@ namespace cheese::curdle {
     }
 
     gcref<ComptimeValue> Complex64Type::get_child_comptime(std::string key, cheese::project::GlobalContext *gctx) {
-        if (key == "__name__") {
-            return gctx->gc.gcnew<ComptimeString>("c64");
+        CATCH_DUNDER_NAME;
+        CATCH_DUNDER_SIZE;
+        if (key == "zero") {
+            return gctx->gc.gcnew<ComptimeComplex>(0.0, 0.0, get(gctx));
         }
-        if (key == "__size__") {
-            auto ty_ptr = get_cached_type()->get_llvm_type(gctx->machine);
-
-            ty_ptr->dump();
-        }
-        throw CurdleError("key not a comptime child of type c64: " + key,
-                          error::ErrorCode::InvalidSubscript);
+        INVALID_CHILD;
     }
 }

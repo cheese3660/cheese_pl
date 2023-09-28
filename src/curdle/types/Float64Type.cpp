@@ -8,7 +8,11 @@
 #include "curdle/types/ComptimeIntegerType.h"
 #include "curdle/types/ComptimeFloatType.h"
 #include "curdle/types/Complex64Type.h"
-
+#include "curdle/values/ComptimeString.h"
+#include "curdle/values/ComptimeInteger.h"
+#include "curdle/values/ComptimeFloat.h"
+#include "curdle/curdle.h"
+#include <limits>
 
 namespace cheese::curdle {
 
@@ -63,5 +67,39 @@ namespace cheese::curdle {
             return REF(this);
         }
         return NO_PEER;
+    }
+
+    memory::garbage_collection::gcref<ComptimeValue>
+    Float64Type::get_child_comptime(std::string key, cheese::project::GlobalContext *gctx) {
+        CATCH_DUNDER_NAME;
+        CATCH_DUNDER_SIZE;
+        if (key == "zero") {
+            return gctx->gc.gcnew<ComptimeFloat>(0.0, get(gctx));
+        }
+        if (key == "signaling_nan") {
+            return gctx->gc.gcnew<ComptimeFloat>(std::numeric_limits<double>::signaling_NaN(), get(gctx));
+        }
+        if (key == "nan") {
+            return gctx->gc.gcnew<ComptimeFloat>(std::numeric_limits<double>::quiet_NaN(), get(gctx));
+        }
+        if (key == "infinity") {
+            return gctx->gc.gcnew<ComptimeFloat>(std::numeric_limits<double>::infinity(), get(gctx));
+        }
+        if (key == "epsilon") {
+            return gctx->gc.gcnew<ComptimeFloat>(std::numeric_limits<double>::epsilon(), get(gctx));
+        }
+        if (key == "min") {
+            return gctx->gc.gcnew<ComptimeFloat>(std::numeric_limits<double>::min(), get(gctx));
+        }
+        if (key == "denormalized_min") {
+            return gctx->gc.gcnew<ComptimeFloat>(std::numeric_limits<double>::denorm_min(), get(gctx));
+        }
+        if (key == "max") {
+            return gctx->gc.gcnew<ComptimeFloat>(std::numeric_limits<double>::max(), get(gctx));
+        }
+        if (key == "lowest") {
+            return gctx->gc.gcnew<ComptimeFloat>(std::numeric_limits<double>::lowest(), get(gctx));
+        }
+        INVALID_CHILD;
     }
 }

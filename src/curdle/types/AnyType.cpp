@@ -42,11 +42,7 @@ namespace cheese::curdle {
     }
 
     gcref<ComptimeValue> AnyType::get_child_comptime(std::string key, cheese::project::GlobalContext *gctx) {
-        if (key == "__name__") {
-            auto str = gctx->gc.gcnew<ComptimeString>("any");
-            return str;
-        }
-
-        throw CurdleError("key not a comptime child of type any: " + key, error::ErrorCode::InvalidSubscript);
+        CATCH_DUNDER_NAME;
+        INVALID_CHILD;
     }
 }

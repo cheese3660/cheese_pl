@@ -33,6 +33,9 @@ namespace cheese::curdle {
 
         memory::garbage_collection::gcref<Type> peer(Type *other, GlobalContext *gctx) override;
 
+        memory::garbage_collection::gcref<ComptimeValue>
+        get_child_comptime(std::string key, cheese::project::GlobalContext *gctx) override;
+
     private:
 
         IntegerType(bool sn, std::uint16_t sz) : sign(sn), size(sz) {}

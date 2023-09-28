@@ -9,6 +9,10 @@
 #include "curdle/types/ComptimeFloatType.h"
 #include "curdle/types/ComptimeComplexType.h"
 #include "curdle/types/Complex64Type.h"
+#include "curdle/comptime.h"
+#include "curdle/curdle.h"
+#include "curdle/values/ComptimeString.h"
+#include "curdle/values/ComptimeInteger.h"
 
 namespace cheese::curdle {
     IntegerType *IntegerType::get(cheese::project::GlobalContext *gctx, bool sign, std::uint16_t size) {
@@ -89,5 +93,15 @@ namespace cheese::curdle {
             return REF(Complex64Type::get(gctx));
         }
         return NO_PEER;
+    }
+
+    memory::garbage_collection::gcref<ComptimeValue>
+    IntegerType::get_child_comptime(std::string key, cheese::project::GlobalContext *gctx) {
+        CATCH_DUNDER_NAME;
+        CATCH_DUNDER_SIZE;
+        if (key == "zero") {
+            
+        }
+        INVALID_CHILD;
     }
 }

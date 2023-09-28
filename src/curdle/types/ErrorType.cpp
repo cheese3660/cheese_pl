@@ -45,4 +45,9 @@ namespace cheese::curdle {
         }
         return dynamic_cast<ErrorType *>(gctx->cached_objects["type: error"]);
     }
+
+    gcref<ComptimeValue> ErrorType::get_child_comptime(std::string key, cheese::project::GlobalContext *gctx) {
+        CATCH_DUNDER_NAME;
+        INVALID_CHILD;
+    }
 }

@@ -77,4 +77,9 @@ namespace cheese::curdle {
         }
         return NO_PEER;
     }
+
+    gcref<ComptimeValue> ComptimeFloatType::get_child_comptime(std::string key, cheese::project::GlobalContext *gctx) {
+        CATCH_DUNDER_NAME;
+        INVALID_CHILD;
+    }
 }
