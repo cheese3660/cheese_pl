@@ -9,7 +9,7 @@
 
 namespace cheese::curdle {
     struct ComptimeString : ComptimeValue {
-        explicit ComptimeString(std::string value);
+        explicit ComptimeString(std::string value, Type *type);
 
         void mark_value() override;
 

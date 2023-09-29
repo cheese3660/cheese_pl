@@ -62,6 +62,6 @@ namespace cheese::curdle {
     bool trivial_arithmetic_type(Type *type);
 }
 #define INVALID_CHILD throw CurdleError("key not a comptime child of type " + to_string() + ": " + key, error::ErrorCode::InvalidSubscript)
-#define CATCH_DUNDER_NAME do { if (key == "__name__") { return gctx->gc.gcnew<ComptimeString>(to_string()); } } while(0)
-#define CATCH_DUNDER_SIZE do { if (key == "__size__") { gctx->gc.gcnew<ComptimeInteger>(get_cached_type(gctx->global_receiver.get())->get_llvm_size(gctx), ComptimeIntegerType::get(gctx));}} while (0)
+#define CATCH_DUNDER_NAME do { if (key == "__name__") { return gctx->gc.gcnew<ComptimeString>(to_string(), ComptimeStringType::get(gctx)); } } while(0)
+#define CATCH_DUNDER_SIZE do { if (key == "__size__") { return gctx->gc.gcnew<ComptimeInteger>(get_cached_type(gctx->global_receiver.get())->get_llvm_size(gctx), IntegerType::get(gctx, false, gctx->machine.data_pointer_size));}} while (0)
 #endif //CHEESE_TYPE_H

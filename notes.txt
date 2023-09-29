@@ -19,7 +19,8 @@ TODO:
 [ ] refactor std::map -> std::unordered_map
 [ ] refactor ComptimeValue ->  ComptimeValue.h/cpp
 [ ] A whole shit ton of curdle tests
-
+[ ] Compile time attributes
+[ ] Function return type deduction
 
 
 ROADMAP:
@@ -48,3 +49,57 @@ try
     /* this is where there is no wrapped value */
 }
 Any Type of error not caught by a catch statement gets returned and passed upwards yet again
+
+Self hosting thoughts
+Run most of the parsing and lowering in Cheese, but have a second bytecode language called Swiss (written in Cheese) to handle targeting and extensions to the compiler, it'll be a full garbage collected, likely OOP VM
+
+Thoughts on that VM:
+Reference exist as a tagged union in the VM
+
+let Reference = enum {
+    ObjectReference(*object), // Objects are allocated on the heap and garbage collected
+    ValueReference(*value), // Values like structs/tuples are allocated in the scope (A locally allocated array), and are passed by value
+    Float32(f32),
+    Float64(f64),
+    UnsignedByte(u8),
+    SignedByte(i8),
+    UnsignedShort(u16),
+    SignedShort(i16),
+    UnsignedInt(u32),
+    SignedInt(i32),
+    UnsignedLong(u64),
+    SignedLong(i64)
+}
+
+This system will likely work well as an extension/target library, as it means that extensions/targets don't have to be compiled into the executable and can instead exist separately and be distributed separately
+It'll also be easier for developers to use as they don't have to worry about low level memory management within the compiler, all they have to do is provide a class similar to the following
+#["..."] // This attribute will be the name of the target
+class <...>Target impl CheeseTarget {
+    //...
+    constructor target_triple: String, features: List<String>, arguments: List<String> public
+    {
+        ...
+    }
+    // MachineType is an interface for the backend to use for cached types
+    // CheeseType is a reference to a backend type
+    fn GetType type: CheeseType => MachineType
+    {
+    }
+    fn CreateFunction string
+
+    fn EmitAssembly stream: Stream => void
+    {
+    }
+
+    fn EmitObject stream: Stream => void
+    {
+    }
+
+    fn EmitLibrary stream: Stream, static_libraries: List<LinkedLibrary> => void
+    {
+    }
+
+    fn EmitExecutable stream: Stream, static_libraries: List<Linked_Library> => void
+    {
+    }
+}

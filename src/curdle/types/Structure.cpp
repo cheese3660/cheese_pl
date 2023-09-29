@@ -12,6 +12,11 @@
 #include "curdle/types/AnyType.h"
 #include "curdle/curdle.h"
 #include "curdle/names.h"
+#include "curdle/values/ComptimeFunctionSet.h"
+#include "curdle/types/ComptimeStringType.h"
+#include "curdle/types/IntegerType.h"
+#include "curdle/values/ComptimeString.h"
+#include "curdle/values/ComptimeInteger.h"
 
 namespace cheese::curdle {
 
@@ -254,5 +259,18 @@ namespace cheese::curdle {
 
     Structure::Structure(std::string name, ComptimeContext *ctx, garbage_collector &gc) : name(name) {
         containedContext = gc.gcnew<ComptimeContext>(ctx, this);
+    }
+
+    gcref<ComptimeValue> Structure::get_child_comptime(std::string key, cheese::project::GlobalContext *gctx) {
+        CATCH_DUNDER_NAME;
+        CATCH_DUNDER_SIZE;
+        if (comptime_variables.contains(key)) {
+            return gctx->gc.manage(comptime_variables[key].value);
+        }
+        if (function_sets.contains(key)) {
+            auto set = function_sets[key];
+            return gctx->gc.gcnew<ComptimeFunctionSet>(set, gctx);
+        }
+        INVALID_CHILD;
     }
 }

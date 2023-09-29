@@ -6,6 +6,8 @@
 #include "project/GlobalContext.h"
 #include "curdle/curdle.h"
 #include "curdle/types/AnyType.h"
+#include "curdle/types/ComptimeStringType.h"
+#include "curdle/values/ComptimeString.h"
 
 namespace cheese::curdle {
     bacteria::TypePtr TypeType::get_bacteria_type(bacteria::nodes::BacteriaProgram *program) {
@@ -41,5 +43,10 @@ namespace cheese::curdle {
     gcref<Type> TypeType::peer(Type *other, cheese::project::GlobalContext *gctx) {
         PEER_TYPE_CATCH_ANY();
         return NO_PEER;
+    }
+
+    gcref<ComptimeValue> TypeType::get_child_comptime(std::string key, cheese::project::GlobalContext *gctx) {
+        CATCH_DUNDER_NAME;
+        INVALID_CHILD;
     }
 }

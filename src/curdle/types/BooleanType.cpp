@@ -5,7 +5,8 @@
 #include "curdle/types/AnyType.h"
 #include "project/GlobalContext.h"
 #include "curdle/values/ComptimeInteger.h"
-#include "curdle/types/ComptimeIntegerType.h"
+#include "curdle/types/IntegerType.h"
+#include "curdle/Types/ComptimeStringType.h"
 #include "curdle/values/ComptimeString.h"
 #include "curdle/curdle.h"
 

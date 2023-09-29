@@ -70,6 +70,8 @@ namespace cheese::curdle {
 
         memory::garbage_collection::gcref<Type> peer(Type *other, GlobalContext *gc) override;
 
+        gcref<ComptimeValue> get_child_comptime(std::string key, cheese::project::GlobalContext *gctx) override;
+
     };
 }
 

@@ -9,9 +9,11 @@
 #include "curdle/types/ComptimeFloatType.h"
 #include "curdle/types/Float64Type.h"
 #include "curdle/types/ComptimeComplexType.h"
-#include "curdle/curdle.h"
-#include "curdle/values/ComptimeString.h"
 #include "curdle/values/ComptimeInteger.h"
+#include "curdle/types/IntegerType.h"
+#include "curdle/Types/ComptimeStringType.h"
+#include "curdle/values/ComptimeString.h"
+#include "curdle/curdle.h"
 #include "curdle/values/ComptimeComplex.h"
 #include <llvm/IR/Type.h>
 

@@ -3,9 +3,12 @@
 //
 #include "curdle/types/BuiltinReferenceType.h"
 #include "curdle/types/AnyType.h"
-#include "curdle/curdle.h"
 #include "project/GlobalContext.h"
+#include "curdle/values/ComptimeInteger.h"
+#include "curdle/types/IntegerType.h"
+#include "curdle/Types/ComptimeStringType.h"
 #include "curdle/values/ComptimeString.h"
+#include "curdle/curdle.h"
 
 namespace cheese::curdle {
     bacteria::TypePtr BuiltinReferenceType::get_bacteria_type(bacteria::nodes::BacteriaProgram *program) {

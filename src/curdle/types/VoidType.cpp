@@ -3,6 +3,11 @@
 //
 #include "curdle/types/VoidType.h"
 #include "project/GlobalContext.h"
+#include "curdle/curdle.h"
+#include "curdle/types/ComptimeStringType.h"
+#include "curdle/values/ComptimeString.h"
+#include "curdle/types/IntegerType.h"
+#include "curdle/values/ComptimeInteger.h"
 
 namespace cheese::curdle {
     bacteria::TypePtr VoidType::get_bacteria_type(bacteria::nodes::BacteriaProgram *program) {
@@ -38,5 +43,12 @@ namespace cheese::curdle {
 
     gcref<Type> VoidType::peer(Type *other, cheese::project::GlobalContext *gctx) {
         return REF(this);
+    }
+
+    memory::garbage_collection::gcref<ComptimeValue>
+    VoidType::get_child_comptime(std::string key, cheese::project::GlobalContext *gctx) {
+        CATCH_DUNDER_NAME;
+        CATCH_DUNDER_SIZE;
+        INVALID_CHILD;
     }
 }

@@ -4,6 +4,13 @@
 #include "curdle/types/ReferenceType.h"
 #include "project/GlobalContext.h"
 #include "curdle/types/AnyType.h"
+#include "curdle/curdle.h"
+#include "curdle/values/ComptimeString.h"
+#include "curdle/types/IntegerType.h"
+#include "curdle/types/ComptimeStringType.h"
+#include "curdle/values/ComptimeInteger.h"
+#include "curdle/values/ComptimeType.h"
+#include "curdle/types/TypeType.h"
 
 namespace cheese::curdle {
     bacteria::TypePtr ReferenceType::get_bacteria_type(bacteria::nodes::BacteriaProgram *program) {
@@ -41,5 +48,15 @@ namespace cheese::curdle {
         if (compare(other) == 0) return REF(this);
         PEER_TYPE_CATCH_ANY();
         return NO_PEER;
+    }
+
+    memory::garbage_collection::gcref<ComptimeValue>
+    ReferenceType::get_child_comptime(std::string key, cheese::project::GlobalContext *gctx) {
+        CATCH_DUNDER_NAME;
+        CATCH_DUNDER_SIZE;
+        if (key == "subtype") {
+            return gctx->gc.gcnew<ComptimeType>(gctx, child);
+        }
+        INVALID_CHILD;
     }
 }

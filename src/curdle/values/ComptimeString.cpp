@@ -30,5 +30,7 @@ namespace cheese::curdle {
         NOT_IMPL;
     }
 
-    ComptimeString::ComptimeString(std::string value) : value(std::move(value)) {}
+    ComptimeString::ComptimeString(std::string value, Type *type) : value(std::move(value)) {
+        this->type = type;
+    }
 }
