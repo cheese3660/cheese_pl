@@ -48,7 +48,7 @@ namespace cheese::curdle {
 
         std::vector<Mixin *> mixins;
         // So we don't have to do funky stuff :3
-        bacteria::TypePtr cached_type;
+        bacteria::TypePtr cached_type = nullptr;
 
         void mark_references() final;
 

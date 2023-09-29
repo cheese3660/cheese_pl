@@ -19,17 +19,11 @@ namespace cheese::bacteria::nodes {
         TypeList all_types = {};
         TypeDict named_types = {};
 
-        void emit_named_type(const TypePtr &type) {
-            if (!type->struct_name.empty()) {
-                named_types[type->struct_name] = type;
-            }
-        }
-
         std::string get_textual_representation(int depth) override {
             std::stringstream ss{};
             for (auto &type: named_types) {
                 add_indentation(ss, depth);
-                ss << type.first << ": type =" << type.second->to_string(true);
+                ss << type.first << ": type = " << type.second->to_string(true) << '\n';
             }
             for (auto &child: children) {
                 add_indentation(ss, depth);
@@ -75,13 +69,13 @@ namespace cheese::bacteria::nodes {
             if (json.size() != children.size() + named_types.size()) return false;
             auto map = get_child_map();
             for (auto &kv: map) {
-                if (!json.contains(kv.first)) return false;
+                if (!json.contains(kv.first)) continue;
                 if (!children[kv.second]->compare_json(json[kv.first])) return false;
             }
             return std::ranges::all_of(named_types.cbegin(), named_types.cend(),
                                        [&](const std::pair<std::string, TypePtr> &kv) {
-                                           return json.contains(kv.first) &&
-                                                  kv.second->to_string(true) == json[kv.first].get<std::string>();
+                                           return !json.contains(kv.first) || kv.second->to_string(true) ==
+                                                                              json[kv.first].get<std::string>();
                                        });
         }
     };
@@ -109,7 +103,7 @@ namespace cheese::bacteria::nodes {
     struct Function : BacteriaReceiver {
         Function(Coordinate location, std::string n, std::vector<FunctionArgument> args, bacteria::TypePtr rt)
                 : BacteriaReceiver(location), name(n), arguments(args), return_type(rt) {
-            
+
         }
 
         std::string name;

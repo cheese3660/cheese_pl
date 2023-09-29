@@ -438,15 +438,16 @@
     "expressions: Subscription (tuple, value)",
     "fn main => void entry\n{let x: struct(i64,i64,i64) = .(1,2,3)\nlet y = x.0}",
     {
+      "_0_00": "{i64,i64,i64}",
       "main": {
         "arguments": [],
         "body": [
           {
             "name": "x",
-            "ty": "{i64,i64,i64}",
+            "ty": "_0_00",
             "type": "init",
             "value": {
-              "ty": "{i64,i64,i64}",
+              "ty": "_0_00",
               "type": "object",
               "values": [
                 {
@@ -490,15 +491,16 @@
     "expressions: Subscription (tuple, reference)",
     "fn main => void entry\n{let x: struct(i64,i64,i64) = .(1,2,3)\nlet y = &x\nlet z = y.0}",
     {
+      "_0_00": "{i64,i64,i64}",
       "main": {
         "arguments": [],
         "body": [
           {
             "name": "x",
-            "ty": "{i64,i64,i64}",
+            "ty": "_0_00",
             "type": "init",
             "value": {
-              "ty": "{i64,i64,i64}",
+              "ty": "_0_00",
               "type": "object",
               "values": [
                 {
@@ -521,7 +523,7 @@
           },
           {
             "name": "y",
-            "ty": "*{i64,i64,i64}",
+            "ty": "*_0_00",
             "type": "init",
             "value": {
               "child": {
@@ -554,15 +556,16 @@
     "expressions: Subscription (structure, value)",
     "fn main => void entry\n{let x: struct{a:i64\nb:i64\nc:i64} = .{a:1,b:2,c:3}\nlet y = x.a}",
     {
+      "_0_00": "{i64,i64,i64}",
       "main": {
         "arguments": [],
         "body": [
           {
             "name": "x",
-            "ty": "{i64,i64,i64}",
+            "ty": "_0_00",
             "type": "init",
             "value": {
-              "ty": "{i64,i64,i64}",
+              "ty": "_0_00",
               "type": "object",
               "values": [
                 {
@@ -606,15 +609,16 @@
     "expressions: Subscription (structure, reference)",
     "fn main => void entry\n{let x: struct{a:i64\nb:i64\nc:i64} = .{a:1,b:2,c:3}\nlet y = &x\nlet z = y.a}",
     {
+      "_0_00": "{i64,i64,i64}",
       "main": {
         "arguments": [],
         "body": [
           {
             "name": "x",
-            "ty": "{i64,i64,i64}",
+            "ty": "_0_00",
             "type": "init",
             "value": {
-              "ty": "{i64,i64,i64}",
+              "ty": "_0_00",
               "type": "object",
               "values": [
                 {
@@ -637,7 +641,7 @@
           },
           {
             "name": "y",
-            "ty": "*{i64,i64,i64}",
+            "ty": "*_0_00",
             "type": "init",
             "value": {
               "child": {
