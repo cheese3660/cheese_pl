@@ -89,7 +89,7 @@ namespace cheese::bacteria::nodes {
 
         JSON_FUNCS("nop", std::vector<std::string>{})
     };
-
+    
 
     struct IntegerLiteral : BacteriaNode {
         IntegerLiteral(const Coordinate &location, const math::BigInteger &value, TypePtr type) : BacteriaNode(

@@ -35,38 +35,42 @@ namespace cheese::bacteria {
             Array,
             Reference,
             Pointer,
-            Object,
-            WeakReference,
-            WeakPointer,
-            WeakSlice,
+            Object
         } type = Type::Void;
         std::uint16_t integer_size = 0;
-        std::shared_ptr<BacteriaType> subtype = {};
+        BacteriaType *subtype = {};
         std::vector<std::size_t> array_dimensions = {};
-        std::vector<std::shared_ptr<BacteriaType>> child_types = {}; //Used for structures, all pointers to objects are replaced with opaque pointers
-        std::weak_ptr<BacteriaType> weak_reference = {};
+        std::vector<BacteriaType *> child_types = {}; //Used for structures, all pointers to objects are replaced with opaque pointers
+        std::string struct_name{};
+        // If this is empty, there is no name, otherwise there is
+        // Named structure types will be emitted as text to the top of bacteria file
 
-        BacteriaType(Type type = Type::Void, uint16_t integerSize = 0,
-                     const std::shared_ptr<BacteriaType> &subtype = {},
-                     const std::vector<std::size_t> &arrayDimensions = {},
-                     const std::vector<std::shared_ptr<BacteriaType>> &childTypes = {},
-                     const std::weak_ptr<BacteriaType> &weak_reference = {});
+        explicit BacteriaType(Type type = Type::Void, uint16_t integerSize = 0,
+                              BacteriaType *subtype = {},
+                              const std::vector<std::size_t> &arrayDimensions = {},
+                              const std::vector<BacteriaType *> &childTypes = {},
+                              const std::string &structName = {});
 
         BacteriaType &operator=(const BacteriaType &other) = default;
 
         BacteriaType(const BacteriaType &other) = default;
 
-        std::string to_string();
+        std::string to_string(bool emitFirstLayer = false);
 
         llvm::Type *get_llvm_type(cheese::project::GlobalContext *ctx);
 
         size_t get_llvm_size(cheese::project::GlobalContext *ctx);
 
+        bool
+        matches(Type otherType, uint16_t integerSize, BacteriaType *subtype,
+                const std::vector<std::size_t> &arrayDimensions,
+                const std::vector<BacteriaType *> &childTypes, const std::string &structName);
+
     private:
         llvm::Type *cached_llvm_type;
     };
 
-    typedef std::shared_ptr<BacteriaType> TypePtr;
+    typedef BacteriaType *TypePtr;
     typedef std::vector<TypePtr> TypeList;
     typedef std::map<std::string, TypePtr> TypeDict;
 }

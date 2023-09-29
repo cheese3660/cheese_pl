@@ -8,8 +8,8 @@
 #include "curdle/values/ComptimeString.h"
 
 namespace cheese::curdle {
-    bacteria::TypePtr BuiltinReferenceType::get_bacteria_type() {
-        NO_BACTERIA_TYPE(builtin_reference);
+    bacteria::TypePtr BuiltinReferenceType::get_bacteria_type(bacteria::nodes::BacteriaProgram *program) {
+        NO_BACTERIA_TYPE;
     }
 
     void BuiltinReferenceType::mark_type_references() {

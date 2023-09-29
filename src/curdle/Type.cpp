@@ -14,6 +14,7 @@
 #include "curdle/types/Float64Type.h"
 #include "curdle/types/ComptimeComplexType.h"
 #include "curdle/types/Complex64Type.h"
+#include "curdle/types/BooleanType.h"
 
 namespace cheese::curdle {
 
@@ -25,11 +26,11 @@ namespace cheese::curdle {
         mark_type_references();
     }
 
-    bacteria::TypePtr Type::get_cached_type() {
+    bacteria::TypePtr Type::get_cached_type(bacteria::nodes::BacteriaProgram *program) {
         if (cached_type) {
             return cached_type;
         } else {
-            cached_type = std::move(get_bacteria_type());
+            cached_type = std::move(get_bacteria_type(program));
             return cached_type;
         }
     }

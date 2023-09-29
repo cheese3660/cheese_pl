@@ -195,7 +195,7 @@ namespace cheese::curdle {
             }
             gctx->entry_function->get({});
         }
-        return gctx->global_reciever.release()->get();
+        return gctx->global_receiver.release()->get();
     }
 
     bacteria::BacteriaPtr translate_expression(LocalContext *lctx, parser::NodePtr expr);
@@ -1045,7 +1045,7 @@ namespace cheese::curdle {
             if (auto as_def = dynamic_cast<parser::nodes::VariableDefinition *>(match.get()); as_def) {
                 auto name = as_def->name;
                 auto type = field.type;
-                rctx->local_reciever->recieve(
+                rctx->local_reciever->receive(
                         std::make_unique<bacteria::nodes::VariableInitializationNode>(match->location, name,
                                                                                       type->get_cached_type(),
                                                                                       make_cast(
@@ -1087,7 +1087,7 @@ namespace cheese::curdle {
                 auto assignee = pAssignment->lhs;
                 // Now we check if this is a discard statement as that is the most important at the moment.
                 if (dynamic_cast<parser::nodes::Underscore *>(assignee.get())) {
-                    rctx->local_reciever->recieve(
+                    rctx->local_reciever->receive(
                             translate_expression(rctx->comptime->globalContext->gc.gcnew<LocalContext>(rctx).get(),
                                                  pAssignment->rhs));
                     return;
@@ -1157,7 +1157,7 @@ namespace cheese::curdle {
                         inner_ptr = make_cast(result_context, pVariableDeclaration->location, std::move(inner_ptr),
                                               value_type);
                     }
-                    rctx->local_reciever->recieve(
+                    rctx->local_reciever->receive(
                             std::make_unique<bacteria::nodes::VariableInitializationNode>(
                                     pVariableDeclaration->location,
                                     definition->name,
@@ -1178,7 +1178,7 @@ namespace cheese::curdle {
                 } else {
                     auto var_name = gctx->get_anonymous_variable("destructure");
                     rctx->variables[var_name] = RuntimeVariableInfo{true, var_name, destructure_type};
-                    rctx->local_reciever->recieve(
+                    rctx->local_reciever->receive(
                             std::make_unique<bacteria::nodes::VariableInitializationNode>(pDestructure->location,
                                                                                           var_name,
                                                                                           destructure_type->get_cached_type(),
@@ -1212,7 +1212,7 @@ namespace cheese::curdle {
                                                      error::ErrorCode::UnusedValue);
                 return;
             }
-            rctx->local_reciever->recieve(
+            rctx->local_reciever->receive(
                     translate_expression(rctx->comptime->globalContext->gc.gcnew<LocalContext>(rctx).get(), stmnt));
 //        NOT_IMPL_FOR(typeid(*true_statement).name());
         } catch (const CurdleError &curdleError) {
@@ -1240,11 +1240,11 @@ namespace cheese::curdle {
             // We translate this as a return instruction + what ever is on the other side!
             auto lctx = rctx->comptime->globalContext->gc.gcnew<LocalContext>(rctx, rctx->functionReturnType);
             if (auto as_return = dynamic_cast<parser::nodes::Return *>(true_body); as_return) {
-                rctx->local_reciever->recieve((new bacteria::nodes::Return(functionBody->location,
+                rctx->local_reciever->receive((new bacteria::nodes::Return(functionBody->location,
                                                                            translate_expression(lctx,
                                                                                                 as_return->child)))->get());
             } else {
-                rctx->local_reciever->recieve((new bacteria::nodes::Return(functionBody->location,
+                rctx->local_reciever->receive((new bacteria::nodes::Return(functionBody->location,
                                                                            translate_expression(lctx,
                                                                                                 functionBody)))->get());
             }

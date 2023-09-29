@@ -17,7 +17,7 @@ namespace cheese::curdle {
         memory::garbage_collection::gcref<ComptimeValue>
         get_child_comptime(std::string key, cheese::project::GlobalContext *gc) override;
 
-        bacteria::TypePtr get_bacteria_type() override;
+        bacteria::TypePtr get_bacteria_type(bacteria::nodes::BacteriaProgram *program) override;
 
         void mark_type_references() override;
 
@@ -39,3 +39,4 @@ namespace cheese::curdle {
     };
 }
 #endif //CHEESE_ANYTYPE_H
++

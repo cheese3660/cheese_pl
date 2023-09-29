@@ -16,8 +16,8 @@
 
 namespace cheese::curdle {
 
-    bacteria::TypePtr Float64Type::get_bacteria_type() {
-        return std::make_shared<bacteria::BacteriaType>(bacteria::BacteriaType::Type::Float64);
+    bacteria::TypePtr Float64Type::get_bacteria_type(bacteria::nodes::BacteriaProgram *program) {
+        return program->get_type(bacteria::BacteriaType::Type::Float64);
     }
 
     void Float64Type::mark_type_references() {

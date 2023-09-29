@@ -4,10 +4,13 @@
 #include "curdle/types/FunctionTemplateType.h"
 #include "curdle/types/AnyType.h"
 #include "project/GlobalContext.h"
+#include "curdle/values/ComptimeString.h"
+#include "curdle/curdle.h"
+
 
 namespace cheese::curdle {
-    bacteria::TypePtr FunctionTemplateType::get_bacteria_type() {
-        return {};
+    bacteria::TypePtr FunctionTemplateType::get_bacteria_type(bacteria::nodes::BacteriaProgram *program) {
+        NO_BACTERIA_TYPE;
     }
 
     void FunctionTemplateType::mark_type_references() {

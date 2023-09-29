@@ -6,10 +6,9 @@
 #include "curdle/types/AnyType.h"
 
 namespace cheese::curdle {
-    bacteria::TypePtr ReferenceType::get_bacteria_type() {
-        // Weak reference generation will be done at the structure level
-        auto child_type = child->get_cached_type();
-        return std::make_shared<bacteria::BacteriaType>(bacteria::BacteriaType::Type::Reference, 0, child_type);
+    bacteria::TypePtr ReferenceType::get_bacteria_type(bacteria::nodes::BacteriaProgram *program) {
+        auto child_type = child->get_cached_type(program);
+        return program->get_type(bacteria::BacteriaType::Type::Reference, {}, child_type);
     }
 
     void ReferenceType::mark_type_references() {

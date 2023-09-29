@@ -12,15 +12,14 @@
 #include "curdle/curdle.h"
 #include "curdle/values/ComptimeString.h"
 #include "curdle/values/ComptimeInteger.h"
-#include "GlobalContext.h"
 #include "curdle/values/ComptimeComplex.h"
 #include <llvm/IR/Type.h>
 
 
 namespace cheese::curdle {
 
-    bacteria::TypePtr Complex64Type::get_bacteria_type() {
-        return std::make_shared<bacteria::BacteriaType>(bacteria::BacteriaType::Type::Complex64);
+    bacteria::TypePtr Complex64Type::get_bacteria_type(bacteria::nodes::BacteriaProgram *program) {
+        return program->get_type(bacteria::BacteriaType::Type::Complex64);
     }
 
     void Complex64Type::mark_type_references() {

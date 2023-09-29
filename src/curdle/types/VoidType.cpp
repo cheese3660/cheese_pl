@@ -5,8 +5,8 @@
 #include "project/GlobalContext.h"
 
 namespace cheese::curdle {
-    bacteria::TypePtr VoidType::get_bacteria_type() {
-        return std::make_shared<bacteria::BacteriaType>(bacteria::BacteriaType::Type::Void);
+    bacteria::TypePtr VoidType::get_bacteria_type(bacteria::nodes::BacteriaProgram *program) {
+        return program->get_type(bacteria::BacteriaType::Type::Void);
     }
 
     void VoidType::mark_type_references() {

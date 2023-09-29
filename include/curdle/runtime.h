@@ -8,7 +8,7 @@
 #include "memory/garbage_collection.h"
 #include "curdle/comptime.h"
 #include "curdle/variables.h"
-#include "bacteria/BacteriaReciever.h"
+#include "bacteria/BacteriaReceiver.h"
 #include <string>
 #include <map>
 
@@ -49,7 +49,7 @@ namespace cheese::curdle {
         RuntimeContext(ComptimeContext *c, Structure *s) : parent(nullptr), comptime(c), structure(s),
                                                            functionReturnType(nullptr) {}
 
-        bacteria::BacteriaReciever *local_reciever{nullptr};
+        bacteria::BacteriaReceiver *local_reciever{nullptr};
         RuntimeContext *parent;
         ComptimeContext *comptime;
         Structure *structure;

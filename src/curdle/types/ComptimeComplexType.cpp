@@ -18,8 +18,8 @@
 
 namespace cheese::curdle {
 
-    bacteria::TypePtr ComptimeComplexType::get_bacteria_type() {
-        NO_BACTERIA_TYPE(comptime_complex);
+    bacteria::TypePtr ComptimeComplexType::get_bacteria_type(bacteria::nodes::BacteriaProgram *program) {
+        NO_BACTERIA_TYPE;
     }
 
     void ComptimeComplexType::mark_type_references() {

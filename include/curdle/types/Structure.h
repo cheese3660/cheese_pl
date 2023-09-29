@@ -37,7 +37,7 @@ namespace cheese::curdle {
 
         ComptimeContext *containedContext;
 
-        bacteria::TypePtr get_bacteria_type() override;
+        bacteria::TypePtr get_bacteria_type(bacteria::nodes::BacteriaProgram *program) override;
 
         void mark_type_references() override;
 

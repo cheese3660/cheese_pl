@@ -7,8 +7,8 @@
 #include "curdle/curdle.h"
 
 namespace cheese::curdle {
-    bacteria::TypePtr AnyType::get_bacteria_type() {
-        NO_BACTERIA_TYPE(any);
+    bacteria::TypePtr AnyType::get_bacteria_type(bacteria::nodes::BacteriaProgram *program) {
+        NO_BACTERIA_TYPE;
     }
 
     void AnyType::mark_type_references() {

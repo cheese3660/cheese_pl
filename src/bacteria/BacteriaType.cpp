@@ -7,7 +7,7 @@
 
 namespace cheese::bacteria {
 
-    std::string bacteria::BacteriaType::to_string() {
+    std::string bacteria::BacteriaType::to_string(bool emitFirstLayer) {
         switch (type) {
             case Type::Opaque:
                 return "opaque";
@@ -46,39 +46,37 @@ namespace cheese::bacteria {
             case Type::Pointer:
                 return "[*]" + subtype->to_string();
             case Type::Object: {
-                std::stringstream ss{};
-                ss << "{";
-                for (int i = 0; i < child_types.size(); i++) {
-                    ss << child_types[i]->to_string();
-                    if (i < child_types.size() - 1) {
-                        ss << ",";
+                if (emitFirstLayer || struct_name.empty()) {
+                    std::stringstream ss{};
+                    ss << "{";
+                    for (int i = 0; i < child_types.size(); i++) {
+                        ss << child_types[i]->to_string();
+                        if (i < child_types.size() - 1) {
+                            ss << ",";
+                        }
                     }
+                    ss << "}";
+                    return ss.str();
+                } else {
+                    return struct_name;
                 }
-                ss << "}";
-                return ss.str();
             }
             case Type::UnsignedSize:
                 return "usize";
             case Type::SignedSize:
                 return "isize";
-            case Type::WeakReference:
-                return "*cyclic";
-            case Type::WeakPointer:
-                return "[*]cyclic";
-            case Type::WeakSlice:
-                return "<>cyclic";
             default:
                 return "unknown";
         }
     }
 
-    BacteriaType::BacteriaType(BacteriaType::Type type, uint16_t integerSize,
-                               const std::shared_ptr<BacteriaType> &subtype,
+    BacteriaType::BacteriaType(Type type, uint16_t integerSize,
+                               BacteriaType *subtype,
                                const std::vector<std::size_t> &arrayDimensions,
-                               const std::vector<std::shared_ptr<BacteriaType>> &childTypes,
-                               const std::weak_ptr<BacteriaType> &weak_reference) : type(type), integer_size(
+                               const std::vector<BacteriaType *> &childTypes,
+                               const std::string &structName) : type(type), integer_size(
             integerSize), subtype(subtype), array_dimensions(arrayDimensions), child_types(childTypes),
-                                                                                    weak_reference(weak_reference) {}
+                                                                struct_name(structName) {}
 
     llvm::Type *BacteriaType::get_llvm_type(cheese::project::GlobalContext *ctx) {
         if (cached_llvm_type) return cached_llvm_type;
@@ -105,6 +103,7 @@ namespace cheese::bacteria {
             case Type::Complex32: {
                 auto struct_type = llvm::StructType::create(ctx->llvm_context);
                 cached_llvm_type = struct_type;
+                struct_type->setName("c32");
                 struct_type->setBody(llvm::ArrayRef<llvm::Type *>{llvm::Type::getFloatTy(ctx->llvm_context),
                                                                   llvm::Type::getFloatTy(ctx->llvm_context)}, true);
                 break;
@@ -112,6 +111,7 @@ namespace cheese::bacteria {
             case Type::Complex64: {
                 auto struct_type = llvm::StructType::create(ctx->llvm_context);
                 cached_llvm_type = struct_type;
+                struct_type->setName("c64");
                 struct_type->setBody(llvm::ArrayRef<llvm::Type *>{llvm::Type::getDoubleTy(ctx->llvm_context),
                                                                   llvm::Type::getDoubleTy(ctx->llvm_context)}, true);
                 break;
@@ -141,6 +141,7 @@ namespace cheese::bacteria {
                 break;
             case Type::Object: {
                 auto struct_type = llvm::StructType::create(ctx->llvm_context);
+                if (!struct_name.empty()) struct_type->setName(struct_name);
                 cached_llvm_type = struct_type;
                 auto vec = std::vector<llvm::Type *>{};
                 for (const auto &ty: child_types) {
@@ -150,29 +151,49 @@ namespace cheese::bacteria {
                 struct_type->setBody(arr);
                 break;
             }
-            case Type::WeakReference: {
-                auto ref = weak_reference.lock();
-                cached_llvm_type = llvm::PointerType::get(ref->get_llvm_type(ctx), ctx->machine.data_pointer_addr);
-                break;
-            }
-            case Type::WeakPointer: {
-                auto ref = weak_reference.lock();
-                cached_llvm_type = llvm::PointerType::get(ref->get_llvm_type(ctx), ctx->machine.data_pointer_addr);
-                break;
-            }
-            case Type::WeakSlice: {
-                auto ref = weak_reference.lock();
-                auto struct_type = llvm::StructType::create(ctx->llvm_context);
-                cached_llvm_type = struct_type;
-                struct_type->setBody(llvm::IntegerType::get(ctx->llvm_context, ctx->machine.data_pointer_size * 8),
-                                     llvm::PointerType::get(ref->get_llvm_type(ctx), ctx->machine.data_pointer_addr));
-                break;
-            }
         }
         return cached_llvm_type;
     }
 
     size_t BacteriaType::get_llvm_size(cheese::project::GlobalContext *ctx) {
         return ctx->machine.layout.getTypeAllocSize(get_llvm_type(ctx));
+    }
+
+    bool BacteriaType::matches(BacteriaType::Type otherType, uint16_t integerSize, BacteriaType *otherSubtype,
+                               const std::vector<std::size_t> &arrayDimensions,
+                               const std::vector<BacteriaType *> &childTypes, const std::string &structName) {
+        if (otherType != this->type) return false;
+        switch (type) {
+            case Type::Opaque:
+            case Type::Noreturn:
+            case Type::Void:
+            case Type::UnsignedSize:
+            case Type::SignedSize:
+            case Type::Float32:
+            case Type::Float64:
+            case Type::Complex32:
+            case Type::Complex64:
+                return true;
+            case Type::SignedInteger:
+            case Type::UnsignedInteger:
+                return integer_size == integerSize;
+            case Type::Slice:
+            case Type::Reference:
+            case Type::Pointer:
+                return subtype == otherSubtype;
+            case Type::Array:
+                return arrayDimensions == array_dimensions && subtype == otherSubtype;
+            case Type::Object:
+                if (structName != struct_name) return false;
+                if (struct_name.empty()) {
+                    if (childTypes.size() != child_types.size()) return false;
+                    for (auto i = 0; i < childTypes.size(); i++) {
+                        if (childTypes[i] != child_types[i]) return false;
+                    }
+                    return true;
+                } else {
+                    return true; // As these kinda have to be the same, struct names are globally unique
+                }
+        }
     }
 }

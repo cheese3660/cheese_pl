@@ -9,12 +9,13 @@
 #include "Mixin.h"
 #include "memory/garbage_collection.h"
 #include "project/GlobalContext.h"
+#include "bacteria/nodes/reciever_nodes.h"
 
 namespace cheese::curdle {
 #define PEER_TYPE_CATCH_ANY() if (dynamic_cast<AnyType*>(other)) return gcref{gctx->gc,this}
 #define NO_PEER gcref<Type>{gctx->gc,nullptr}
 #define REF(X) gcref{gctx->gc,X}
-#define NO_BACTERIA_TYPE(name) throw cheese::curdle::CurdleError{"No bacteria type for " # name, error::ErrorCode::NoBacteriaType};
+#define NO_BACTERIA_TYPE throw cheese::curdle::CurdleError{"No bacteria type for " + to_string(), error::ErrorCode::NoBacteriaType}
     struct ComptimeValue;
     enum class Comptimeness {
         Comptime,
@@ -24,9 +25,9 @@ namespace cheese::curdle {
 
     struct Type : memory::garbage_collection::managed_object {
         // This function is used for converting a type into bacteria.
-        bacteria::TypePtr get_cached_type();
+        bacteria::TypePtr get_cached_type(bacteria::nodes::BacteriaProgram *program);
 
-        virtual bacteria::TypePtr get_bacteria_type() = 0;
+        virtual bacteria::TypePtr get_bacteria_type(bacteria::nodes::BacteriaProgram *program) = 0;
 
         virtual void mark_type_references() = 0;
 
@@ -62,5 +63,5 @@ namespace cheese::curdle {
 }
 #define INVALID_CHILD throw CurdleError("key not a comptime child of type " + to_string() + ": " + key, error::ErrorCode::InvalidSubscript)
 #define CATCH_DUNDER_NAME do { if (key == "__name__") { return gctx->gc.gcnew<ComptimeString>(to_string()); } } while(0)
-#define CATCH_DUNDER_SIZE do { if (key == "__size__") { gctx->gc.gcnew<ComptimeInteger>(get_cached_type()->get_llvm_size(gctx), ComptimeIntegerType::get(gctx));}} while (0)
+#define CATCH_DUNDER_SIZE do { if (key == "__size__") { gctx->gc.gcnew<ComptimeInteger>(get_cached_type(gctx->global_receiver.get())->get_llvm_size(gctx), ComptimeIntegerType::get(gctx));}} while (0)
 #endif //CHEESE_TYPE_H

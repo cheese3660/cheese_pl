@@ -25,13 +25,10 @@ namespace cheese::curdle {
         return dynamic_cast<IntegerType *>(gctx->cached_objects[name]);
     }
 
-    bacteria::TypePtr IntegerType::get_bacteria_type() {
-        if (sign) {
-            return std::shared_ptr<bacteria::BacteriaType>(
-                    new bacteria::BacteriaType(bacteria::BacteriaType::Type::SignedInteger, size));
-        } else {
-            return std::make_shared<bacteria::BacteriaType>(bacteria::BacteriaType::Type::UnsignedInteger, size);
-        }
+    bacteria::TypePtr IntegerType::get_bacteria_type(bacteria::nodes::BacteriaProgram *program) {
+        return program->get_type(
+                sign ? bacteria::BacteriaType::Type::SignedInteger : bacteria::BacteriaType::Type::UnsignedInteger,
+                size);
     }
 
     void IntegerType::mark_type_references() {
@@ -100,7 +97,10 @@ namespace cheese::curdle {
         CATCH_DUNDER_NAME;
         CATCH_DUNDER_SIZE;
         if (key == "zero") {
-            
+            return gctx->gc.gcnew<ComptimeInteger>(0, get(gctx, sign, size));
+        }
+        if (key == "signed") {
+
         }
         INVALID_CHILD;
     }

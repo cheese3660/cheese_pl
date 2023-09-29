@@ -19,7 +19,7 @@ namespace cheese::curdle {
 
         static IntegerType *get(GlobalContext *gctx, bool sign, std::uint16_t size);
 
-        bacteria::TypePtr get_bacteria_type() override;
+        bacteria::TypePtr get_bacteria_type(bacteria::nodes::BacteriaProgram *program) override;
 
         void mark_type_references() override;
 

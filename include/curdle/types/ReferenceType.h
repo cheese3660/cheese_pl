@@ -14,7 +14,7 @@ namespace cheese::curdle {
     struct ReferenceType : Type {
         ReferenceType(Type *child, bool constant) : child(child), constant(constant) {}
 
-        bacteria::TypePtr get_bacteria_type() override;
+        bacteria::TypePtr get_bacteria_type(bacteria::nodes::BacteriaProgram *program) override;
 
         void mark_type_references() override;
 

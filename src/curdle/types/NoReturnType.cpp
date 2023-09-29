@@ -15,9 +15,9 @@ namespace cheese::curdle {
         return dynamic_cast<NoReturnType *>(gctx->cached_objects["type: noreturn"]);
     }
 
-    bacteria::TypePtr NoReturnType::get_bacteria_type() {
+    bacteria::TypePtr NoReturnType::get_bacteria_type(bacteria::nodes::BacteriaProgram *program) {
         // Wait this might be an error
-        NO_BACTERIA_TYPE(noreturn);
+        NO_BACTERIA_TYPE;
     }
 
     void NoReturnType::mark_type_references() {

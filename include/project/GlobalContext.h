@@ -13,7 +13,7 @@
 #include "error.h"
 //#include "curdle/functions.h"
 #include "bacteria/BacteriaNode.h"
-#include "bacteria/BacteriaReciever.h"
+#include "bacteria/BacteriaReceiver.h"
 #include "bacteria/nodes/reciever_nodes.h"
 #include "Machine.h"
 #include <set>
@@ -32,10 +32,10 @@ namespace cheese::project {
         GlobalContext(const Project &project, garbage_collector &collector, const Machine &machine)
                 : project(project), root_structure(nullptr),
                   gc(collector), entry_function(nullptr), machine(machine), llvm_context(llvm::LLVMContext()) {
-            global_reciever = std::make_unique<bacteria::nodes::BacteriaProgram>(project.root_file->location);
+            global_receiver = std::make_unique<bacteria::nodes::BacteriaProgram>(project.root_file->location);
         }
 
-        bacteria::Reciever global_reciever;
+        std::unique_ptr<bacteria::nodes::BacteriaProgram> global_receiver;
 
         const Project &project;
         const Machine &machine;

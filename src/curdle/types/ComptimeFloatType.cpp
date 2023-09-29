@@ -12,8 +12,8 @@
 #include "curdle/types/Complex64Type.h"
 
 namespace cheese::curdle {
-    bacteria::TypePtr ComptimeFloatType::get_bacteria_type() {
-        NO_BACTERIA_TYPE(comptime_float);
+    bacteria::TypePtr ComptimeFloatType::get_bacteria_type(bacteria::nodes::BacteriaProgram *program) {
+        NO_BACTERIA_TYPE;
     }
 
 

@@ -14,7 +14,7 @@ namespace cheese::curdle {
     struct ComptimeIntegerType : Type {
         friend class cheese::memory::garbage_collection::garbage_collector;
 
-        bacteria::TypePtr get_bacteria_type() override;
+        bacteria::TypePtr get_bacteria_type(bacteria::nodes::BacteriaProgram *program) override;
 
         void mark_type_references() override;
 

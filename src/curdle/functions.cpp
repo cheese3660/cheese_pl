@@ -417,8 +417,8 @@ namespace cheese::curdle {
                 }
                 auto node = (new bacteria::nodes::Function{body_ptr->location, mangled_name, bacteria_args,
                                                            returnType->get_cached_type()})->get();
-                rctx->local_reciever = dynamic_cast<bacteria::BacteriaReciever *>(node.get());
-                cctx->globalContext->global_reciever->recieve(std::move(node));
+                rctx->local_reciever = dynamic_cast<bacteria::BacteriaReceiver *>(node.get());
+                cctx->globalContext->global_receiver->receive(std::move(node));
             }
             translate_function_body(rctx, std::move(body_ptr));
         }

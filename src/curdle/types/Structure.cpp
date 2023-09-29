@@ -11,65 +11,14 @@
 #include "curdle/values/ComptimeType.h"
 #include "curdle/types/AnyType.h"
 #include "curdle/curdle.h"
+#include "curdle/names.h"
 
 namespace cheese::curdle {
 
-    bacteria::TypePtr Structure::get_bacteria_type() {
-        cached_type = std::make_shared<bacteria::BacteriaType>(bacteria::BacteriaType::Type::Object);
-        std::vector<bacteria::TypePtr> child_types;
-        std::vector<bacteria::TypePtr> to_check_references;
+    bacteria::TypePtr Structure::get_bacteria_type(bacteria::nodes::BacteriaProgram *program) {
+        cached_type = program->get_type(bacteria::BacteriaType::Type::Object, {}, {}, {}, {}, mangle(name));
         for (auto &child: fields) {
-            child_types.push_back(child.type->get_cached_type());
-        }
-        // Now we do a cyclic reference finding algorithm to find if we have any non-weak references to this type in the list and we replace them
-
-
-
-        *cached_type = bacteria::BacteriaType(bacteria::BacteriaType::Type::Object, 0,
-                                              std::shared_ptr<bacteria::BacteriaType>{},
-                                              std::vector<std::size_t>{},
-                                              std::move(child_types));
-        to_check_references.push_back(cached_type);
-        // Treat this like a stack
-        while (!to_check_references.empty()) {
-            auto next_check = to_check_references.back();
-            to_check_references.pop_back();
-            if (next_check->type == bacteria::BacteriaType::Type::Reference) {
-                if (next_check->subtype == cached_type) {
-                    next_check->type = bacteria::BacteriaType::Type::WeakReference;
-                    next_check->weak_reference = std::weak_ptr<bacteria::BacteriaType>(cached_type);
-                    next_check->subtype = {}; // Clear it out to make sure it gets destroyed
-                } else {
-                    to_check_references.push_back(next_check->subtype);
-                }
-            }
-            if (next_check->type == bacteria::BacteriaType::Type::Pointer) {
-                if (next_check->subtype == cached_type) {
-                    next_check->type = bacteria::BacteriaType::Type::WeakPointer;
-                    next_check->weak_reference = std::weak_ptr<bacteria::BacteriaType>(cached_type);
-                    next_check->subtype = {}; // Clear it out to make sure it gets destroyed
-                } else {
-                    to_check_references.push_back(next_check->subtype);
-                }
-            }
-            if (next_check->type == bacteria::BacteriaType::Type::Slice) {
-                if (next_check->subtype == cached_type) {
-                    next_check->type = bacteria::BacteriaType::Type::WeakSlice;
-                    next_check->weak_reference = std::weak_ptr<bacteria::BacteriaType>(cached_type);
-                    next_check->subtype = {}; // Clear it out to make sure it gets destroyed
-                } else {
-                    to_check_references.push_back(next_check->subtype);
-                }
-            }
-
-            if (next_check->type == bacteria::BacteriaType::Type::Array) {
-                to_check_references.push_back(next_check->subtype);
-            }
-            if (next_check->type == bacteria::BacteriaType::Type::Object) {
-                for (const auto &to_check: next_check->child_types) {
-                    to_check_references.push_back(to_check);
-                }
-            }
+            cached_type->child_types.push_back(child.type->get_cached_type(program));
         }
         return cached_type;
     }

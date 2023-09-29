@@ -5,21 +5,32 @@
 #ifndef CHEESE_RECIEVER_NODES_H
 #define CHEESE_RECIEVER_NODES_H
 
-#include "bacteria/BacteriaReciever.h"
+#include "bacteria/BacteriaReceiver.h"
 #include "bacteria/BacteriaType.h"
 #include "parser/Node.h"
 #include <sstream>
 
 namespace cheese::bacteria::nodes {
 
-    struct BacteriaProgram : BacteriaReciever {
+    struct BacteriaProgram : public BacteriaReceiver {
 
-        BacteriaProgram(Coordinate location) : BacteriaReciever(location) {
+        BacteriaProgram(Coordinate location);
 
+        TypeList all_types = {};
+        TypeDict named_types = {};
+
+        void emit_named_type(const TypePtr &type) {
+            if (!type->struct_name.empty()) {
+                named_types[type->struct_name] = type;
+            }
         }
 
         std::string get_textual_representation(int depth) override {
             std::stringstream ss{};
+            for (auto &type: named_types) {
+                add_indentation(ss, depth);
+                ss << type.first << ": type =" << type.second->to_string(true);
+            }
             for (auto &child: children) {
                 add_indentation(ss, depth);
                 ss << child->get_textual_representation(depth);
@@ -28,13 +39,29 @@ namespace cheese::bacteria::nodes {
             return ss.str();
         }
 
-        ~BacteriaProgram() override = default;
+        TypePtr get_type(BacteriaType::Type type = BacteriaType::Type::Void, uint16_t integerSize = 0,
+                         BacteriaType *subtype = {},
+                         const std::vector<std::size_t> &arrayDimensions = {},
+                         const std::vector<BacteriaType *> &childTypes = {},
+                         const std::string &structName = {});
+
+
+        ~BacteriaProgram() override {
+            for (auto type : all_types) {
+                delete type;
+            }
+        }
+
 
         [[nodiscard]] std::map<std::string, int> get_child_map() const;
+
 
         // For this we actually want to return a dictionary with top level declarations, rather than anything else as it will make generating tests simpler as ordering is wierd
         [[nodiscard]] nlohmann::json as_json() const override {
             auto object = nlohmann::json::object();
+            for (auto &kv: named_types) {
+                object[kv.first] = kv.second->to_string(true);
+            }
             auto map = get_child_map();
             for (auto &kv: map) {
                 object[kv.first] = children[kv.second]->as_json();
@@ -45,17 +72,23 @@ namespace cheese::bacteria::nodes {
         [[nodiscard]] bool compare_json(const nlohmann::json &json) const override {
             // This is going to be interesting
             if (!json.is_object()) return false;
-            if (json.size() != children.size()) return false;
+            if (json.size() != children.size() + named_types.size()) return false;
             auto map = get_child_map();
             for (auto &kv: map) {
                 if (!json.contains(kv.first)) return false;
                 if (!children[kv.second]->compare_json(json[kv.first])) return false;
             }
-            return true;
+            return std::ranges::all_of(named_types.cbegin(), named_types.cend(),
+                                       [&](const std::pair<std::string, TypePtr> &kv) {
+                                           return json.contains(kv.first) &&
+                                                  kv.second->to_string(true) == json[kv.first].get<std::string>();
+                                       });
         }
     };
 
-    struct UnnamedBlock : BacteriaReciever {
+    struct UnnamedBlock : BacteriaReceiver {
+        UnnamedBlock() {}
+
         std::string get_textual_representation(int depth) override {
             std::stringstream ss{};
             ss << "{\n";
@@ -73,9 +106,9 @@ namespace cheese::bacteria::nodes {
     };
 
 
-    struct Function : BacteriaReciever {
+    struct Function : BacteriaReceiver {
         Function(Coordinate location, std::string n, std::vector<FunctionArgument> args, bacteria::TypePtr rt)
-                : BacteriaReciever(location), name(n), arguments(args), return_type(rt) {
+                : BacteriaReceiver(location, std::function < (void) TypePtr > (), std::function < (bool) TypePtr > ()), name(n), arguments(args), return_type(rt) {
 
         }
 

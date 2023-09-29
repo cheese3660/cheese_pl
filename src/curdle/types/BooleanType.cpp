@@ -10,8 +10,8 @@
 #include "curdle/curdle.h"
 
 namespace cheese::curdle {
-    bacteria::TypePtr BooleanType::get_bacteria_type() {
-        return std::make_shared<bacteria::BacteriaType>(bacteria::BacteriaType::Type::UnsignedInteger, 1);
+    bacteria::TypePtr BooleanType::get_bacteria_type(bacteria::nodes::BacteriaProgram *program) {
+        return program->get_type(bacteria::BacteriaType::Type::UnsignedInteger, 1);
     }
 
     void BooleanType::mark_type_references() {

@@ -69,8 +69,8 @@ namespace cheese::curdle {
         }
     }
 
-    bacteria::TypePtr ComptimeIntegerType::get_bacteria_type() {
-        NO_BACTERIA_TYPE(comptime_int);
+    bacteria::TypePtr ComptimeIntegerType::get_bacteria_type(bacteria::nodes::BacteriaProgram *program) {
+        NO_BACTERIA_TYPE;
     }
 
     gcref<ComptimeValue>

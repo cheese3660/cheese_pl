@@ -14,6 +14,8 @@
 #include "curdle/types/Float64Type.h"
 #include "curdle/values/ComptimeComplex.h"
 #include "curdle/types/Complex64Type.h"
+#include "curdle/types/BooleanType.h"
+#include "curdle/values/ComptimeBool.h"
 
 namespace cheese::curdle {
     void ComptimeInteger::mark_value() {
@@ -72,6 +74,9 @@ namespace cheese::curdle {
         }
         WHEN_TYPE_IS(Float64Type, pFloat64Type) {
             return new_value(garbageCollector, new ComptimeFloat(value, pFloat64Type));
+        }
+        WHEN_TYPE_IS(BooleanType, pBooleanType) {
+            return new_value(garbageCollector, new ComptimeBool(value != 0, pBooleanType));
         }
         throw CurdleError(
                 "Bad Compile Time Cast: Cannot convert value of type: " + type->to_string() + " to type: " +
@@ -261,34 +266,34 @@ if (rhsi == nullptr) throw CurdleError("Invalid Comptime Operation: Cannot " #na
 
     gcref<ComptimeValue> ComptimeInteger::op_lesser_than(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
         PUSH_PEER(lesser_than);
-        NOT_IMPL;
+        return gctx->gc.gcnew<ComptimeBool>(value < rhsi->value, BooleanType::get(gctx));
     }
 
     gcref<ComptimeValue> ComptimeInteger::op_greater_than(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
         PUSH_PEER(greater_than);
-        NOT_IMPL;
+        return gctx->gc.gcnew<ComptimeBool>(value > rhsi->value, BooleanType::get(gctx));
     }
 
     gcref<ComptimeValue>
     ComptimeInteger::op_lesser_than_equal(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
         PUSH_PEER(lesser_than_equal);
-        NOT_IMPL;
+        return gctx->gc.gcnew<ComptimeBool>(value <= rhsi->value, BooleanType::get(gctx));
     }
 
     gcref<ComptimeValue>
     ComptimeInteger::op_greater_than_equal(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
         PUSH_PEER(greater_than_equal);
-        NOT_IMPL;
+        return gctx->gc.gcnew<ComptimeBool>(value >= rhsi->value, BooleanType::get(gctx));
     }
 
     gcref<ComptimeValue> ComptimeInteger::op_equal(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
         PUSH_PEER(equal);
-        NOT_IMPL;
+        return gctx->gc.gcnew<ComptimeBool>(value == rhsi->value, BooleanType::get(gctx));
     }
 
     gcref<ComptimeValue> ComptimeInteger::op_not_equal(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
         PUSH_PEER(not_equal);
-        NOT_IMPL;
+        return gctx->gc.gcnew<ComptimeBool>(value != rhsi->value, BooleanType::get(gctx));
     }
 
     gcref<ComptimeValue> ComptimeInteger::op_and(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
