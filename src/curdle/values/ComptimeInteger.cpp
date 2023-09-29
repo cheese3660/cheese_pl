@@ -172,67 +172,69 @@ namespace cheese::curdle {
         return gctx->gc.gcnew<ComptimeInteger>(result, type);
     }
 
-    //TODO: make the compare operation return -2 when an explicit cast would solve the problem for better error handling
-#define PUSH_PEER(name) auto peer = peer_type({type, other->type}, gctx); \
-auto lhs_compare = peer->compare(type);                                    \
-if (lhs_compare == -1) throw CurdleError("Bad Compile Time Cast: cannot cast a value of type " + type->to_string() + " to a value of type " + peer->to_string(), error::ErrorCode::BadComptimeCast);\
-if (lhs_compare != 0) return cast(peer,gctx->gc)->op_##name(gctx,other); \
-gcref<ComptimeValue> rhs = {gctx->gc,nullptr};                            \
-auto rhs_compare = peer->compare(other->type);                            \
-if (rhs_compare == -1) throw CurdleError("Bad Compile Time Cast: cannot cast a value of type " + other->type->to_string() + " to a value of type " + peer->to_string(), error::ErrorCode::BadComptimeCast);\
-if (rhs_compare != 0) rhs = other->cast(peer,gctx->gc); \
-else rhs = {gctx->gc,other};                                              \
-ComptimeInteger* rhsi = dynamic_cast<ComptimeInteger*>(rhs.get());        \
-if (rhsi == nullptr) throw CurdleError("Invalid Comptime Operation: Cannot " #name " a value of type " + type->to_string() + " and a value of type " + rhs->to_string(),error::ErrorCode::InvalidComptimeOperation)
-
 
     gcref<ComptimeValue> ComptimeInteger::op_multiply(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
-        if (auto as_complex = dynamic_cast<ComptimeComplex *>(other); as_complex) {
-            return other->op_multiply(gctx, this);
-        }
-        PUSH_PEER(multiply);
+        bool cast_self;
+        auto peer = binary_peer_lhs(other->type, cast_self, gctx);
+        if (cast_self) return cast(peer, gctx->gc)->op_multiply(gctx, other);
+        auto rhs = binary_peer_rhs<ComptimeInteger>(other, peer, gctx);
         // So now we assume we are both of the same type
-        auto result = value * rhsi->value;
+        auto result = value * rhs->value;
         assert_in_range(result, peer);
         return gctx->gc.gcnew<ComptimeInteger>(result, peer);
     }
 
     gcref<ComptimeValue> ComptimeInteger::op_divide(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
-        PUSH_PEER(divide);
+        bool cast_self;
+        auto peer = binary_peer_lhs(other->type, cast_self, gctx);
+        if (cast_self) return cast(peer, gctx->gc)->op_divide(gctx, other);
+        auto rhs = binary_peer_rhs<ComptimeInteger>(other, peer, gctx);
         // So now we assume we are both of the same type
-        auto result = value / rhsi->value;
+        auto result = value / rhs->value;
         assert_in_range(result, peer);
         return gctx->gc.gcnew<ComptimeInteger>(result, peer);
     }
 
     gcref<ComptimeValue> ComptimeInteger::op_remainder(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
-        PUSH_PEER(remainder);
+        bool cast_self;
+        auto peer = binary_peer_lhs(other->type, cast_self, gctx);
+        if (cast_self) return cast(peer, gctx->gc)->op_remainder(gctx, other);
+        auto rhs = binary_peer_rhs<ComptimeInteger>(other, peer, gctx);
         // So now we assume we are both of the same type
-        auto result = value % rhsi->value;
+        auto result = value % rhs->value;
         assert_in_range(result, peer);
         return gctx->gc.gcnew<ComptimeInteger>(result, peer);
     }
 
     gcref<ComptimeValue> ComptimeInteger::op_add(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
-        PUSH_PEER(add);
+        bool cast_self;
+        auto peer = binary_peer_lhs(other->type, cast_self, gctx);
+        if (cast_self) return cast(peer, gctx->gc)->op_add(gctx, other);
+        auto rhs = binary_peer_rhs<ComptimeInteger>(other, peer, gctx);
         // So now we assume we are both of the same type
-        auto result = value + rhsi->value;
+        auto result = value + rhs->value;
         assert_in_range(result, peer);
         return gctx->gc.gcnew<ComptimeInteger>(result, peer);
     }
 
     gcref<ComptimeValue> ComptimeInteger::op_subtract(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
-        PUSH_PEER(subtract);
+        bool cast_self;
+        auto peer = binary_peer_lhs(other->type, cast_self, gctx);
+        if (cast_self) return cast(peer, gctx->gc)->op_subtract(gctx, other);
+        auto rhs = binary_peer_rhs<ComptimeInteger>(other, peer, gctx);
         // So now we assume we are both of the same type
-        auto result = value - rhsi->value;
+        auto result = value - rhs->value;
         assert_in_range(result, peer);
         return gctx->gc.gcnew<ComptimeInteger>(result, peer);
     }
 
     gcref<ComptimeValue> ComptimeInteger::op_left_shift(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
-        PUSH_PEER(left_shift);
+        bool cast_self;
+        auto peer = binary_peer_lhs(other->type, cast_self, gctx);
+        if (cast_self) return cast(peer, gctx->gc)->op_left_shift(gctx, other);
+        auto rhs = binary_peer_rhs<ComptimeInteger>(other, peer, gctx);
         // So now we assume we are both of the same type
-        auto result = value << rhsi->value;
+        auto result = value << rhs->value;
         // But now instead of asserting in range, we clip it into range, if we left shift out of range, then the bits are lost
         auto sz = int_size(peer);
         if (sz > 0) {
@@ -257,57 +259,87 @@ if (rhsi == nullptr) throw CurdleError("Invalid Comptime Operation: Cannot " #na
     }
 
     gcref<ComptimeValue> ComptimeInteger::op_right_shift(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
-        PUSH_PEER(right_shift);
+        bool cast_self;
+        auto peer = binary_peer_lhs(other->type, cast_self, gctx);
+        if (cast_self) return cast(peer, gctx->gc)->op_right_shift(gctx, other);
+        auto rhs = binary_peer_rhs<ComptimeInteger>(other, peer, gctx);
         // So now we assume we are both of the same type
         // This should automatically do a right shift correctly w/ sign extension if necessary
-        auto result = value >> rhsi->value;
+        auto result = value >> rhs->value;
         return gctx->gc.gcnew<ComptimeInteger>(result, peer);
     }
 
     gcref<ComptimeValue> ComptimeInteger::op_lesser_than(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
-        PUSH_PEER(lesser_than);
-        return gctx->gc.gcnew<ComptimeBool>(value < rhsi->value, BooleanType::get(gctx));
+        bool cast_self;
+        auto peer = binary_peer_lhs(other->type, cast_self, gctx);
+        if (cast_self) return cast(peer, gctx->gc)->op_lesser_than(gctx, other);
+        auto rhs = binary_peer_rhs<ComptimeInteger>(other, peer, gctx);
+        return gctx->gc.gcnew<ComptimeBool>(value < rhs->value, BooleanType::get(gctx));
     }
 
     gcref<ComptimeValue> ComptimeInteger::op_greater_than(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
-        PUSH_PEER(greater_than);
-        return gctx->gc.gcnew<ComptimeBool>(value > rhsi->value, BooleanType::get(gctx));
+        bool cast_self;
+        auto peer = binary_peer_lhs(other->type, cast_self, gctx);
+        if (cast_self) return cast(peer, gctx->gc)->op_greater_than(gctx, other);
+        auto rhs = binary_peer_rhs<ComptimeInteger>(other, peer, gctx);
+        return gctx->gc.gcnew<ComptimeBool>(value > rhs->value, BooleanType::get(gctx));
     }
 
     gcref<ComptimeValue>
     ComptimeInteger::op_lesser_than_equal(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
-        PUSH_PEER(lesser_than_equal);
-        return gctx->gc.gcnew<ComptimeBool>(value <= rhsi->value, BooleanType::get(gctx));
+        bool cast_self;
+        auto peer = binary_peer_lhs(other->type, cast_self, gctx);
+        if (cast_self) return cast(peer, gctx->gc)->op_lesser_than_equal(gctx, other);
+        auto rhs = binary_peer_rhs<ComptimeInteger>(other, peer, gctx);
+        return gctx->gc.gcnew<ComptimeBool>(value <= rhs->value, BooleanType::get(gctx));
     }
 
     gcref<ComptimeValue>
     ComptimeInteger::op_greater_than_equal(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
-        PUSH_PEER(greater_than_equal);
-        return gctx->gc.gcnew<ComptimeBool>(value >= rhsi->value, BooleanType::get(gctx));
+        bool cast_self;
+        auto peer = binary_peer_lhs(other->type, cast_self, gctx);
+        if (cast_self) return cast(peer, gctx->gc)->op_greater_than_equal(gctx, other);
+        auto rhs = binary_peer_rhs<ComptimeInteger>(other, peer, gctx);
+        return gctx->gc.gcnew<ComptimeBool>(value >= rhs->value, BooleanType::get(gctx));
     }
 
     gcref<ComptimeValue> ComptimeInteger::op_equal(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
-        PUSH_PEER(equal);
-        return gctx->gc.gcnew<ComptimeBool>(value == rhsi->value, BooleanType::get(gctx));
+        bool cast_self;
+        auto peer = binary_peer_lhs(other->type, cast_self, gctx);
+        if (cast_self) return cast(peer, gctx->gc)->op_equal(gctx, other);
+        auto rhs = binary_peer_rhs<ComptimeInteger>(other, peer, gctx);
+        return gctx->gc.gcnew<ComptimeBool>(value == rhs->value, BooleanType::get(gctx));
     }
 
     gcref<ComptimeValue> ComptimeInteger::op_not_equal(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
-        PUSH_PEER(not_equal);
-        return gctx->gc.gcnew<ComptimeBool>(value != rhsi->value, BooleanType::get(gctx));
+        bool cast_self;
+        auto peer = binary_peer_lhs(other->type, cast_self, gctx);
+        if (cast_self) return cast(peer, gctx->gc)->op_not_equal(gctx, other);
+        auto rhs = binary_peer_rhs<ComptimeInteger>(other, peer, gctx);
+        return gctx->gc.gcnew<ComptimeBool>(value != rhs->value, BooleanType::get(gctx));
     }
 
     gcref<ComptimeValue> ComptimeInteger::op_and(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
-        PUSH_PEER(and);
-        return gctx->gc.gcnew<ComptimeInteger>(value & rhsi->value, peer);
+        bool cast_self;
+        auto peer = binary_peer_lhs(other->type, cast_self, gctx);
+        if (cast_self) return cast(peer, gctx->gc)->op_and(gctx, other);
+        auto rhs = binary_peer_rhs<ComptimeInteger>(other, peer, gctx);
+        return gctx->gc.gcnew<ComptimeInteger>(value & rhs->value, peer);
     }
 
     gcref<ComptimeValue> ComptimeInteger::op_xor(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
-        PUSH_PEER(or);
-        return gctx->gc.gcnew<ComptimeInteger>(value ^ rhsi->value, peer);
+        bool cast_self;
+        auto peer = binary_peer_lhs(other->type, cast_self, gctx);
+        if (cast_self) return cast(peer, gctx->gc)->op_xor(gctx, other);
+        auto rhs = binary_peer_rhs<ComptimeInteger>(other, peer, gctx);
+        return gctx->gc.gcnew<ComptimeInteger>(value ^ rhs->value, peer);
     }
 
     gcref<ComptimeValue> ComptimeInteger::op_or(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
-        PUSH_PEER(xor);
-        return gctx->gc.gcnew<ComptimeInteger>(value | rhsi->value, peer);
+        bool cast_self;
+        auto peer = binary_peer_lhs(other->type, cast_self, gctx);
+        if (cast_self) return cast(peer, gctx->gc)->op_or(gctx, other);
+        auto rhs = binary_peer_rhs<ComptimeInteger>(other, peer, gctx);
+        return gctx->gc.gcnew<ComptimeInteger>(value | rhs->value, peer);
     }
 }

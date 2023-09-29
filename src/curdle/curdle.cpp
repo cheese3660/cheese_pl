@@ -681,6 +681,32 @@ namespace cheese::curdle {
         NOT_IMPL_FOR(typeid(*vv).name());
     }
 
+    bacteria::BacteriaPtr translate_subscription(LocalContext *lctx, parser::nodes::Subscription *subscription) {
+        auto rctx = lctx->runtime;
+        auto cctx = rctx->comptime;
+        auto gctx = cctx->globalContext;
+        auto &gc = gctx->gc;
+        auto subscript_type = rctx->get_type(subscription->lhs.get());
+        auto subscript_ptr = subscript_type.get();
+        bool reference = false;
+#define WHEN_SUBSCRIPT_IS(type, name) if (auto name = dynamic_cast<type*>(subscript_ptr); name != nullptr)
+#define WHEN_KEY_IS(type, name) if (auto type = dynamic_cast<type*>(subscription->rhs.get); name != nullptr)
+        WHEN_SUBSCRIPT_IS(ReferenceType, pReferenceType) {
+            reference = true;
+            subscript_ptr = pReferenceType->child;
+        }
+        WHEN_SUBSCRIPT_IS(TypeType, pTypeType) {
+            NOT_IMPL_FOR("types");
+        }
+        WHEN_SUBSCRIPT_IS(Structure, pStructure) {
+            // This is the hellish part, innit?
+            
+        }
+        NOT_IMPL_FOR(typeid(*subscript_ptr).name());
+#undef WHEN_SUBSCRIPT_IS
+#undef WHEN_KEY_IS
+    }
+
     bacteria::BacteriaPtr translate_expression(LocalContext *lctx, parser::NodePtr expr) {
         auto rctx = lctx->runtime;
         auto cctx = rctx->comptime;
@@ -852,6 +878,10 @@ namespace cheese::curdle {
                                                                                lctx->runtime->comptime->globalContext->global_receiver.get()));
             }
             WHEN_EXPR_IS(parser::nodes::Subscription, pSubscription) {
+                return translate_subscription(lctx, pSubscription);
+                // It's time to redo this
+
+                /*
                 auto subscript_type = rctx->get_type(pSubscription->lhs.get());
                 auto subscript_ctx = gc.gcnew<LocalContext>(rctx, subscript_type);
                 auto identifier = dynamic_cast<parser::nodes::ValueReference *>(pSubscription->rhs.get());
@@ -859,8 +889,8 @@ namespace cheese::curdle {
                 auto structure = dynamic_cast<Structure *>(subscript_type.get());
                 bool reference = false;
                 if (!structure) {
-                    reference = true;
                     auto ref = dynamic_cast<ReferenceType *>(subscript_type.get());
+                    reference = ref;
                     if (!ref) {
                         NOT_IMPL_FOR("Non structure subscriptions");
                     }
@@ -905,6 +935,7 @@ namespace cheese::curdle {
                     }
                 }
                 NOT_IMPL_FOR("Possible traits");
+                */
             }
             WHEN_EXPR_IS(parser::nodes::TupleLiteral, pTupleLiteral) {
                 gcref<Type> expected_type =

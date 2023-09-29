@@ -20,6 +20,7 @@
 #include "parser/nodes/terminal_nodes.h"
 #include "curdle/runtime.h"
 #include "project/GlobalContext.h"
+#include "error.h"
 
 using namespace cheese::project;
 //#include "builtin.h"
@@ -48,6 +49,7 @@ namespace cheese::curdle {
         NotComptimeError(const std::string &message) : std::runtime_error(message) {};
     };
 
+
     struct ComptimeValue : managed_object {
 
         virtual void mark_value() = 0;
@@ -59,6 +61,23 @@ namespace cheese::curdle {
         virtual std::string to_string() = 0;
 
         void mark_references() override;
+
+
+        memory::garbage_collection::gcref<Type>
+        binary_peer_lhs(Type *other_type, bool &cast_self, cheese::project::GlobalContext *gctx);
+
+
+        template<typename T>
+        gcref<T> binary_peer_rhs(ComptimeValue *other, Type *peer, cheese::project::GlobalContext *gctx) {
+            gcref<ComptimeValue> rhs = {gctx->gc, other};
+            auto rhs_compare = peer->compare(other->type);
+            if (rhs_compare == -1)
+                binary_peer_error(
+                        "Bad Compile Time Cast: cannot cast a value of type " + other->type->to_string() +
+                        " to a value of type " + peer->to_string(), error::ErrorCode::BadComptimeCast);
+            if (rhs_compare != 0) rhs = other->cast(peer, gctx->gc); else rhs = {gctx->gc, other};
+            return {gctx->gc, dynamic_cast<T *>(rhs.get())};
+        }
 
         // A comptime value can have many types
         Type *type;
@@ -112,6 +131,9 @@ namespace cheese::curdle {
         virtual gcref<ComptimeValue> op_or(GlobalContext *gctx, ComptimeValue *other);
 
         virtual gcref<ComptimeValue> op_combine(GlobalContext *gctx, ComptimeValue *other);
+
+    private:
+        static void binary_peer_error(std::string msg, error::ErrorCode errorCode);
     };
 
 

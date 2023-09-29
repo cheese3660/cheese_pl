@@ -8,6 +8,7 @@
 #include "typeinfo"
 #include "stringutil.h"
 #include <iostream>
+#include <utility>
 #include "curdle/builtin.h"
 #include "curdle/curdle.h"
 #include "curdle/values/ComptimeInteger.h"
@@ -133,6 +134,18 @@ namespace cheese::curdle {
 
     gcref<ComptimeValue> ComptimeValue::op_combine(cheese::project::GlobalContext *gctx, ComptimeValue *other) {
         OPERATOR_NOT_DEFINED_FOR("&");
+    }
+
+    memory::garbage_collection::gcref<Type>
+    ComptimeValue::binary_peer_lhs(Type *other_type, bool &cast_self, cheese::project::GlobalContext *gctx) {
+        auto peer = peer_type({type, other_type}, gctx);
+        auto lhs_compare = peer->compare(type);
+        if (lhs_compare == -1)
+            throw CurdleError(
+                    "Bad Compile Time Cast: cannot cast a value of type " + type->to_string() + " to a value of type " +
+                    peer->to_string(), error::ErrorCode::BadComptimeCast);
+        cast_self = lhs_compare != 0;
+        return peer;
     }
 
 #undef OPERATOR_NOT_DEFINED_FOR
@@ -578,5 +591,9 @@ namespace cheese::curdle {
 
     BadComptimeCastError::BadComptimeCastError(const std::string &message) : runtime_error(message) {
 
+    }
+
+    void ComptimeValue::binary_peer_error(std::string msg, error::ErrorCode errorCode) {
+        throw CurdleError{std::move(msg), errorCode};
     }
 }

@@ -43,45 +43,48 @@ namespace cheese::curdle {
         return value ? "true" : "false";
     }
 
-#define PUSH_PEER(name) auto peer = peer_type({type, other->type}, gctx); \
-auto lhs_compare = peer->compare(type);                                    \
-if (lhs_compare == -1) throw CurdleError("Bad Compile Time Cast: cannot cast a value of type " + type->to_string() + " to a value of type " + peer->to_string(), error::ErrorCode::BadComptimeCast);\
-if (lhs_compare != 0) return cast(peer,gctx->gc)->op_##name(gctx,other); \
-gcref<ComptimeValue> rhs = {gctx->gc,nullptr};                            \
-auto rhs_compare = peer->compare(other->type);                            \
-if (rhs_compare == -1) throw CurdleError("Bad Compile Time Cast: cannot cast a value of type " + other->type->to_string() + " to a value of type " + peer->to_string(), error::ErrorCode::BadComptimeCast);\
-if (rhs_compare != 0) rhs = other->cast(peer,gctx->gc); \
-else rhs = {gctx->gc,other};                                              \
-ComptimeBool* rhsb = dynamic_cast<ComptimeBool*>(rhs.get());        \
-if (rhsb == nullptr) throw CurdleError("Invalid Comptime Operation: Cannot " #name " a value of type " + type->to_string() + " and a value of type " + rhs->to_string(),error::ErrorCode::InvalidComptimeOperation)
-
     gcref<ComptimeValue> ComptimeBool::op_not(GlobalContext *gctx) {
         return gctx->gc.gcnew<ComptimeBool>(!value, type);
     }
 
     gcref<ComptimeValue> ComptimeBool::op_equal(GlobalContext *gctx, ComptimeValue *other) {
-        PUSH_PEER(equal);
-        return gctx->gc.gcnew<ComptimeBool>(value == rhsb->value, type);
+        bool cast_self;
+        auto peer = binary_peer_lhs(other->type, cast_self, gctx);
+        if (cast_self) return cast(peer, gctx->gc)->op_equal(gctx, other);
+        auto rhs = binary_peer_rhs<ComptimeBool>(other, peer, gctx);
+        return gctx->gc.gcnew<ComptimeBool>(value == rhs->value, type);
     }
 
     gcref<ComptimeValue> ComptimeBool::op_not_equal(GlobalContext *gctx, ComptimeValue *other) {
-        PUSH_PEER(not_equal);
-        return gctx->gc.gcnew<ComptimeBool>(value != rhsb->value, type);
+        bool cast_self;
+        auto peer = binary_peer_lhs(other->type, cast_self, gctx);
+        if (cast_self) return cast(peer, gctx->gc)->op_not_equal(gctx, other);
+        auto rhs = binary_peer_rhs<ComptimeBool>(other, peer, gctx);
+        return gctx->gc.gcnew<ComptimeBool>(value != rhs->value, type);
     }
 
     gcref<ComptimeValue> ComptimeBool::op_and(GlobalContext *gctx, ComptimeValue *other) {
-        PUSH_PEER(and);
-        return gctx->gc.gcnew<ComptimeBool>(value && rhsb->value, type);
+        bool cast_self;
+        auto peer = binary_peer_lhs(other->type, cast_self, gctx);
+        if (cast_self) return cast(peer, gctx->gc)->op_and(gctx, other);
+        auto rhs = binary_peer_rhs<ComptimeBool>(other, peer, gctx);
+        return gctx->gc.gcnew<ComptimeBool>(value && rhs->value, type);
     }
 
     gcref<ComptimeValue> ComptimeBool::op_xor(GlobalContext *gctx, ComptimeValue *other) {
-        PUSH_PEER(xor);
-        return gctx->gc.gcnew<ComptimeBool>(value != rhsb->value, type);
+        bool cast_self;
+        auto peer = binary_peer_lhs(other->type, cast_self, gctx);
+        if (cast_self) return cast(peer, gctx->gc)->op_xor(gctx, other);
+        auto rhs = binary_peer_rhs<ComptimeBool>(other, peer, gctx);
+        return gctx->gc.gcnew<ComptimeBool>(value != rhs->value, type);
     }
 
     gcref<ComptimeValue> ComptimeBool::op_or(GlobalContext *gctx, ComptimeValue *other) {
-        PUSH_PEER(or);
-        return gctx->gc.gcnew<ComptimeBool>(value || rhsb->value, type);
+        bool cast_self;
+        auto peer = binary_peer_lhs(other->type, cast_self, gctx);
+        if (cast_self) return cast(peer, gctx->gc)->op_or(gctx, other);
+        auto rhs = binary_peer_rhs<ComptimeBool>(other, peer, gctx);
+        return gctx->gc.gcnew<ComptimeBool>(value || rhs->value, type);
     }
 
 }

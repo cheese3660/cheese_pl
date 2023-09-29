@@ -766,7 +766,7 @@
   ],
   [
     "expressions: Unary plus (function pointers)",
-    "import function_pointers @ l\nfn main => void entry\n{_ = +l.fn_pointer_integer}",
+    "import function_pointers @ l\nfn main => void entry\n{_ = (+l.fn_pointer_integer)(0)}",
     {}
   ],
   [
@@ -836,7 +836,7 @@
   ],
   [
     "expressions: Unary minus (function pointers)",
-    "import function_pointers @ l\nfn main => void entry\n{_ = -l.fn_pointer_integer}",
+    "import function_pointers @ l\nfn main => void entry\n{_ = (-l.fn_pointer_integer)(0)}",
     {}
   ],
   [
@@ -851,7 +851,7 @@
   ],
   [
     "expressions: Not (function pointers)",
-    "import function_pointers @ l\nfn main => void entry\n{_ = not l.fn_pointer_integer}",
+    "import function_pointers @ l\nfn main => void entry\n{_ = (not l.fn_pointer_integer)(0)}",
     {}
   ],
   {

@@ -264,6 +264,7 @@ namespace cheese::curdle {
     gcref<ComptimeValue> Structure::get_child_comptime(std::string key, cheese::project::GlobalContext *gctx) {
         CATCH_DUNDER_NAME;
         CATCH_DUNDER_SIZE;
+        resolve_by_name(key);
         if (comptime_variables.contains(key)) {
             return gctx->gc.manage(comptime_variables[key].value);
         }
