@@ -7,7 +7,7 @@
 
 namespace cheese::curdle {
 
-    bacteria::TypePtr Interface::get_bacteria_type() {
+    bacteria::TypePtr Interface::get_bacteria_type(bacteria::nodes::BacteriaProgram *program) {
         // This is going to be a fun one
         return {};
     }

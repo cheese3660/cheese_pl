@@ -18,8 +18,6 @@ namespace cheese::curdle {
 
     }
 
-    static VoidType *vt_instance;
-
     VoidType *VoidType::get(cheese::project::GlobalContext *gctx) {
         if (!gctx->cached_objects.contains("type: void")) {
             auto ref = gctx->gc.gcnew<VoidType>();

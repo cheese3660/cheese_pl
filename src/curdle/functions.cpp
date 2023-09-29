@@ -410,13 +410,14 @@ namespace cheese::curdle {
                 for (auto &argument: arguments) {
                     if (argument.is_type) {
                         bacteria_args.push_back(bacteria::FunctionArgument{
-                                argument.type->get_cached_type(),
+                                argument.type->get_cached_type(cctx->globalContext->global_receiver.get()),
                                 rtime_names[rtime_index++],
                         });
                     }
                 }
                 auto node = (new bacteria::nodes::Function{body_ptr->location, mangled_name, bacteria_args,
-                                                           returnType->get_cached_type()})->get();
+                                                           returnType->get_cached_type(
+                                                                   cctx->globalContext->global_receiver.get())})->get();
                 rctx->local_reciever = dynamic_cast<bacteria::BacteriaReceiver *>(node.get());
                 cctx->globalContext->global_receiver->receive(std::move(node));
             }

@@ -7,6 +7,7 @@
 #include "curdle/values/ComptimeString.h"
 #include "curdle/values/ComptimeInteger.h"
 #include "curdle/types/IntegerType.h"
+#include "curdle/types/ComptimeStringType.h"
 
 
 namespace cheese::curdle {

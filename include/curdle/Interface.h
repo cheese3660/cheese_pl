@@ -9,7 +9,7 @@
 
 namespace cheese::curdle {
     struct Interface : Type {
-        bacteria::TypePtr get_bacteria_type() override;
+        bacteria::TypePtr get_bacteria_type(cheese::bacteria::nodes::BacteriaProgram *program) override;
 
         void mark_type_references() override;
 

@@ -47,7 +47,7 @@ namespace cheese::bacteria::nodes {
 
 
         ~BacteriaProgram() override {
-            for (auto type : all_types) {
+            for (auto type: all_types) {
                 delete type;
             }
         }
@@ -87,7 +87,7 @@ namespace cheese::bacteria::nodes {
     };
 
     struct UnnamedBlock : BacteriaReceiver {
-        UnnamedBlock() {}
+        UnnamedBlock(Coordinate location) : BacteriaReceiver(location) {}
 
         std::string get_textual_representation(int depth) override {
             std::stringstream ss{};
@@ -108,8 +108,8 @@ namespace cheese::bacteria::nodes {
 
     struct Function : BacteriaReceiver {
         Function(Coordinate location, std::string n, std::vector<FunctionArgument> args, bacteria::TypePtr rt)
-                : BacteriaReceiver(location, std::function < (void) TypePtr > (), std::function < (bool) TypePtr > ()), name(n), arguments(args), return_type(rt) {
-
+                : BacteriaReceiver(location), name(n), arguments(args), return_type(rt) {
+            
         }
 
         std::string name;

@@ -11,6 +11,9 @@
 #include "curdle/values/ComptimeString.h"
 #include "curdle/values/ComptimeInteger.h"
 #include "curdle/values/ComptimeFloat.h"
+
+#include "curdle/types/ComptimeStringType.h"
+
 #include "curdle/curdle.h"
 #include <limits>
 

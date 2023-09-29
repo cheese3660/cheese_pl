@@ -210,7 +210,8 @@ namespace cheese::curdle {
                     std::move(castee), from));
         }
         return std::make_unique<bacteria::nodes::CastNode>(location, std::move(castee),
-                                                           lctx->expected_type->get_cached_type());
+                                                           lctx->expected_type->get_cached_type(
+                                                                   lctx->runtime->comptime->globalContext->global_receiver.get()));
     }
 
     bacteria::BacteriaPtr make_cast(LocalContext *lctx, parser::NodePtr ptr) {
@@ -316,7 +317,8 @@ namespace cheese::curdle {
                         //todo: check if it contains one w/o a self argument
                         NOT_IMPL_FOR("Constructors");
                     } else {
-                        auto type = pStructure->get_cached_type();
+                        auto type = pStructure->get_cached_type(
+                                lctx->runtime->comptime->globalContext->global_receiver.get());
                         std::vector<bacteria::BacteriaPtr> initialized_values;
                         initialized_values.reserve(pStructure->fields.size());
                         // We need to give an error if no fields are initialized, and also an error if they are initialized out of order
@@ -434,7 +436,8 @@ namespace cheese::curdle {
                                                                                                          pIf->condition),
                                                                                     std::make_unique<bacteria::nodes::IntegerLiteral>(
                                                                                             pIf->condition->location, 0,
-                                                                                            pIntegerType->get_cached_type()));
+                                                                                            pIntegerType->get_cached_type(
+                                                                                                    lctx->runtime->comptime->globalContext->global_receiver.get())));
                 } else if TYPE_IS(BooleanType, pBooleanType) {
                     auto bctx = gc.gcnew<LocalContext>(empty_ctx, pBooleanType);
                     condition_ptr = translate_expression(bctx, pIf->condition);
@@ -637,15 +640,17 @@ namespace cheese::curdle {
 #define WHEN_COMPTIME_IS(type, name) if (auto name = dynamic_cast<type*>(vv); name)
         WHEN_COMPTIME_IS(ComptimeInteger, pComptimeInteger) {
             return std::make_unique<bacteria::nodes::IntegerLiteral>(location, pComptimeInteger->value,
-                                                                     result_type->get_cached_type());
+                                                                     result_type->get_cached_type(
+                                                                             lctx->runtime->comptime->globalContext->global_receiver.get()));
         }
         WHEN_COMPTIME_IS(ComptimeFloat, pComptimeFloat) {
             return std::make_unique<bacteria::nodes::FloatLiteral>(location, pComptimeFloat->value,
-                                                                   result_type->get_cached_type());
+                                                                   result_type->get_cached_type(
+                                                                           lctx->runtime->comptime->globalContext->global_receiver.get()));
         }
         WHEN_COMPTIME_IS(ComptimeArray, pComptimeArray) {
             if (auto as_structure = dynamic_cast<Structure *>(pComptimeArray->type); as_structure) {
-                auto t = as_structure->get_cached_type();
+                auto t = as_structure->get_cached_type(lctx->runtime->comptime->globalContext->global_receiver.get());
                 std::vector<bacteria::BacteriaPtr> values;
                 for (int i = 0; i < pComptimeArray->values.size(); i++) {
                     auto field = pComptimeArray->values[i];
@@ -657,7 +662,7 @@ namespace cheese::curdle {
         }
         WHEN_COMPTIME_IS(ComptimeObject, pComptimeObject) {
             if (auto as_structure = dynamic_cast<Structure *>(pComptimeObject->type); as_structure) {
-                auto t = as_structure->get_cached_type();
+                auto t = as_structure->get_cached_type(lctx->runtime->comptime->globalContext->global_receiver.get());
                 std::vector<bacteria::BacteriaPtr> values;
                 for (auto &field: as_structure->fields) {
                     auto lower_context = gc.gcnew<LocalContext>(lctx, field.type);
@@ -668,7 +673,8 @@ namespace cheese::curdle {
         }
         WHEN_COMPTIME_IS(ComptimeComplex, pComptimeComplex) {
             return std::make_unique<bacteria::nodes::ComplexLiteral>(location, pComptimeComplex->a, pComptimeComplex->b,
-                                                                     result_type->get_cached_type());
+                                                                     result_type->get_cached_type(
+                                                                             lctx->runtime->comptime->globalContext->global_receiver.get()));
         }
 
 #undef WHEN_COMPTIME_IS
@@ -726,9 +732,11 @@ namespace cheese::curdle {
                 return std::make_unique<bacteria::nodes::IntegerLiteral>(pIntegerLiteral->location,
                                                                          pIntegerLiteral->value,
                                                                          lctx->expected_type
-                                                                         ? lctx->expected_type->get_cached_type()
+                                                                         ? lctx->expected_type->get_cached_type(
+                                                                                 lctx->runtime->comptime->globalContext->global_receiver.get())
                                                                          : IntegerType::get(gctx, true,
-                                                                                            64)->get_cached_type());
+                                                                                            64)->get_cached_type(
+                                                                                 lctx->runtime->comptime->globalContext->global_receiver.get()));
             }
             WHEN_EXPR_IS(parser::nodes::EqualTo, pEqualTo) {
                 return translate_binary<bacteria::nodes::EqualToNode>(lctx, expr->location, pEqualTo->lhs,
@@ -838,8 +846,10 @@ namespace cheese::curdle {
             WHEN_EXPR_IS(parser::nodes::FloatLiteral, pFloatLiteral) {
                 return std::make_unique<bacteria::nodes::FloatLiteral>(pFloatLiteral->location, pFloatLiteral->value,
                                                                        lctx->expected_type
-                                                                       ? lctx->expected_type->get_cached_type()
-                                                                       : Float64Type::get(gctx)->get_cached_type());
+                                                                       ? lctx->expected_type->get_cached_type(
+                                                                               lctx->runtime->comptime->globalContext->global_receiver.get())
+                                                                       : Float64Type::get(gctx)->get_cached_type(
+                                                                               lctx->runtime->comptime->globalContext->global_receiver.get()));
             }
             WHEN_EXPR_IS(parser::nodes::Subscription, pSubscription) {
                 auto subscript_type = rctx->get_type(pSubscription->lhs.get());
@@ -921,7 +931,8 @@ namespace cheese::curdle {
                     children.push_back(make_cast(ctx, val));
                 }
                 return std::make_unique<bacteria::nodes::AggregrateObject>(pTupleLiteral->location,
-                                                                           expected_type->get_cached_type(),
+                                                                           expected_type->get_cached_type(
+                                                                                   lctx->runtime->comptime->globalContext->global_receiver.get()),
                                                                            std::move(children));
             }
             WHEN_EXPR_IS(parser::nodes::ObjectLiteral, pObjectLiteral) {
@@ -975,7 +986,8 @@ namespace cheese::curdle {
                     return std::make_unique<bacteria::nodes::Nop>(pObjectLiteral->location);
                 }
                 return std::make_unique<bacteria::nodes::AggregrateObject>(pObjectLiteral->location,
-                                                                           as_struct->get_cached_type(),
+                                                                           as_struct->get_cached_type(
+                                                                                   lctx->runtime->comptime->globalContext->global_receiver.get()),
                                                                            std::move(initialized_values));
             }
             WHEN_EXPR_IS(parser::nodes::AddressOf, pAddressOf) {
@@ -1047,7 +1059,8 @@ namespace cheese::curdle {
                 auto type = field.type;
                 rctx->local_reciever->receive(
                         std::make_unique<bacteria::nodes::VariableInitializationNode>(match->location, name,
-                                                                                      type->get_cached_type(),
+                                                                                      type->get_cached_type(
+                                                                                              rctx->comptime->globalContext->global_receiver.get()),
                                                                                       make_cast(
                                                                                               rctx->comptime->globalContext->gc.gcnew<LocalContext>(
                                                                                                       rctx, type),
@@ -1161,7 +1174,7 @@ namespace cheese::curdle {
                             std::make_unique<bacteria::nodes::VariableInitializationNode>(
                                     pVariableDeclaration->location,
                                     definition->name,
-                                    result_type->get_cached_type(),
+                                    result_type->get_cached_type(rctx->comptime->globalContext->global_receiver.get()),
                                     std::move(inner_ptr)));
                     rctx->variables[definition->name] = RuntimeVariableInfo{!definition->flags.mut, definition->name,
                                                                             result_type};
@@ -1181,7 +1194,8 @@ namespace cheese::curdle {
                     rctx->local_reciever->receive(
                             std::make_unique<bacteria::nodes::VariableInitializationNode>(pDestructure->location,
                                                                                           var_name,
-                                                                                          destructure_type->get_cached_type(),
+                                                                                          destructure_type->get_cached_type(
+                                                                                                  rctx->comptime->globalContext->global_receiver.get()),
                                                                                           translate_expression(
                                                                                                   gc.gcnew<LocalContext>(
                                                                                                           rctx,

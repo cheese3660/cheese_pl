@@ -13,6 +13,7 @@
 #include "curdle/curdle.h"
 #include "curdle/values/ComptimeString.h"
 #include "curdle/values/ComptimeInteger.h"
+#include "curdle/types/ComptimeStringType.h"
 
 namespace cheese::curdle {
     IntegerType *IntegerType::get(cheese::project::GlobalContext *gctx, bool sign, std::uint16_t size) {

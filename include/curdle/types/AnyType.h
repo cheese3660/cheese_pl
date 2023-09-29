@@ -39,4 +39,3 @@ namespace cheese::curdle {
     };
 }
 #endif //CHEESE_ANYTYPE_H
-+
