@@ -31,8 +31,16 @@
       "%": ":remove",
       ":default": [
         "expressions: %NAME% (integer-complex)",
-        "fn main => void entry\n{let x: i64 = 1\nlet y: c64 = 1.0\n_=x%OPERATION%y}",
-        "@INTEGER_COMPLEX@"
+        {
+          ":template": "binary_arithmetic_simple",
+          "TYPE_A": "i64",
+          "TYPE_B": "c64",
+          "TYPE_A_B": "i64",
+          "VALUE_A": ":template!integer_one",
+          "TYPE_B_B": "c64",
+          "VALUE_B": ":template!complex_one",
+          "OPERATION": "%OPERATION%"
+        }
       ]
     },
     [
@@ -53,8 +61,16 @@
       "%": ":remove",
       ":default": [
         "expressions: %NAME% (float-complex)",
-        "fn main => void entry\n{let x: f64 = 1.0\nlet y: c64 = 1.0\n_=x%OPERATION%y}",
-        "@FLOAT_COMPLEX@"
+        {
+          ":template": "binary_arithmetic_simple",
+          "TYPE_A": "f64",
+          "TYPE_B": "c64",
+          "TYPE_A_B": "f64",
+          "VALUE_A": ":template!float_one",
+          "TYPE_B_B": "c64",
+          "VALUE_B": ":template!complex_one",
+          "OPERATION": "%OPERATION%"
+        }
       ]
     },
     {
@@ -62,8 +78,16 @@
       "%": ":remove",
       ":default": [
         "expressions: %NAME% (complex-complex)",
-        "fn main => void entry\n{let x: c64 = 1.0\nlet y: c64 = 1.0\n_=x%OPERATION%y}",
-        "@COMPLEX_COMPLEX@"
+        {
+          ":template": "binary_arithmetic_simple",
+          "TYPE_A": "c64",
+          "TYPE_B": "c64",
+          "TYPE_A_B": "c64",
+          "VALUE_A": ":template!complex_one",
+          "TYPE_B_B": "c64",
+          "VALUE_B": ":template!complex_one",
+          "OPERATION": "%OPERATION%"
+        }
       ]
     },
     [

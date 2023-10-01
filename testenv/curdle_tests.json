@@ -767,7 +767,111 @@
   [
     "expressions: Unary plus (function pointers)",
     "import function_pointers @ l\nfn main => void entry\n{_ = (+l.fn_pointer_integer)(0)}",
-    {}
+    {
+      "_0_0_L_9_Pfn_Li64_R_E_gi64_R": "{fn(i64)=>i64}",
+      "_0_0_L_9_Pfn_Li64_R_E_gi64_R_0fn": {
+        "arguments": [
+          {
+            "name": "state",
+            "type": "*_0_0_L_9_Pfn_Li64_R_E_gi64_R"
+          },
+          {
+            "name": "_0",
+            "type": "i64"
+          }
+        ],
+        "body": [
+          {
+            "type": "return",
+            "value": {
+              "child": {
+                "arguments": [
+                  {
+                    "name": "_0",
+                    "type": "value"
+                  }
+                ],
+                "function": {
+                  "child": {
+                    "name": "state",
+                    "type": "value"
+                  },
+                  "type": "->"
+                },
+                "type": "pointer_call"
+              },
+              "type": "unary +"
+            }
+          }
+        ],
+        "name": "_0_0_L_9_Pfn_Li64_R_E_gi64_R_0fn",
+        "return_type": "i64",
+        "type": "function"
+      },
+      "function__pointers_Dfn__pointer__integer": {
+        "name": "function__pointers_Dfn__pointer__integer",
+        "ty": "fn(i64)=>i64",
+        "type": "init",
+        "value": {
+          "child": {
+            "name": "function__pointers_Dtest__fn_ai64",
+            "type": "value"
+          },
+          "type": "&"
+        }
+      },
+      "function__pointers_Dtest__fn_ai64": {
+        "arguments": [
+          {
+            "name": "x",
+            "type": "i64"
+          }
+        ],
+        "body": [
+          {
+            "type": "return",
+            "value": {
+              "name": "x",
+              "type": "value"
+            }
+          }
+        ],
+        "name": "function__pointers_Dtest__fn_ai64",
+        "return_type": "i64",
+        "type": "function"
+      },
+      "main": {
+        "arguments": [],
+        "body": [
+          {
+            "arguments": [
+              {
+                "child": {
+                  "ty": "_0_0_L_9_Pfn_Li64_R_E_gi64_R",
+                  "type": "object",
+                  "values": [
+                    {
+                      "name": "function__pointers_Dfn__pointer__integer",
+                      "type": "value"
+                    }
+                  ]
+                },
+                "type": "&&"
+              },
+              {
+                "ty": "i64",
+                "type": "integer"
+              }
+            ],
+            "function": "_0_0_L_9_Pfn_Li64_R_E_gi64_R_0fn",
+            "type": "call"
+          }
+        ],
+        "name": "main",
+        "return_type": "void",
+        "type": "function"
+      }
+    }
   ],
   [
     "expressions: Unary minus (integers)",
@@ -831,13 +935,144 @@
   ],
   [
     "expressions: Unary minus (complex numbers)",
-    "fn main => void entry\n{let x: c64 = 1+2I\n_ = -x}",
-    {}
+    "fn main => void entry\n{let x: c64 = 1.0+2I\n_ = -x}",
+    {
+      "main": {
+        "arguments": [],
+        "body": [
+          {
+            "name": "x",
+            "ty": "c64",
+            "type": "init",
+            "value": {
+              "a": 1.0,
+              "b": 2.0,
+              "ty": "c64",
+              "type": "complex"
+            }
+          },
+          {
+            "child": {
+              "name": "x",
+              "type": "value"
+            },
+            "type": "unary -"
+          }
+        ],
+        "name": "main",
+        "return_type": "void",
+        "type": "function"
+      }
+    }
   ],
   [
     "expressions: Unary minus (function pointers)",
     "import function_pointers @ l\nfn main => void entry\n{_ = (-l.fn_pointer_integer)(0)}",
-    {}
+    {
+      "_0_0_L_m_Pfn_Li64_R_E_gi64_R": "{fn(i64)=>i64}",
+      "_0_0_L_m_Pfn_Li64_R_E_gi64_R_0fn": {
+        "arguments": [
+          {
+            "name": "state",
+            "type": "*_0_0_L_m_Pfn_Li64_R_E_gi64_R"
+          },
+          {
+            "name": "_0",
+            "type": "i64"
+          }
+        ],
+        "body": [
+          {
+            "type": "return",
+            "value": {
+              "child": {
+                "arguments": [
+                  {
+                    "name": "_0",
+                    "type": "value"
+                  }
+                ],
+                "function": {
+                  "child": {
+                    "name": "state",
+                    "type": "value"
+                  },
+                  "type": "->"
+                },
+                "type": "pointer_call"
+              },
+              "type": "unary -"
+            }
+          }
+        ],
+        "name": "_0_0_L_m_Pfn_Li64_R_E_gi64_R_0fn",
+        "return_type": "i64",
+        "type": "function"
+      },
+      "function__pointers_Dfn__pointer__integer": {
+        "name": "function__pointers_Dfn__pointer__integer",
+        "ty": "fn(i64)=>i64",
+        "type": "init",
+        "value": {
+          "child": {
+            "name": "function__pointers_Dtest__fn_ai64",
+            "type": "value"
+          },
+          "type": "&"
+        }
+      },
+      "function__pointers_Dtest__fn_ai64": {
+        "arguments": [
+          {
+            "name": "x",
+            "type": "i64"
+          }
+        ],
+        "body": [
+          {
+            "type": "return",
+            "value": {
+              "name": "x",
+              "type": "value"
+            }
+          }
+        ],
+        "name": "function__pointers_Dtest__fn_ai64",
+        "return_type": "i64",
+        "type": "function"
+      },
+      "main": {
+        "arguments": [],
+        "body": [
+          {
+            "arguments": [
+              {
+                "child": {
+                  "ty": "_0_0_L_m_Pfn_Li64_R_E_gi64_R",
+                  "type": "object",
+                  "values": [
+                    {
+                      "name": "function__pointers_Dfn__pointer__integer",
+                      "type": "value"
+                    }
+                  ]
+                },
+                "type": "&&"
+              },
+              {
+                "ty": "i64",
+                "type": "integer"
+              }
+            ],
+            "function": "_0_0_L_m_Pfn_Li64_R_E_gi64_R_0fn",
+            "type": "call"
+          }
+        ],
+        "name": "main",
+        "return_type": "void",
+        "type": "function"
+      }
+    }
   ],
   [
     "expressions: Not (integers)",
@@ -858,40 +1093,2929 @@
     ":template": "binary_group",
     "NAME": "Multiplication",
     "OPERATION": "*",
-    "INTEGER_COMPLEX": {},
-    "FLOAT_COMPLEX": {},
-    "COMPLEX_COMPLEX": {}
+    "POINTER_INTEGER": {
+      "_0_0_L_Pfn_Li64_R_E_gi64_Pi64_R": "{fn(i64)=>i64,i64}",
+      "_0_0_L_Pfn_Li64_R_E_gi64_Pi64_R_0fn": {
+        "arguments": [
+          {
+            "name": "state",
+            "type": "*_0_0_L_Pfn_Li64_R_E_gi64_Pi64_R"
+          },
+          {
+            "name": "_0",
+            "type": "i64"
+          }
+        ],
+        "body": [
+          {
+            "type": "return",
+            "value": {
+              "lhs": {
+                "arguments": [
+                  {
+                    "name": "_0",
+                    "type": "value"
+                  }
+                ],
+                "function": {
+                  "child": {
+                    "name": "state",
+                    "type": "value"
+                  },
+                  "type": "->"
+                },
+                "type": "pointer_call"
+              },
+              "rhs": {
+                "child": {
+                  "name": "state",
+                  "type": "value"
+                },
+                "index": 1,
+                "type": "->"
+              },
+              "type": "*"
+            }
+          }
+        ],
+        "name": "_0_0_L_Pfn_Li64_R_E_gi64_Pi64_R_0fn",
+        "return_type": "i64",
+        "type": "function"
+      },
+      "function__pointers_Dfn__pointer__integer": {
+        "name": "function__pointers_Dfn__pointer__integer",
+        "ty": "fn(i64)=>i64",
+        "type": "init",
+        "value": {
+          "child": {
+            "name": "function__pointers_Dtest__fn_ai64",
+            "type": "value"
+          },
+          "type": "&"
+        }
+      },
+      "function__pointers_Dtest__fn_ai64": {
+        "arguments": [
+          {
+            "name": "x",
+            "type": "i64"
+          }
+        ],
+        "body": [
+          {
+            "type": "return",
+            "value": {
+              "name": "x",
+              "type": "value"
+            }
+          }
+        ],
+        "name": "function__pointers_Dtest__fn_ai64",
+        "return_type": "i64",
+        "type": "function"
+      },
+      "main": {
+        "arguments": [],
+        "body": [
+          {
+            "name": "x",
+            "ty": "i64",
+            "type": "init",
+            "value": {
+              "ty": "i64",
+              "type": "integer",
+              "value": 1
+            }
+          },
+          {
+            "name": "y",
+            "ty": "i64",
+            "type": "init",
+            "value": {
+              "ty": "i64",
+              "type": "integer",
+              "value": 1
+            }
+          },
+          {
+            "name": "z",
+            "ty": "_0_0_L_Pfn_Li64_R_E_gi64_Pi64_R",
+            "type": "init",
+            "value": {
+              "ty": "_0_0_L_Pfn_Li64_R_E_gi64_Pi64_R",
+              "type": "object",
+              "values": [
+                {
+                  "name": "function__pointers_Dfn__pointer__integer",
+                  "type": "value"
+                },
+                {
+                  "name": "y",
+                  "type": "value"
+                }
+              ]
+            }
+          },
+          {
+            "arguments": [
+              {
+                "child": {
+                  "name": "z",
+                  "type": "value"
+                },
+                "type": "&&"
+              },
+              {
+                "name": "x",
+                "type": "value"
+              }
+            ],
+            "function": "_0_0_L_Pfn_Li64_R_E_gi64_Pi64_R_0fn",
+            "type": "call"
+          }
+        ],
+        "name": "main",
+        "return_type": "void",
+        "type": "function"
+      }
+    },
+    "POINTER_FLOAT": {
+      "_0_0_L_Pfn_Lf64_R_E_gf64_Pf64_R": "{fn(f64)=>f64,f64}",
+      "_0_0_L_Pfn_Lf64_R_E_gf64_Pf64_R_0fn": {
+        "arguments": [
+          {
+            "name": "state",
+            "type": "*_0_0_L_Pfn_Lf64_R_E_gf64_Pf64_R"
+          },
+          {
+            "name": "_0",
+            "type": "f64"
+          }
+        ],
+        "body": [
+          {
+            "type": "return",
+            "value": {
+              "lhs": {
+                "arguments": [
+                  {
+                    "name": "_0",
+                    "type": "value"
+                  }
+                ],
+                "function": {
+                  "child": {
+                    "name": "state",
+                    "type": "value"
+                  },
+                  "type": "->"
+                },
+                "type": "pointer_call"
+              },
+              "rhs": {
+                "child": {
+                  "name": "state",
+                  "type": "value"
+                },
+                "index": 1,
+                "type": "->"
+              },
+              "type": "*"
+            }
+          }
+        ],
+        "name": "_0_0_L_Pfn_Lf64_R_E_gf64_Pf64_R_0fn",
+        "return_type": "f64",
+        "type": "function"
+      },
+      "function__pointers_Dfn__pointer__float": {
+        "name": "function__pointers_Dfn__pointer__float",
+        "ty": "fn(f64)=>f64",
+        "type": "init",
+        "value": {
+          "child": {
+            "name": "function__pointers_Dtest__fn_af64",
+            "type": "value"
+          },
+          "type": "&"
+        }
+      },
+      "function__pointers_Dtest__fn_af64": {
+        "arguments": [
+          {
+            "name": "x",
+            "type": "f64"
+          }
+        ],
+        "body": [
+          {
+            "type": "return",
+            "value": {
+              "name": "x",
+              "type": "value"
+            }
+          }
+        ],
+        "name": "function__pointers_Dtest__fn_af64",
+        "return_type": "f64",
+        "type": "function"
+      },
+      "main": {
+        "arguments": [],
+        "body": [
+          {
+            "name": "x",
+            "ty": "f64",
+            "type": "init",
+            "value": {
+              "ty": "f64",
+              "type": "float",
+              "value": 1.0
+            }
+          },
+          {
+            "name": "y",
+            "ty": "f64",
+            "type": "init",
+            "value": {
+              "ty": "f64",
+              "type": "float",
+              "value": 1.0
+            }
+          },
+          {
+            "name": "z",
+            "ty": "_0_0_L_Pfn_Lf64_R_E_gf64_Pf64_R",
+            "type": "init",
+            "value": {
+              "ty": "_0_0_L_Pfn_Lf64_R_E_gf64_Pf64_R",
+              "type": "object",
+              "values": [
+                {
+                  "name": "function__pointers_Dfn__pointer__float",
+                  "type": "value"
+                },
+                {
+                  "name": "y",
+                  "type": "value"
+                }
+              ]
+            }
+          },
+          {
+            "arguments": [
+              {
+                "child": {
+                  "name": "z",
+                  "type": "value"
+                },
+                "type": "&&"
+              },
+              {
+                "name": "x",
+                "type": "value"
+              }
+            ],
+            "function": "_0_0_L_Pfn_Lf64_R_E_gf64_Pf64_R_0fn",
+            "type": "call"
+          }
+        ],
+        "name": "main",
+        "return_type": "void",
+        "type": "function"
+      }
+    },
+    "POINTER_COMPLEX": {
+      "_0_0_L_Pfn_Lc64_R_E_gc64_Pc64_R": "{fn(c64)=>c64,c64}",
+      "_0_0_L_Pfn_Lc64_R_E_gc64_Pc64_R_0fn": {
+        "arguments": [
+          {
+            "name": "state",
+            "type": "*_0_0_L_Pfn_Lc64_R_E_gc64_Pc64_R"
+          },
+          {
+            "name": "_0",
+            "type": "c64"
+          }
+        ],
+        "body": [
+          {
+            "type": "return",
+            "value": {
+              "lhs": {
+                "arguments": [
+                  {
+                    "name": "_0",
+                    "type": "value"
+                  }
+                ],
+                "function": {
+                  "child": {
+                    "name": "state",
+                    "type": "value"
+                  },
+                  "type": "->"
+                },
+                "type": "pointer_call"
+              },
+              "rhs": {
+                "child": {
+                  "name": "state",
+                  "type": "value"
+                },
+                "index": 1,
+                "type": "->"
+              },
+              "type": "*"
+            }
+          }
+        ],
+        "name": "_0_0_L_Pfn_Lc64_R_E_gc64_Pc64_R_0fn",
+        "return_type": "c64",
+        "type": "function"
+      },
+      "function__pointers_Dfn__pointer__complex": {
+        "name": "function__pointers_Dfn__pointer__complex",
+        "ty": "fn(c64)=>c64",
+        "type": "init",
+        "value": {
+          "child": {
+            "name": "function__pointers_Dtest__fn_ac64",
+            "type": "value"
+          },
+          "type": "&"
+        }
+      },
+      "function__pointers_Dtest__fn_ac64": {
+        "arguments": [
+          {
+            "name": "x",
+            "type": "c64"
+          }
+        ],
+        "body": [
+          {
+            "type": "return",
+            "value": {
+              "name": "x",
+              "type": "value"
+            }
+          }
+        ],
+        "name": "function__pointers_Dtest__fn_ac64",
+        "return_type": "c64",
+        "type": "function"
+      },
+      "main": {
+        "arguments": [],
+        "body": [
+          {
+            "name": "x",
+            "ty": "c64",
+            "type": "init",
+            "value": {
+              "a": 1.0,
+              "ty": "c64",
+              "type": "complex"
+            }
+          },
+          {
+            "name": "y",
+            "ty": "c64",
+            "type": "init",
+            "value": {
+              "a": 1.0,
+              "ty": "c64",
+              "type": "complex"
+            }
+          },
+          {
+            "name": "z",
+            "ty": "_0_0_L_Pfn_Lc64_R_E_gc64_Pc64_R",
+            "type": "init",
+            "value": {
+              "ty": "_0_0_L_Pfn_Lc64_R_E_gc64_Pc64_R",
+              "type": "object",
+              "values": [
+                {
+                  "name": "function__pointers_Dfn__pointer__complex",
+                  "type": "value"
+                },
+                {
+                  "name": "y",
+                  "type": "value"
+                }
+              ]
+            }
+          },
+          {
+            "arguments": [
+              {
+                "child": {
+                  "name": "z",
+                  "type": "value"
+                },
+                "type": "&&"
+              },
+              {
+                "name": "x",
+                "type": "value"
+              }
+            ],
+            "function": "_0_0_L_Pfn_Lc64_R_E_gc64_Pc64_R_0fn",
+            "type": "call"
+          }
+        ],
+        "name": "main",
+        "return_type": "void",
+        "type": "function"
+      }
+    },
+    "POINTER_POINTER": {
+      "_0_0_L_Pfn_Li64_R_E_gi64_P_Pfn_Li64_R_E_gi64_R": "{fn(i64)=>i64,fn(i64)=>i64}",
+      "_0_0_L_Pfn_Li64_R_E_gi64_P_Pfn_Li64_R_E_gi64_R_0fn": {
+        "arguments": [
+          {
+            "name": "state",
+            "type": "*_0_0_L_Pfn_Li64_R_E_gi64_P_Pfn_Li64_R_E_gi64_R"
+          },
+          {
+            "name": "_0",
+            "type": "i64"
+          }
+        ],
+        "body": [
+          {
+            "type": "return",
+            "value": {
+              "lhs": {
+                "arguments": [
+                  {
+                    "name": "_0",
+                    "type": "value"
+                  }
+                ],
+                "function": {
+                  "child": {
+                    "name": "state",
+                    "type": "value"
+                  },
+                  "type": "->"
+                },
+                "type": "pointer_call"
+              },
+              "rhs": {
+                "arguments": [
+                  {
+                    "name": "_0",
+                    "type": "value"
+                  }
+                ],
+                "function": {
+                  "child": {
+                    "name": "state",
+                    "type": "value"
+                  },
+                  "index": 1,
+                  "type": "->"
+                },
+                "type": "pointer_call"
+              },
+              "type": "*"
+            }
+          }
+        ],
+        "name": "_0_0_L_Pfn_Li64_R_E_gi64_P_Pfn_Li64_R_E_gi64_R_0fn",
+        "return_type": "i64",
+        "type": "function"
+      },
+      "function__pointers_Dfn__pointer__integer": {
+        "name": "function__pointers_Dfn__pointer__integer",
+        "ty": "fn(i64)=>i64",
+        "type": "init",
+        "value": {
+          "child": {
+            "name": "function__pointers_Dtest__fn_ai64",
+            "type": "value"
+          },
+          "type": "&"
+        }
+      },
+      "function__pointers_Dtest__fn_ai64": {
+        "arguments": [
+          {
+            "name": "x",
+            "type": "i64"
+          }
+        ],
+        "body": [
+          {
+            "type": "return",
+            "value": {
+              "name": "x",
+              "type": "value"
+            }
+          }
+        ],
+        "name": "function__pointers_Dtest__fn_ai64",
+        "return_type": "i64",
+        "type": "function"
+      },
+      "main": {
+        "arguments": [],
+        "body": [
+          {
+            "name": "x",
+            "ty": "i64",
+            "type": "init",
+            "value": {
+              "ty": "i64",
+              "type": "integer",
+              "value": 1
+            }
+          },
+          {
+            "name": "y",
+            "ty": "i64",
+            "type": "init",
+            "value": {
+              "ty": "i64",
+              "type": "integer",
+              "value": 1
+            }
+          },
+          {
+            "name": "z",
+            "ty": "_0_0_L_Pfn_Li64_R_E_gi64_P_Pfn_Li64_R_E_gi64_R",
+            "type": "init",
+            "value": {
+              "ty": "_0_0_L_Pfn_Li64_R_E_gi64_P_Pfn_Li64_R_E_gi64_R",
+              "type": "object",
+              "values": [
+                {
+                  "name": "function__pointers_Dfn__pointer__integer",
+                  "type": "value"
+                },
+                {
+                  "name": "function__pointers_Dfn__pointer__integer",
+                  "type": "value"
+                }
+              ]
+            }
+          },
+          {
+            "arguments": [
+              {
+                "child": {
+                  "name": "z",
+                  "type": "value"
+                },
+                "type": "&&"
+              },
+              {
+                "name": "x",
+                "type": "value"
+              }
+            ],
+            "function": "_0_0_L_Pfn_Li64_R_E_gi64_P_Pfn_Li64_R_E_gi64_R_0fn",
+            "type": "call"
+          },
+          {
+            "arguments": [
+              {
+                "child": {
+                  "name": "z",
+                  "type": "value"
+                },
+                "type": "&&"
+              },
+              {
+                "name": "y",
+                "type": "value"
+              }
+            ],
+            "function": "_0_0_L_Pfn_Li64_R_E_gi64_P_Pfn_Li64_R_E_gi64_R_0fn",
+            "type": "call"
+          }
+        ],
+        "name": "main",
+        "return_type": "void",
+        "type": "function"
+      }
+    }
   },
   {
     ":template": "binary_group",
     "NAME": "Division",
     "OPERATION": "/",
-    "INTEGER_COMPLEX": {},
-    "FLOAT_COMPLEX": {},
-    "COMPLEX_COMPLEX": {}
+    "POINTER_INTEGER": {
+      "_0_0_L_Pfn_Li64_R_E_gi64_si64_R": "{fn(i64)=>i64,i64}",
+      "_0_0_L_Pfn_Li64_R_E_gi64_si64_R_0fn": {
+        "arguments": [
+          {
+            "name": "state",
+            "type": "*_0_0_L_Pfn_Li64_R_E_gi64_si64_R"
+          },
+          {
+            "name": "_0",
+            "type": "i64"
+          }
+        ],
+        "body": [
+          {
+            "type": "return",
+            "value": {
+              "lhs": {
+                "arguments": [
+                  {
+                    "name": "_0",
+                    "type": "value"
+                  }
+                ],
+                "function": {
+                  "child": {
+                    "name": "state",
+                    "type": "value"
+                  },
+                  "type": "->"
+                },
+                "type": "pointer_call"
+              },
+              "rhs": {
+                "child": {
+                  "name": "state",
+                  "type": "value"
+                },
+                "index": 1,
+                "type": "->"
+              },
+              "type": "/"
+            }
+          }
+        ],
+        "name": "_0_0_L_Pfn_Li64_R_E_gi64_si64_R_0fn",
+        "return_type": "i64",
+        "type": "function"
+      },
+      "function__pointers_Dfn__pointer__integer": {
+        "name": "function__pointers_Dfn__pointer__integer",
+        "ty": "fn(i64)=>i64",
+        "type": "init",
+        "value": {
+          "child": {
+            "name": "function__pointers_Dtest__fn_ai64",
+            "type": "value"
+          },
+          "type": "&"
+        }
+      },
+      "function__pointers_Dtest__fn_ai64": {
+        "arguments": [
+          {
+            "name": "x",
+            "type": "i64"
+          }
+        ],
+        "body": [
+          {
+            "type": "return",
+            "value": {
+              "name": "x",
+              "type": "value"
+            }
+          }
+        ],
+        "name": "function__pointers_Dtest__fn_ai64",
+        "return_type": "i64",
+        "type": "function"
+      },
+      "main": {
+        "arguments": [],
+        "body": [
+          {
+            "name": "x",
+            "ty": "i64",
+            "type": "init",
+            "value": {
+              "ty": "i64",
+              "type": "integer",
+              "value": 1
+            }
+          },
+          {
+            "name": "y",
+            "ty": "i64",
+            "type": "init",
+            "value": {
+              "ty": "i64",
+              "type": "integer",
+              "value": 1
+            }
+          },
+          {
+            "name": "z",
+            "ty": "_0_0_L_Pfn_Li64_R_E_gi64_si64_R",
+            "type": "init",
+            "value": {
+              "ty": "_0_0_L_Pfn_Li64_R_E_gi64_si64_R",
+              "type": "object",
+              "values": [
+                {
+                  "name": "function__pointers_Dfn__pointer__integer",
+                  "type": "value"
+                },
+                {
+                  "name": "y",
+                  "type": "value"
+                }
+              ]
+            }
+          },
+          {
+            "arguments": [
+              {
+                "child": {
+                  "name": "z",
+                  "type": "value"
+                },
+                "type": "&&"
+              },
+              {
+                "name": "x",
+                "type": "value"
+              }
+            ],
+            "function": "_0_0_L_Pfn_Li64_R_E_gi64_si64_R_0fn",
+            "type": "call"
+          }
+        ],
+        "name": "main",
+        "return_type": "void",
+        "type": "function"
+      }
+    },
+    "POINTER_FLOAT": {
+      "_0_0_L_Pfn_Lf64_R_E_gf64_sf64_R": "{fn(f64)=>f64,f64}",
+      "_0_0_L_Pfn_Lf64_R_E_gf64_sf64_R_0fn": {
+        "arguments": [
+          {
+            "name": "state",
+            "type": "*_0_0_L_Pfn_Lf64_R_E_gf64_sf64_R"
+          },
+          {
+            "name": "_0",
+            "type": "f64"
+          }
+        ],
+        "body": [
+          {
+            "type": "return",
+            "value": {
+              "lhs": {
+                "arguments": [
+                  {
+                    "name": "_0",
+                    "type": "value"
+                  }
+                ],
+                "function": {
+                  "child": {
+                    "name": "state",
+                    "type": "value"
+                  },
+                  "type": "->"
+                },
+                "type": "pointer_call"
+              },
+              "rhs": {
+                "child": {
+                  "name": "state",
+                  "type": "value"
+                },
+                "index": 1,
+                "type": "->"
+              },
+              "type": "/"
+            }
+          }
+        ],
+        "name": "_0_0_L_Pfn_Lf64_R_E_gf64_sf64_R_0fn",
+        "return_type": "f64",
+        "type": "function"
+      },
+      "function__pointers_Dfn__pointer__float": {
+        "name": "function__pointers_Dfn__pointer__float",
+        "ty": "fn(f64)=>f64",
+        "type": "init",
+        "value": {
+          "child": {
+            "name": "function__pointers_Dtest__fn_af64",
+            "type": "value"
+          },
+          "type": "&"
+        }
+      },
+      "function__pointers_Dtest__fn_af64": {
+        "arguments": [
+          {
+            "name": "x",
+            "type": "f64"
+          }
+        ],
+        "body": [
+          {
+            "type": "return",
+            "value": {
+              "name": "x",
+              "type": "value"
+            }
+          }
+        ],
+        "name": "function__pointers_Dtest__fn_af64",
+        "return_type": "f64",
+        "type": "function"
+      },
+      "main": {
+        "arguments": [],
+        "body": [
+          {
+            "name": "x",
+            "ty": "f64",
+            "type": "init",
+            "value": {
+              "ty": "f64",
+              "type": "float",
+              "value": 1.0
+            }
+          },
+          {
+            "name": "y",
+            "ty": "f64",
+            "type": "init",
+            "value": {
+              "ty": "f64",
+              "type": "float",
+              "value": 1.0
+            }
+          },
+          {
+            "name": "z",
+            "ty": "_0_0_L_Pfn_Lf64_R_E_gf64_sf64_R",
+            "type": "init",
+            "value": {
+              "ty": "_0_0_L_Pfn_Lf64_R_E_gf64_sf64_R",
+              "type": "object",
+              "values": [
+                {
+                  "name": "function__pointers_Dfn__pointer__float",
+                  "type": "value"
+                },
+                {
+                  "name": "y",
+                  "type": "value"
+                }
+              ]
+            }
+          },
+          {
+            "arguments": [
+              {
+                "child": {
+                  "name": "z",
+                  "type": "value"
+                },
+                "type": "&&"
+              },
+              {
+                "name": "x",
+                "type": "value"
+              }
+            ],
+            "function": "_0_0_L_Pfn_Lf64_R_E_gf64_sf64_R_0fn",
+            "type": "call"
+          }
+        ],
+        "name": "main",
+        "return_type": "void",
+        "type": "function"
+      }
+    },
+    "POINTER_COMPLEX": {
+      "_0_0_L_Pfn_Lc64_R_E_gc64_sc64_R": "{fn(c64)=>c64,c64}",
+      "_0_0_L_Pfn_Lc64_R_E_gc64_sc64_R_0fn": {
+        "arguments": [
+          {
+            "name": "state",
+            "type": "*_0_0_L_Pfn_Lc64_R_E_gc64_sc64_R"
+          },
+          {
+            "name": "_0",
+            "type": "c64"
+          }
+        ],
+        "body": [
+          {
+            "type": "return",
+            "value": {
+              "lhs": {
+                "arguments": [
+                  {
+                    "name": "_0",
+                    "type": "value"
+                  }
+                ],
+                "function": {
+                  "child": {
+                    "name": "state",
+                    "type": "value"
+                  },
+                  "type": "->"
+                },
+                "type": "pointer_call"
+              },
+              "rhs": {
+                "child": {
+                  "name": "state",
+                  "type": "value"
+                },
+                "index": 1,
+                "type": "->"
+              },
+              "type": "/"
+            }
+          }
+        ],
+        "name": "_0_0_L_Pfn_Lc64_R_E_gc64_sc64_R_0fn",
+        "return_type": "c64",
+        "type": "function"
+      },
+      "function__pointers_Dfn__pointer__complex": {
+        "name": "function__pointers_Dfn__pointer__complex",
+        "ty": "fn(c64)=>c64",
+        "type": "init",
+        "value": {
+          "child": {
+            "name": "function__pointers_Dtest__fn_ac64",
+            "type": "value"
+          },
+          "type": "&"
+        }
+      },
+      "function__pointers_Dtest__fn_ac64": {
+        "arguments": [
+          {
+            "name": "x",
+            "type": "c64"
+          }
+        ],
+        "body": [
+          {
+            "type": "return",
+            "value": {
+              "name": "x",
+              "type": "value"
+            }
+          }
+        ],
+        "name": "function__pointers_Dtest__fn_ac64",
+        "return_type": "c64",
+        "type": "function"
+      },
+      "main": {
+        "arguments": [],
+        "body": [
+          {
+            "name": "x",
+            "ty": "c64",
+            "type": "init",
+            "value": {
+              "a": 1.0,
+              "ty": "c64",
+              "type": "complex"
+            }
+          },
+          {
+            "name": "y",
+            "ty": "c64",
+            "type": "init",
+            "value": {
+              "a": 1.0,
+              "ty": "c64",
+              "type": "complex"
+            }
+          },
+          {
+            "name": "z",
+            "ty": "_0_0_L_Pfn_Lc64_R_E_gc64_sc64_R",
+            "type": "init",
+            "value": {
+              "ty": "_0_0_L_Pfn_Lc64_R_E_gc64_sc64_R",
+              "type": "object",
+              "values": [
+                {
+                  "name": "function__pointers_Dfn__pointer__complex",
+                  "type": "value"
+                },
+                {
+                  "name": "y",
+                  "type": "value"
+                }
+              ]
+            }
+          },
+          {
+            "arguments": [
+              {
+                "child": {
+                  "name": "z",
+                  "type": "value"
+                },
+                "type": "&&"
+              },
+              {
+                "name": "x",
+                "type": "value"
+              }
+            ],
+            "function": "_0_0_L_Pfn_Lc64_R_E_gc64_sc64_R_0fn",
+            "type": "call"
+          }
+        ],
+        "name": "main",
+        "return_type": "void",
+        "type": "function"
+      }
+    },
+    "POINTER_POINTER": {
+      "_0_0_L_Pfn_Li64_R_E_gi64_s_Pfn_Li64_R_E_gi64_R": "{fn(i64)=>i64,fn(i64)=>i64}",
+      "_0_0_L_Pfn_Li64_R_E_gi64_s_Pfn_Li64_R_E_gi64_R_0fn": {
+        "arguments": [
+          {
+            "name": "state",
+            "type": "*_0_0_L_Pfn_Li64_R_E_gi64_s_Pfn_Li64_R_E_gi64_R"
+          },
+          {
+            "name": "_0",
+            "type": "i64"
+          }
+        ],
+        "body": [
+          {
+            "type": "return",
+            "value": {
+              "lhs": {
+                "arguments": [
+                  {
+                    "name": "_0",
+                    "type": "value"
+                  }
+                ],
+                "function": {
+                  "child": {
+                    "name": "state",
+                    "type": "value"
+                  },
+                  "type": "->"
+                },
+                "type": "pointer_call"
+              },
+              "rhs": {
+                "arguments": [
+                  {
+                    "name": "_0",
+                    "type": "value"
+                  }
+                ],
+                "function": {
+                  "child": {
+                    "name": "state",
+                    "type": "value"
+                  },
+                  "index": 1,
+                  "type": "->"
+                },
+                "type": "pointer_call"
+              },
+              "type": "/"
+            }
+          }
+        ],
+        "name": "_0_0_L_Pfn_Li64_R_E_gi64_s_Pfn_Li64_R_E_gi64_R_0fn",
+        "return_type": "i64",
+        "type": "function"
+      },
+      "function__pointers_Dfn__pointer__integer": {
+        "name": "function__pointers_Dfn__pointer__integer",
+        "ty": "fn(i64)=>i64",
+        "type": "init",
+        "value": {
+          "child": {
+            "name": "function__pointers_Dtest__fn_ai64",
+            "type": "value"
+          },
+          "type": "&"
+        }
+      },
+      "function__pointers_Dtest__fn_ai64": {
+        "arguments": [
+          {
+            "name": "x",
+            "type": "i64"
+          }
+        ],
+        "body": [
+          {
+            "type": "return",
+            "value": {
+              "name": "x",
+              "type": "value"
+            }
+          }
+        ],
+        "name": "function__pointers_Dtest__fn_ai64",
+        "return_type": "i64",
+        "type": "function"
+      },
+      "main": {
+        "arguments": [],
+        "body": [
+          {
+            "name": "x",
+            "ty": "i64",
+            "type": "init",
+            "value": {
+              "ty": "i64",
+              "type": "integer",
+              "value": 1
+            }
+          },
+          {
+            "name": "y",
+            "ty": "i64",
+            "type": "init",
+            "value": {
+              "ty": "i64",
+              "type": "integer",
+              "value": 1
+            }
+          },
+          {
+            "name": "z",
+            "ty": "_0_0_L_Pfn_Li64_R_E_gi64_s_Pfn_Li64_R_E_gi64_R",
+            "type": "init",
+            "value": {
+              "ty": "_0_0_L_Pfn_Li64_R_E_gi64_s_Pfn_Li64_R_E_gi64_R",
+              "type": "object",
+              "values": [
+                {
+                  "name": "function__pointers_Dfn__pointer__integer",
+                  "type": "value"
+                },
+                {
+                  "name": "function__pointers_Dfn__pointer__integer",
+                  "type": "value"
+                }
+              ]
+            }
+          },
+          {
+            "arguments": [
+              {
+                "child": {
+                  "name": "z",
+                  "type": "value"
+                },
+                "type": "&&"
+              },
+              {
+                "name": "x",
+                "type": "value"
+              }
+            ],
+            "function": "_0_0_L_Pfn_Li64_R_E_gi64_s_Pfn_Li64_R_E_gi64_R_0fn",
+            "type": "call"
+          },
+          {
+            "arguments": [
+              {
+                "child": {
+                  "name": "z",
+                  "type": "value"
+                },
+                "type": "&&"
+              },
+              {
+                "name": "y",
+                "type": "value"
+              }
+            ],
+            "function": "_0_0_L_Pfn_Li64_R_E_gi64_s_Pfn_Li64_R_E_gi64_R_0fn",
+            "type": "call"
+          }
+        ],
+        "name": "main",
+        "return_type": "void",
+        "type": "function"
+      }
+    }
   },
   {
     ":template": "binary_group",
     "NAME": "Remainder",
     "OPERATION": "%",
-    "INTEGER_COMPLEX": {},
-    "FLOAT_COMPLEX": {},
-    "COMPLEX_COMPLEX": {}
+    "POINTER_INTEGER": {
+      "_0_0_L_Pfn_Li64_R_E_gi64_pi64_R": "{fn(i64)=>i64,i64}",
+      "_0_0_L_Pfn_Li64_R_E_gi64_pi64_R_0fn": {
+        "arguments": [
+          {
+            "name": "state",
+            "type": "*_0_0_L_Pfn_Li64_R_E_gi64_pi64_R"
+          },
+          {
+            "name": "_0",
+            "type": "i64"
+          }
+        ],
+        "body": [
+          {
+            "type": "return",
+            "value": {
+              "lhs": {
+                "arguments": [
+                  {
+                    "name": "_0",
+                    "type": "value"
+                  }
+                ],
+                "function": {
+                  "child": {
+                    "name": "state",
+                    "type": "value"
+                  },
+                  "type": "->"
+                },
+                "type": "pointer_call"
+              },
+              "rhs": {
+                "child": {
+                  "name": "state",
+                  "type": "value"
+                },
+                "index": 1,
+                "type": "->"
+              },
+              "type": "%"
+            }
+          }
+        ],
+        "name": "_0_0_L_Pfn_Li64_R_E_gi64_pi64_R_0fn",
+        "return_type": "i64",
+        "type": "function"
+      },
+      "function__pointers_Dfn__pointer__integer": {
+        "name": "function__pointers_Dfn__pointer__integer",
+        "ty": "fn(i64)=>i64",
+        "type": "init",
+        "value": {
+          "child": {
+            "name": "function__pointers_Dtest__fn_ai64",
+            "type": "value"
+          },
+          "type": "&"
+        }
+      },
+      "function__pointers_Dtest__fn_ai64": {
+        "arguments": [
+          {
+            "name": "x",
+            "type": "i64"
+          }
+        ],
+        "body": [
+          {
+            "type": "return",
+            "value": {
+              "name": "x",
+              "type": "value"
+            }
+          }
+        ],
+        "name": "function__pointers_Dtest__fn_ai64",
+        "return_type": "i64",
+        "type": "function"
+      },
+      "main": {
+        "arguments": [],
+        "body": [
+          {
+            "name": "x",
+            "ty": "i64",
+            "type": "init",
+            "value": {
+              "ty": "i64",
+              "type": "integer",
+              "value": 1
+            }
+          },
+          {
+            "name": "y",
+            "ty": "i64",
+            "type": "init",
+            "value": {
+              "ty": "i64",
+              "type": "integer",
+              "value": 1
+            }
+          },
+          {
+            "name": "z",
+            "ty": "_0_0_L_Pfn_Li64_R_E_gi64_pi64_R",
+            "type": "init",
+            "value": {
+              "ty": "_0_0_L_Pfn_Li64_R_E_gi64_pi64_R",
+              "type": "object",
+              "values": [
+                {
+                  "name": "function__pointers_Dfn__pointer__integer",
+                  "type": "value"
+                },
+                {
+                  "name": "y",
+                  "type": "value"
+                }
+              ]
+            }
+          },
+          {
+            "arguments": [
+              {
+                "child": {
+                  "name": "z",
+                  "type": "value"
+                },
+                "type": "&&"
+              },
+              {
+                "name": "x",
+                "type": "value"
+              }
+            ],
+            "function": "_0_0_L_Pfn_Li64_R_E_gi64_pi64_R_0fn",
+            "type": "call"
+          }
+        ],
+        "name": "main",
+        "return_type": "void",
+        "type": "function"
+      }
+    },
+    "POINTER_FLOAT": {
+      "_0_0_L_Pfn_Lf64_R_E_gf64_pf64_R": "{fn(f64)=>f64,f64}",
+      "_0_0_L_Pfn_Lf64_R_E_gf64_pf64_R_0fn": {
+        "arguments": [
+          {
+            "name": "state",
+            "type": "*_0_0_L_Pfn_Lf64_R_E_gf64_pf64_R"
+          },
+          {
+            "name": "_0",
+            "type": "f64"
+          }
+        ],
+        "body": [
+          {
+            "type": "return",
+            "value": {
+              "lhs": {
+                "arguments": [
+                  {
+                    "name": "_0",
+                    "type": "value"
+                  }
+                ],
+                "function": {
+                  "child": {
+                    "name": "state",
+                    "type": "value"
+                  },
+                  "type": "->"
+                },
+                "type": "pointer_call"
+              },
+              "rhs": {
+                "child": {
+                  "name": "state",
+                  "type": "value"
+                },
+                "index": 1,
+                "type": "->"
+              },
+              "type": "%"
+            }
+          }
+        ],
+        "name": "_0_0_L_Pfn_Lf64_R_E_gf64_pf64_R_0fn",
+        "return_type": "f64",
+        "type": "function"
+      },
+      "function__pointers_Dfn__pointer__float": {
+        "name": "function__pointers_Dfn__pointer__float",
+        "ty": "fn(f64)=>f64",
+        "type": "init",
+        "value": {
+          "child": {
+            "name": "function__pointers_Dtest__fn_af64",
+            "type": "value"
+          },
+          "type": "&"
+        }
+      },
+      "function__pointers_Dtest__fn_af64": {
+        "arguments": [
+          {
+            "name": "x",
+            "type": "f64"
+          }
+        ],
+        "body": [
+          {
+            "type": "return",
+            "value": {
+              "name": "x",
+              "type": "value"
+            }
+          }
+        ],
+        "name": "function__pointers_Dtest__fn_af64",
+        "return_type": "f64",
+        "type": "function"
+      },
+      "main": {
+        "arguments": [],
+        "body": [
+          {
+            "name": "x",
+            "ty": "f64",
+            "type": "init",
+            "value": {
+              "ty": "f64",
+              "type": "float",
+              "value": 1.0
+            }
+          },
+          {
+            "name": "y",
+            "ty": "f64",
+            "type": "init",
+            "value": {
+              "ty": "f64",
+              "type": "float",
+              "value": 1.0
+            }
+          },
+          {
+            "name": "z",
+            "ty": "_0_0_L_Pfn_Lf64_R_E_gf64_pf64_R",
+            "type": "init",
+            "value": {
+              "ty": "_0_0_L_Pfn_Lf64_R_E_gf64_pf64_R",
+              "type": "object",
+              "values": [
+                {
+                  "name": "function__pointers_Dfn__pointer__float",
+                  "type": "value"
+                },
+                {
+                  "name": "y",
+                  "type": "value"
+                }
+              ]
+            }
+          },
+          {
+            "arguments": [
+              {
+                "child": {
+                  "name": "z",
+                  "type": "value"
+                },
+                "type": "&&"
+              },
+              {
+                "name": "x",
+                "type": "value"
+              }
+            ],
+            "function": "_0_0_L_Pfn_Lf64_R_E_gf64_pf64_R_0fn",
+            "type": "call"
+          }
+        ],
+        "name": "main",
+        "return_type": "void",
+        "type": "function"
+      }
+    },
+    "POINTER_POINTER": {
+      "_0_0_L_Pfn_Li64_R_E_gi64_p_Pfn_Li64_R_E_gi64_R": "{fn(i64)=>i64,fn(i64)=>i64}",
+      "_0_0_L_Pfn_Li64_R_E_gi64_p_Pfn_Li64_R_E_gi64_R_0fn": {
+        "arguments": [
+          {
+            "name": "state",
+            "type": "*_0_0_L_Pfn_Li64_R_E_gi64_p_Pfn_Li64_R_E_gi64_R"
+          },
+          {
+            "name": "_0",
+            "type": "i64"
+          }
+        ],
+        "body": [
+          {
+            "type": "return",
+            "value": {
+              "lhs": {
+                "arguments": [
+                  {
+                    "name": "_0",
+                    "type": "value"
+                  }
+                ],
+                "function": {
+                  "child": {
+                    "name": "state",
+                    "type": "value"
+                  },
+                  "type": "->"
+                },
+                "type": "pointer_call"
+              },
+              "rhs": {
+                "arguments": [
+                  {
+                    "name": "_0",
+                    "type": "value"
+                  }
+                ],
+                "function": {
+                  "child": {
+                    "name": "state",
+                    "type": "value"
+                  },
+                  "index": 1,
+                  "type": "->"
+                },
+                "type": "pointer_call"
+              },
+              "type": "%"
+            }
+          }
+        ],
+        "name": "_0_0_L_Pfn_Li64_R_E_gi64_p_Pfn_Li64_R_E_gi64_R_0fn",
+        "return_type": "i64",
+        "type": "function"
+      },
+      "function__pointers_Dfn__pointer__integer": {
+        "name": "function__pointers_Dfn__pointer__integer",
+        "ty": "fn(i64)=>i64",
+        "type": "init",
+        "value": {
+          "child": {
+            "name": "function__pointers_Dtest__fn_ai64",
+            "type": "value"
+          },
+          "type": "&"
+        }
+      },
+      "function__pointers_Dtest__fn_ai64": {
+        "arguments": [
+          {
+            "name": "x",
+            "type": "i64"
+          }
+        ],
+        "body": [
+          {
+            "type": "return",
+            "value": {
+              "name": "x",
+              "type": "value"
+            }
+          }
+        ],
+        "name": "function__pointers_Dtest__fn_ai64",
+        "return_type": "i64",
+        "type": "function"
+      },
+      "main": {
+        "arguments": [],
+        "body": [
+          {
+            "name": "x",
+            "ty": "i64",
+            "type": "init",
+            "value": {
+              "ty": "i64",
+              "type": "integer",
+              "value": 1
+            }
+          },
+          {
+            "name": "y",
+            "ty": "i64",
+            "type": "init",
+            "value": {
+              "ty": "i64",
+              "type": "integer",
+              "value": 1
+            }
+          },
+          {
+            "name": "z",
+            "ty": "_0_0_L_Pfn_Li64_R_E_gi64_p_Pfn_Li64_R_E_gi64_R",
+            "type": "init",
+            "value": {
+              "ty": "_0_0_L_Pfn_Li64_R_E_gi64_p_Pfn_Li64_R_E_gi64_R",
+              "type": "object",
+              "values": [
+                {
+                  "name": "function__pointers_Dfn__pointer__integer",
+                  "type": "value"
+                },
+                {
+                  "name": "function__pointers_Dfn__pointer__integer",
+                  "type": "value"
+                }
+              ]
+            }
+          },
+          {
+            "arguments": [
+              {
+                "child": {
+                  "name": "z",
+                  "type": "value"
+                },
+                "type": "&&"
+              },
+              {
+                "name": "x",
+                "type": "value"
+              }
+            ],
+            "function": "_0_0_L_Pfn_Li64_R_E_gi64_p_Pfn_Li64_R_E_gi64_R_0fn",
+            "type": "call"
+          },
+          {
+            "arguments": [
+              {
+                "child": {
+                  "name": "z",
+                  "type": "value"
+                },
+                "type": "&&"
+              },
+              {
+                "name": "y",
+                "type": "value"
+              }
+            ],
+            "function": "_0_0_L_Pfn_Li64_R_E_gi64_p_Pfn_Li64_R_E_gi64_R_0fn",
+            "type": "call"
+          }
+        ],
+        "name": "main",
+        "return_type": "void",
+        "type": "function"
+      }
+    }
   },
   {
     ":template": "binary_group",
     "NAME": "Addition",
     "OPERATION": "+",
-    "INTEGER_COMPLEX": {},
-    "FLOAT_COMPLEX": {},
-    "COMPLEX_COMPLEX": {}
+    "POINTER_INTEGER": {
+      "_0_0_L_Pfn_Li64_R_E_gi64_9i64_R": "{fn(i64)=>i64,i64}",
+      "_0_0_L_Pfn_Li64_R_E_gi64_9i64_R_0fn": {
+        "arguments": [
+          {
+            "name": "state",
+            "type": "*_0_0_L_Pfn_Li64_R_E_gi64_9i64_R"
+          },
+          {
+            "name": "_0",
+            "type": "i64"
+          }
+        ],
+        "body": [
+          {
+            "type": "return",
+            "value": {
+              "lhs": {
+                "arguments": [
+                  {
+                    "name": "_0",
+                    "type": "value"
+                  }
+                ],
+                "function": {
+                  "child": {
+                    "name": "state",
+                    "type": "value"
+                  },
+                  "type": "->"
+                },
+                "type": "pointer_call"
+              },
+              "rhs": {
+                "child": {
+                  "name": "state",
+                  "type": "value"
+                },
+                "index": 1,
+                "type": "->"
+              },
+              "type": "+"
+            }
+          }
+        ],
+        "name": "_0_0_L_Pfn_Li64_R_E_gi64_9i64_R_0fn",
+        "return_type": "i64",
+        "type": "function"
+      },
+      "function__pointers_Dfn__pointer__integer": {
+        "name": "function__pointers_Dfn__pointer__integer",
+        "ty": "fn(i64)=>i64",
+        "type": "init",
+        "value": {
+          "child": {
+            "name": "function__pointers_Dtest__fn_ai64",
+            "type": "value"
+          },
+          "type": "&"
+        }
+      },
+      "function__pointers_Dtest__fn_ai64": {
+        "arguments": [
+          {
+            "name": "x",
+            "type": "i64"
+          }
+        ],
+        "body": [
+          {
+            "type": "return",
+            "value": {
+              "name": "x",
+              "type": "value"
+            }
+          }
+        ],
+        "name": "function__pointers_Dtest__fn_ai64",
+        "return_type": "i64",
+        "type": "function"
+      },
+      "main": {
+        "arguments": [],
+        "body": [
+          {
+            "name": "x",
+            "ty": "i64",
+            "type": "init",
+            "value": {
+              "ty": "i64",
+              "type": "integer",
+              "value": 1
+            }
+          },
+          {
+            "name": "y",
+            "ty": "i64",
+            "type": "init",
+            "value": {
+              "ty": "i64",
+              "type": "integer",
+              "value": 1
+            }
+          },
+          {
+            "name": "z",
+            "ty": "_0_0_L_Pfn_Li64_R_E_gi64_9i64_R",
+            "type": "init",
+            "value": {
+              "ty": "_0_0_L_Pfn_Li64_R_E_gi64_9i64_R",
+              "type": "object",
+              "values": [
+                {
+                  "name": "function__pointers_Dfn__pointer__integer",
+                  "type": "value"
+                },
+                {
+                  "name": "y",
+                  "type": "value"
+                }
+              ]
+            }
+          },
+          {
+            "arguments": [
+              {
+                "child": {
+                  "name": "z",
+                  "type": "value"
+                },
+                "type": "&&"
+              },
+              {
+                "name": "x",
+                "type": "value"
+              }
+            ],
+            "function": "_0_0_L_Pfn_Li64_R_E_gi64_9i64_R_0fn",
+            "type": "call"
+          }
+        ],
+        "name": "main",
+        "return_type": "void",
+        "type": "function"
+      }
+    },
+    "POINTER_FLOAT": {
+      "_0_0_L_Pfn_Lf64_R_E_gf64_9f64_R": "{fn(f64)=>f64,f64}",
+      "_0_0_L_Pfn_Lf64_R_E_gf64_9f64_R_0fn": {
+        "arguments": [
+          {
+            "name": "state",
+            "type": "*_0_0_L_Pfn_Lf64_R_E_gf64_9f64_R"
+          },
+          {
+            "name": "_0",
+            "type": "f64"
+          }
+        ],
+        "body": [
+          {
+            "type": "return",
+            "value": {
+              "lhs": {
+                "arguments": [
+                  {
+                    "name": "_0",
+                    "type": "value"
+                  }
+                ],
+                "function": {
+                  "child": {
+                    "name": "state",
+                    "type": "value"
+                  },
+                  "type": "->"
+                },
+                "type": "pointer_call"
+              },
+              "rhs": {
+                "child": {
+                  "name": "state",
+                  "type": "value"
+                },
+                "index": 1,
+                "type": "->"
+              },
+              "type": "+"
+            }
+          }
+        ],
+        "name": "_0_0_L_Pfn_Lf64_R_E_gf64_9f64_R_0fn",
+        "return_type": "f64",
+        "type": "function"
+      },
+      "function__pointers_Dfn__pointer__float": {
+        "name": "function__pointers_Dfn__pointer__float",
+        "ty": "fn(f64)=>f64",
+        "type": "init",
+        "value": {
+          "child": {
+            "name": "function__pointers_Dtest__fn_af64",
+            "type": "value"
+          },
+          "type": "&"
+        }
+      },
+      "function__pointers_Dtest__fn_af64": {
+        "arguments": [
+          {
+            "name": "x",
+            "type": "f64"
+          }
+        ],
+        "body": [
+          {
+            "type": "return",
+            "value": {
+              "name": "x",
+              "type": "value"
+            }
+          }
+        ],
+        "name": "function__pointers_Dtest__fn_af64",
+        "return_type": "f64",
+        "type": "function"
+      },
+      "main": {
+        "arguments": [],
+        "body": [
+          {
+            "name": "x",
+            "ty": "f64",
+            "type": "init",
+            "value": {
+              "ty": "f64",
+              "type": "float",
+              "value": 1.0
+            }
+          },
+          {
+            "name": "y",
+            "ty": "f64",
+            "type": "init",
+            "value": {
+              "ty": "f64",
+              "type": "float",
+              "value": 1.0
+            }
+          },
+          {
+            "name": "z",
+            "ty": "_0_0_L_Pfn_Lf64_R_E_gf64_9f64_R",
+            "type": "init",
+            "value": {
+              "ty": "_0_0_L_Pfn_Lf64_R_E_gf64_9f64_R",
+              "type": "object",
+              "values": [
+                {
+                  "name": "function__pointers_Dfn__pointer__float",
+                  "type": "value"
+                },
+                {
+                  "name": "y",
+                  "type": "value"
+                }
+              ]
+            }
+          },
+          {
+            "arguments": [
+              {
+                "child": {
+                  "name": "z",
+                  "type": "value"
+                },
+                "type": "&&"
+              },
+              {
+                "name": "x",
+                "type": "value"
+              }
+            ],
+            "function": "_0_0_L_Pfn_Lf64_R_E_gf64_9f64_R_0fn",
+            "type": "call"
+          }
+        ],
+        "name": "main",
+        "return_type": "void",
+        "type": "function"
+      }
+    },
+    "POINTER_COMPLEX": {
+      "_0_0_L_Pfn_Lc64_R_E_gc64_9c64_R": "{fn(c64)=>c64,c64}",
+      "_0_0_L_Pfn_Lc64_R_E_gc64_9c64_R_0fn": {
+        "arguments": [
+          {
+            "name": "state",
+            "type": "*_0_0_L_Pfn_Lc64_R_E_gc64_9c64_R"
+          },
+          {
+            "name": "_0",
+            "type": "c64"
+          }
+        ],
+        "body": [
+          {
+            "type": "return",
+            "value": {
+              "lhs": {
+                "arguments": [
+                  {
+                    "name": "_0",
+                    "type": "value"
+                  }
+                ],
+                "function": {
+                  "child": {
+                    "name": "state",
+                    "type": "value"
+                  },
+                  "type": "->"
+                },
+                "type": "pointer_call"
+              },
+              "rhs": {
+                "child": {
+                  "name": "state",
+                  "type": "value"
+                },
+                "index": 1,
+                "type": "->"
+              },
+              "type": "+"
+            }
+          }
+        ],
+        "name": "_0_0_L_Pfn_Lc64_R_E_gc64_9c64_R_0fn",
+        "return_type": "c64",
+        "type": "function"
+      },
+      "function__pointers_Dfn__pointer__complex": {
+        "name": "function__pointers_Dfn__pointer__complex",
+        "ty": "fn(c64)=>c64",
+        "type": "init",
+        "value": {
+          "child": {
+            "name": "function__pointers_Dtest__fn_ac64",
+            "type": "value"
+          },
+          "type": "&"
+        }
+      },
+      "function__pointers_Dtest__fn_ac64": {
+        "arguments": [
+          {
+            "name": "x",
+            "type": "c64"
+          }
+        ],
+        "body": [
+          {
+            "type": "return",
+            "value": {
+              "name": "x",
+              "type": "value"
+            }
+          }
+        ],
+        "name": "function__pointers_Dtest__fn_ac64",
+        "return_type": "c64",
+        "type": "function"
+      },
+      "main": {
+        "arguments": [],
+        "body": [
+          {
+            "name": "x",
+            "ty": "c64",
+            "type": "init",
+            "value": {
+              "a": 1.0,
+              "ty": "c64",
+              "type": "complex"
+            }
+          },
+          {
+            "name": "y",
+            "ty": "c64",
+            "type": "init",
+            "value": {
+              "a": 1.0,
+              "ty": "c64",
+              "type": "complex"
+            }
+          },
+          {
+            "name": "z",
+            "ty": "_0_0_L_Pfn_Lc64_R_E_gc64_9c64_R",
+            "type": "init",
+            "value": {
+              "ty": "_0_0_L_Pfn_Lc64_R_E_gc64_9c64_R",
+              "type": "object",
+              "values": [
+                {
+                  "name": "function__pointers_Dfn__pointer__complex",
+                  "type": "value"
+                },
+                {
+                  "name": "y",
+                  "type": "value"
+                }
+              ]
+            }
+          },
+          {
+            "arguments": [
+              {
+                "child": {
+                  "name": "z",
+                  "type": "value"
+                },
+                "type": "&&"
+              },
+              {
+                "name": "x",
+                "type": "value"
+              }
+            ],
+            "function": "_0_0_L_Pfn_Lc64_R_E_gc64_9c64_R_0fn",
+            "type": "call"
+          }
+        ],
+        "name": "main",
+        "return_type": "void",
+        "type": "function"
+      }
+    },
+    "POINTER_POINTER": {
+      "_0_0_L_Pfn_Li64_R_E_gi64_9_Pfn_Li64_R_E_gi64_R": "{fn(i64)=>i64,fn(i64)=>i64}",
+      "_0_0_L_Pfn_Li64_R_E_gi64_9_Pfn_Li64_R_E_gi64_R_0fn": {
+        "arguments": [
+          {
+            "name": "state",
+            "type": "*_0_0_L_Pfn_Li64_R_E_gi64_9_Pfn_Li64_R_E_gi64_R"
+          },
+          {
+            "name": "_0",
+            "type": "i64"
+          }
+        ],
+        "body": [
+          {
+            "type": "return",
+            "value": {
+              "lhs": {
+                "arguments": [
+                  {
+                    "name": "_0",
+                    "type": "value"
+                  }
+                ],
+                "function": {
+                  "child": {
+                    "name": "state",
+                    "type": "value"
+                  },
+                  "type": "->"
+                },
+                "type": "pointer_call"
+              },
+              "rhs": {
+                "arguments": [
+                  {
+                    "name": "_0",
+                    "type": "value"
+                  }
+                ],
+                "function": {
+                  "child": {
+                    "name": "state",
+                    "type": "value"
+                  },
+                  "index": 1,
+                  "type": "->"
+                },
+                "type": "pointer_call"
+              },
+              "type": "+"
+            }
+          }
+        ],
+        "name": "_0_0_L_Pfn_Li64_R_E_gi64_9_Pfn_Li64_R_E_gi64_R_0fn",
+        "return_type": "i64",
+        "type": "function"
+      },
+      "function__pointers_Dfn__pointer__integer": {
+        "name": "function__pointers_Dfn__pointer__integer",
+        "ty": "fn(i64)=>i64",
+        "type": "init",
+        "value": {
+          "child": {
+            "name": "function__pointers_Dtest__fn_ai64",
+            "type": "value"
+          },
+          "type": "&"
+        }
+      },
+      "function__pointers_Dtest__fn_ai64": {
+        "arguments": [
+          {
+            "name": "x",
+            "type": "i64"
+          }
+        ],
+        "body": [
+          {
+            "type": "return",
+            "value": {
+              "name": "x",
+              "type": "value"
+            }
+          }
+        ],
+        "name": "function__pointers_Dtest__fn_ai64",
+        "return_type": "i64",
+        "type": "function"
+      },
+      "main": {
+        "arguments": [],
+        "body": [
+          {
+            "name": "x",
+            "ty": "i64",
+            "type": "init",
+            "value": {
+              "ty": "i64",
+              "type": "integer",
+              "value": 1
+            }
+          },
+          {
+            "name": "y",
+            "ty": "i64",
+            "type": "init",
+            "value": {
+              "ty": "i64",
+              "type": "integer",
+              "value": 1
+            }
+          },
+          {
+            "name": "z",
+            "ty": "_0_0_L_Pfn_Li64_R_E_gi64_9_Pfn_Li64_R_E_gi64_R",
+            "type": "init",
+            "value": {
+              "ty": "_0_0_L_Pfn_Li64_R_E_gi64_9_Pfn_Li64_R_E_gi64_R",
+              "type": "object",
+              "values": [
+                {
+                  "name": "function__pointers_Dfn__pointer__integer",
+                  "type": "value"
+                },
+                {
+                  "name": "function__pointers_Dfn__pointer__integer",
+                  "type": "value"
+                }
+              ]
+            }
+          },
+          {
+            "arguments": [
+              {
+                "child": {
+                  "name": "z",
+                  "type": "value"
+                },
+                "type": "&&"
+              },
+              {
+                "name": "x",
+                "type": "value"
+              }
+            ],
+            "function": "_0_0_L_Pfn_Li64_R_E_gi64_9_Pfn_Li64_R_E_gi64_R_0fn",
+            "type": "call"
+          },
+          {
+            "arguments": [
+              {
+                "child": {
+                  "name": "z",
+                  "type": "value"
+                },
+                "type": "&&"
+              },
+              {
+                "name": "y",
+                "type": "value"
+              }
+            ],
+            "function": "_0_0_L_Pfn_Li64_R_E_gi64_9_Pfn_Li64_R_E_gi64_R_0fn",
+            "type": "call"
+          }
+        ],
+        "name": "main",
+        "return_type": "void",
+        "type": "function"
+      }
+    }
   },
   {
     ":template": "binary_group",
     "NAME": "Subtraction",
     "OPERATION": "-",
-    "INTEGER_COMPLEX": {},
-    "FLOAT_COMPLEX": {},
-    "COMPLEX_COMPLEX": {}
+    "POINTER_INTEGER": {
+      "_0_0_L_Pfn_Li64_R_E_gi64_mi64_R": "{fn(i64)=>i64,i64}",
+      "_0_0_L_Pfn_Li64_R_E_gi64_mi64_R_0fn": {
+        "arguments": [
+          {
+            "name": "state",
+            "type": "*_0_0_L_Pfn_Li64_R_E_gi64_mi64_R"
+          },
+          {
+            "name": "_0",
+            "type": "i64"
+          }
+        ],
+        "body": [
+          {
+            "type": "return",
+            "value": {
+              "lhs": {
+                "arguments": [
+                  {
+                    "name": "_0",
+                    "type": "value"
+                  }
+                ],
+                "function": {
+                  "child": {
+                    "name": "state",
+                    "type": "value"
+                  },
+                  "type": "->"
+                },
+                "type": "pointer_call"
+              },
+              "rhs": {
+                "child": {
+                  "name": "state",
+                  "type": "value"
+                },
+                "index": 1,
+                "type": "->"
+              },
+              "type": "-"
+            }
+          }
+        ],
+        "name": "_0_0_L_Pfn_Li64_R_E_gi64_mi64_R_0fn",
+        "return_type": "i64",
+        "type": "function"
+      },
+      "function__pointers_Dfn__pointer__integer": {
+        "name": "function__pointers_Dfn__pointer__integer",
+        "ty": "fn(i64)=>i64",
+        "type": "init",
+        "value": {
+          "child": {
+            "name": "function__pointers_Dtest__fn_ai64",
+            "type": "value"
+          },
+          "type": "&"
+        }
+      },
+      "function__pointers_Dtest__fn_ai64": {
+        "arguments": [
+          {
+            "name": "x",
+            "type": "i64"
+          }
+        ],
+        "body": [
+          {
+            "type": "return",
+            "value": {
+              "name": "x",
+              "type": "value"
+            }
+          }
+        ],
+        "name": "function__pointers_Dtest__fn_ai64",
+        "return_type": "i64",
+        "type": "function"
+      },
+      "main": {
+        "arguments": [],
+        "body": [
+          {
+            "name": "x",
+            "ty": "i64",
+            "type": "init",
+            "value": {
+              "ty": "i64",
+              "type": "integer",
+              "value": 1
+            }
+          },
+          {
+            "name": "y",
+            "ty": "i64",
+            "type": "init",
+            "value": {
+              "ty": "i64",
+              "type": "integer",
+              "value": 1
+            }
+          },
+          {
+            "name": "z",
+            "ty": "_0_0_L_Pfn_Li64_R_E_gi64_mi64_R",
+            "type": "init",
+            "value": {
+              "ty": "_0_0_L_Pfn_Li64_R_E_gi64_mi64_R",
+              "type": "object",
+              "values": [
+                {
+                  "name": "function__pointers_Dfn__pointer__integer",
+                  "type": "value"
+                },
+                {
+                  "name": "y",
+                  "type": "value"
+                }
+              ]
+            }
+          },
+          {
+            "arguments": [
+              {
+                "child": {
+                  "name": "z",
+                  "type": "value"
+                },
+                "type": "&&"
+              },
+              {
+                "name": "x",
+                "type": "value"
+              }
+            ],
+            "function": "_0_0_L_Pfn_Li64_R_E_gi64_mi64_R_0fn",
+            "type": "call"
+          }
+        ],
+        "name": "main",
+        "return_type": "void",
+        "type": "function"
+      }
+    },
+    "POINTER_FLOAT": {
+      "_0_0_L_Pfn_Lf64_R_E_gf64_mf64_R": "{fn(f64)=>f64,f64}",
+      "_0_0_L_Pfn_Lf64_R_E_gf64_mf64_R_0fn": {
+        "arguments": [
+          {
+            "name": "state",
+            "type": "*_0_0_L_Pfn_Lf64_R_E_gf64_mf64_R"
+          },
+          {
+            "name": "_0",
+            "type": "f64"
+          }
+        ],
+        "body": [
+          {
+            "type": "return",
+            "value": {
+              "lhs": {
+                "arguments": [
+                  {
+                    "name": "_0",
+                    "type": "value"
+                  }
+                ],
+                "function": {
+                  "child": {
+                    "name": "state",
+                    "type": "value"
+                  },
+                  "type": "->"
+                },
+                "type": "pointer_call"
+              },
+              "rhs": {
+                "child": {
+                  "name": "state",
+                  "type": "value"
+                },
+                "index": 1,
+                "type": "->"
+              },
+              "type": "-"
+            }
+          }
+        ],
+        "name": "_0_0_L_Pfn_Lf64_R_E_gf64_mf64_R_0fn",
+        "return_type": "f64",
+        "type": "function"
+      },
+      "function__pointers_Dfn__pointer__float": {
+        "name": "function__pointers_Dfn__pointer__float",
+        "ty": "fn(f64)=>f64",
+        "type": "init",
+        "value": {
+          "child": {
+            "name": "function__pointers_Dtest__fn_af64",
+            "type": "value"
+          },
+          "type": "&"
+        }
+      },
+      "function__pointers_Dtest__fn_af64": {
+        "arguments": [
+          {
+            "name": "x",
+            "type": "f64"
+          }
+        ],
+        "body": [
+          {
+            "type": "return",
+            "value": {
+              "name": "x",
+              "type": "value"
+            }
+          }
+        ],
+        "name": "function__pointers_Dtest__fn_af64",
+        "return_type": "f64",
+        "type": "function"
+      },
+      "main": {
+        "arguments": [],
+        "body": [
+          {
+            "name": "x",
+            "ty": "f64",
+            "type": "init",
+            "value": {
+              "ty": "f64",
+              "type": "float",
+              "value": 1.0
+            }
+          },
+          {
+            "name": "y",
+            "ty": "f64",
+            "type": "init",
+            "value": {
+              "ty": "f64",
+              "type": "float",
+              "value": 1.0
+            }
+          },
+          {
+            "name": "z",
+            "ty": "_0_0_L_Pfn_Lf64_R_E_gf64_mf64_R",
+            "type": "init",
+            "value": {
+              "ty": "_0_0_L_Pfn_Lf64_R_E_gf64_mf64_R",
+              "type": "object",
+              "values": [
+                {
+                  "name": "function__pointers_Dfn__pointer__float",
+                  "type": "value"
+                },
+                {
+                  "name": "y",
+                  "type": "value"
+                }
+              ]
+            }
+          },
+          {
+            "arguments": [
+              {
+                "child": {
+                  "name": "z",
+                  "type": "value"
+                },
+                "type": "&&"
+              },
+              {
+                "name": "x",
+                "type": "value"
+              }
+            ],
+            "function": "_0_0_L_Pfn_Lf64_R_E_gf64_mf64_R_0fn",
+            "type": "call"
+          }
+        ],
+        "name": "main",
+        "return_type": "void",
+        "type": "function"
+      }
+    },
+    "POINTER_COMPLEX": {
+      "_0_0_L_Pfn_Lc64_R_E_gc64_mc64_R": "{fn(c64)=>c64,c64}",
+      "_0_0_L_Pfn_Lc64_R_E_gc64_mc64_R_0fn": {
+        "arguments": [
+          {
+            "name": "state",
+            "type": "*_0_0_L_Pfn_Lc64_R_E_gc64_mc64_R"
+          },
+          {
+            "name": "_0",
+            "type": "c64"
+          }
+        ],
+        "body": [
+          {
+            "type": "return",
+            "value": {
+              "lhs": {
+                "arguments": [
+                  {
+                    "name": "_0",
+                    "type": "value"
+                  }
+                ],
+                "function": {
+                  "child": {
+                    "name": "state",
+                    "type": "value"
+                  },
+                  "type": "->"
+                },
+                "type": "pointer_call"
+              },
+              "rhs": {
+                "child": {
+                  "name": "state",
+                  "type": "value"
+                },
+                "index": 1,
+                "type": "->"
+              },
+              "type": "-"
+            }
+          }
+        ],
+        "name": "_0_0_L_Pfn_Lc64_R_E_gc64_mc64_R_0fn",
+        "return_type": "c64",
+        "type": "function"
+      },
+      "function__pointers_Dfn__pointer__complex": {
+        "name": "function__pointers_Dfn__pointer__complex",
+        "ty": "fn(c64)=>c64",
+        "type": "init",
+        "value": {
+          "child": {
+            "name": "function__pointers_Dtest__fn_ac64",
+            "type": "value"
+          },
+          "type": "&"
+        }
+      },
+      "function__pointers_Dtest__fn_ac64": {
+        "arguments": [
+          {
+            "name": "x",
+            "type": "c64"
+          }
+        ],
+        "body": [
+          {
+            "type": "return",
+            "value": {
+              "name": "x",
+              "type": "value"
+            }
+          }
+        ],
+        "name": "function__pointers_Dtest__fn_ac64",
+        "return_type": "c64",
+        "type": "function"
+      },
+      "main": {
+        "arguments": [],
+        "body": [
+          {
+            "name": "x",
+            "ty": "c64",
+            "type": "init",
+            "value": {
+              "a": 1.0,
+              "ty": "c64",
+              "type": "complex"
+            }
+          },
+          {
+            "name": "y",
+            "ty": "c64",
+            "type": "init",
+            "value": {
+              "a": 1.0,
+              "ty": "c64",
+              "type": "complex"
+            }
+          },
+          {
+            "name": "z",
+            "ty": "_0_0_L_Pfn_Lc64_R_E_gc64_mc64_R",
+            "type": "init",
+            "value": {
+              "ty": "_0_0_L_Pfn_Lc64_R_E_gc64_mc64_R",
+              "type": "object",
+              "values": [
+                {
+                  "name": "function__pointers_Dfn__pointer__complex",
+                  "type": "value"
+                },
+                {
+                  "name": "y",
+                  "type": "value"
+                }
+              ]
+            }
+          },
+          {
+            "arguments": [
+              {
+                "child": {
+                  "name": "z",
+                  "type": "value"
+                },
+                "type": "&&"
+              },
+              {
+                "name": "x",
+                "type": "value"
+              }
+            ],
+            "function": "_0_0_L_Pfn_Lc64_R_E_gc64_mc64_R_0fn",
+            "type": "call"
+          }
+        ],
+        "name": "main",
+        "return_type": "void",
+        "type": "function"
+      }
+    },
+    "POINTER_POINTER": {
+      "_0_0_L_Pfn_Li64_R_E_gi64_m_Pfn_Li64_R_E_gi64_R": "{fn(i64)=>i64,fn(i64)=>i64}",
+      "_0_0_L_Pfn_Li64_R_E_gi64_m_Pfn_Li64_R_E_gi64_R_0fn": {
+        "arguments": [
+          {
+            "name": "state",
+            "type": "*_0_0_L_Pfn_Li64_R_E_gi64_m_Pfn_Li64_R_E_gi64_R"
+          },
+          {
+            "name": "_0",
+            "type": "i64"
+          }
+        ],
+        "body": [
+          {
+            "type": "return",
+            "value": {
+              "lhs": {
+                "arguments": [
+                  {
+                    "name": "_0",
+                    "type": "value"
+                  }
+                ],
+                "function": {
+                  "child": {
+                    "name": "state",
+                    "type": "value"
+                  },
+                  "type": "->"
+                },
+                "type": "pointer_call"
+              },
+              "rhs": {
+                "arguments": [
+                  {
+                    "name": "_0",
+                    "type": "value"
+                  }
+                ],
+                "function": {
+                  "child": {
+                    "name": "state",
+                    "type": "value"
+                  },
+                  "index": 1,
+                  "type": "->"
+                },
+                "type": "pointer_call"
+              },
+              "type": "-"
+            }
+          }
+        ],
+        "name": "_0_0_L_Pfn_Li64_R_E_gi64_m_Pfn_Li64_R_E_gi64_R_0fn",
+        "return_type": "i64",
+        "type": "function"
+      },
+      "function__pointers_Dfn__pointer__integer": {
+        "name": "function__pointers_Dfn__pointer__integer",
+        "ty": "fn(i64)=>i64",
+        "type": "init",
+        "value": {
+          "child": {
+            "name": "function__pointers_Dtest__fn_ai64",
+            "type": "value"
+          },
+          "type": "&"
+        }
+      },
+      "function__pointers_Dtest__fn_ai64": {
+        "arguments": [
+          {
+            "name": "x",
+            "type": "i64"
+          }
+        ],
+        "body": [
+          {
+            "type": "return",
+            "value": {
+              "name": "x",
+              "type": "value"
+            }
+          }
+        ],
+        "name": "function__pointers_Dtest__fn_ai64",
+        "return_type": "i64",
+        "type": "function"
+      },
+      "main": {
+        "arguments": [],
+        "body": [
+          {
+            "name": "x",
+            "ty": "i64",
+            "type": "init",
+            "value": {
+              "ty": "i64",
+              "type": "integer",
+              "value": 1
+            }
+          },
+          {
+            "name": "y",
+            "ty": "i64",
+            "type": "init",
+            "value": {
+              "ty": "i64",
+              "type": "integer",
+              "value": 1
+            }
+          },
+          {
+            "name": "z",
+            "ty": "_0_0_L_Pfn_Li64_R_E_gi64_m_Pfn_Li64_R_E_gi64_R",
+            "type": "init",
+            "value": {
+              "ty": "_0_0_L_Pfn_Li64_R_E_gi64_m_Pfn_Li64_R_E_gi64_R",
+              "type": "object",
+              "values": [
+                {
+                  "name": "function__pointers_Dfn__pointer__integer",
+                  "type": "value"
+                },
+                {
+                  "name": "function__pointers_Dfn__pointer__integer",
+                  "type": "value"
+                }
+              ]
+            }
+          },
+          {
+            "arguments": [
+              {
+                "child": {
+                  "name": "z",
+                  "type": "value"
+                },
+                "type": "&&"
+              },
+              {
+                "name": "x",
+                "type": "value"
+              }
+            ],
+            "function": "_0_0_L_Pfn_Li64_R_E_gi64_m_Pfn_Li64_R_E_gi64_R_0fn",
+            "type": "call"
+          },
+          {
+            "arguments": [
+              {
+                "child": {
+                  "name": "z",
+                  "type": "value"
+                },
+                "type": "&&"
+              },
+              {
+                "name": "y",
+                "type": "value"
+              }
+            ],
+            "function": "_0_0_L_Pfn_Li64_R_E_gi64_m_Pfn_Li64_R_E_gi64_R_0fn",
+            "type": "call"
+          }
+        ],
+        "name": "main",
+        "return_type": "void",
+        "type": "function"
+      }
+    }
   }
 ]
