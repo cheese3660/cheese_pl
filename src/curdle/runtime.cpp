@@ -17,6 +17,8 @@
 #include "curdle/types/TypeType.h"
 #include "curdle/types/VoidType.h"
 #include "curdle/types/ErrorType.h"
+#include "curdle/values/BuiltinFunctionReference.h"
+#include "curdle/builtin.h"
 
 
 namespace cheese::curdle {
@@ -82,6 +84,17 @@ namespace cheese::curdle {
                 auto arg_nodes = call->args;
                 ConcreteFunction *function = get_function(rctx, cctx, empty_ctx, function_set->set, arg_nodes);
                 return {gc, function->returnType};
+            }
+            if (auto builtin = dynamic_cast<BuiltinFunctionReference *>(ctime); builtin) {
+                std::vector<parser::Node *> args;
+                for (auto &arg: call->args) {
+                    args.push_back(arg.get());
+                }
+                if (builtin->builtin->runtime) {
+                    return builtin->builtin->type_of(call->location, lctx, args);
+                } else {
+                    return {gc, builtin->builtin->exec(call->location, args, cctx, rctx)->type};
+                }
             }
             NOT_IMPL_FOR(typeid(*ctime).name());
         } else if (auto subscript = dynamic_cast<parser::nodes::Subscription *>(call->object.get()); subscript) {
@@ -211,6 +224,80 @@ namespace cheese::curdle {
     }
 
 
+    gcref<Type> get_subscript_type(LocalContext *lctx, parser::nodes::Subscription *subscription) {
+        auto rctx = lctx->runtime;
+        auto cctx = rctx->comptime;
+        auto gctx = cctx->globalContext;
+        auto &gc = gctx->gc;
+        auto subscript_type = rctx->get_type(subscription->lhs.get());
+        auto subscript_ptr = subscript_type.get();
+        bool reference = false;
+#define WHEN_SUBSCRIPT_IS(type, name) if (auto name = dynamic_cast<type*>(subscript_ptr); name != nullptr)
+#define WHEN_KEY_IS(type, name) if (auto name = dynamic_cast<type*>(subscription->rhs.get()); name != nullptr)
+        WHEN_SUBSCRIPT_IS(ReferenceType, pReferenceType) {
+            reference = true;
+            subscript_ptr = pReferenceType->child;
+        }
+        WHEN_SUBSCRIPT_IS(TypeType, pTypeType) {
+            auto value = cctx->exec(subscription->lhs.get(), rctx);
+            auto type = dynamic_cast<ComptimeType *>(value.get());
+            if (auto struct_type = dynamic_cast<Structure *>(type->typeValue); struct_type) {
+                WHEN_KEY_IS(parser::nodes::ValueReference, pValueReference) {
+                    auto &name = pValueReference->name;
+                    struct_type->resolve_by_name(name);
+                    try {
+                        auto child = struct_type->get_child_comptime(name, gctx);
+                        return {gc, child->type};
+                    } catch (const CurdleError &comptime_error) {
+                        if (struct_type->top_level_variables.contains(name)) {
+                            auto var = struct_type->top_level_variables[name];
+                            // I *really* need to add access control with like a `can_access_private_variables_from(struct* other)` to a structure, but that's not necessary just yet
+                            return {gc, var.type};
+                        }
+                    }
+                } else {
+                    throw LocalizedCurdleError{
+                            "invalid key type " + std::string(typeid(*subscription->rhs.get()).name()) +
+                            " for structure child reference", subscription->rhs->location,
+                            error::ErrorCode::InvalidSubscript};
+                }
+            } else {
+                NOT_IMPL_FOR(typeid(*type->typeValue).name());
+            }
+        }
+        WHEN_SUBSCRIPT_IS(Structure, pStructure) {
+            // This is the hellish part, innit?
+            WHEN_KEY_IS(parser::nodes::ValueReference, pValueReference) {
+                if (pStructure->is_tuple) {
+                    throw LocalizedCurdleError{
+                            "Attempting to use non integer index into a tuple structure: " + pStructure->to_string(),
+                            subscription->rhs->location, error::ErrorCode::InvalidSubscript};
+                } else {
+                    for (int i = 0; i < pStructure->fields.size(); i++) {
+                        auto &field = pStructure->fields[i];
+                        if (field.name == pValueReference->name) {
+                            // This is where we just return the operator to get a field
+                            return {gc, field.type};
+                        }
+                    }
+                }
+            }
+            WHEN_KEY_IS(parser::nodes::IntegerLiteral, pIntegerLiteral) {
+                if (pStructure->is_tuple) {
+                    return {gc, pStructure->fields[pIntegerLiteral->value].type};
+                } else {
+                    throw LocalizedCurdleError{
+                            "Attempting to use an integer index into a non tuple structure: " + pStructure->to_string(),
+                            subscription->rhs->location, error::ErrorCode::InvalidSubscript};
+                }
+
+            }
+        }
+        NOT_IMPL_FOR(typeid(*subscript_ptr).name());
+#undef WHEN_SUBSCRIPT_IS
+#undef WHEN_KEY_IS
+    }
+
     // Might want to make this return a gcref, as it might at some point create new types, but it shouldn't
     gcref<Type> LocalContext::get_type(parser::Node *node) {
         auto gctx = runtime->comptime->globalContext;
@@ -333,38 +420,7 @@ namespace cheese::curdle {
                 return {gc, TypeType::get(gctx)};
             }
             WHEN_NODE_IS(parser::nodes::Subscription, pSubscription) {
-                auto subscript_type = runtime->get_type(pSubscription->lhs.get());
-                auto identifier = dynamic_cast<parser::nodes::ValueReference *>(pSubscription->rhs.get());
-                auto structure = dynamic_cast<Structure *>(subscript_type.get());
-                std::string name;
-                if (!structure) {
-                    auto ref = dynamic_cast<ReferenceType *>(subscript_type.get());
-                    if (!ref || !(structure = dynamic_cast<Structure *>(ref->child))) {
-                        NOT_IMPL_FOR("Non structure subscriptions");
-                    }
-                }
-                if (!identifier) {
-                    auto integer = dynamic_cast<parser::nodes::IntegerLiteral *>(pSubscription->rhs.get());
-                    if (integer) {
-                        if (structure->is_tuple) {
-                            name = "_" + static_cast<std::string>(integer->value);
-                        } else {
-                            throw LocalizedCurdleError(
-                                    "Invalid Subscript: Attempting to tuple index a non-tuple structure",
-                                    pSubscription->location, error::ErrorCode::InvalidSubscript);
-                        }
-                    } else {
-                        NOT_IMPL_FOR("Non identifier subscriptions");
-                    }
-                } else {
-                    name = identifier->name;
-                }
-                for (auto &field: structure->fields) {
-                    if (field.name == name) {
-                        return {gc, field.type};
-                    }
-                }
-                NOT_IMPL_FOR("Possible traits");
+                return get_subscript_type(this, pSubscription);
             }
             WHEN_NODE_IS(parser::nodes::Self, pSelf) {
                 return {gc, runtime->get("self")->type};

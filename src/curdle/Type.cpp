@@ -15,6 +15,9 @@
 #include "curdle/types/ComptimeComplexType.h"
 #include "curdle/types/Complex64Type.h"
 #include "curdle/types/BooleanType.h"
+#include "curdle/types/VoidType.h"
+#include "curdle/types/ComposedFunctionType.h"
+#include "curdle/types/FunctionPointerType.h"
 
 namespace cheese::curdle {
 
@@ -80,4 +83,83 @@ namespace cheese::curdle {
 #undef TRIVIAL
         return false;
     }
+
+    memory::garbage_collection::gcref<Type>
+    binary_result_type(enums::SimpleOperation op, Type *a, Type *b, cheese::project::GlobalContext *gctx) {
+        if (trivial_arithmetic_type(a) && trivial_arithmetic_type(b)) {
+            switch (op) {
+                case enums::SimpleOperation::Multiplication:
+                case enums::SimpleOperation::Division:
+                case enums::SimpleOperation::Remainder:
+                case enums::SimpleOperation::Addition:
+                case enums::SimpleOperation::Subtraction:
+                case enums::SimpleOperation::LeftShift:
+                case enums::SimpleOperation::RightShift:
+                case enums::SimpleOperation::And:
+                case enums::SimpleOperation::Or:
+                case enums::SimpleOperation::Xor:
+                    return peer_type({a, b}, gctx);
+                case enums::SimpleOperation::LesserThan:
+                case enums::SimpleOperation::GreaterThan:
+                case enums::SimpleOperation::LesserThanOrEqualTo:
+                case enums::SimpleOperation::GreaterThanOrEqualTo:
+                case enums::SimpleOperation::EqualTo:
+                case enums::SimpleOperation::NotEqualTo:
+                    return {gctx->gc, BooleanType::get(gctx)};
+            }
+        }
+        if (is_functional_type(a) || is_functional_type(b)) {
+            return {gctx->gc, ComposedFunctionType::get(gctx, op, {a, b})};
+        }
+
+
+        return {gctx->gc, VoidType::get(gctx)};
+    }
+
+    memory::garbage_collection::gcref<Type>
+    unary_result_type(enums::SimpleOperation op, Type *t, cheese::project::GlobalContext *gctx) {
+        if (trivial_arithmetic_type(t)) {
+            return {gctx->gc, t};
+        } else if (is_functional_type(t)) {
+            return {gctx->gc, ComposedFunctionType::get(gctx, op, {t})};
+        }
+        return {gctx->gc, VoidType::get(gctx)};
+    }
+
+    bool is_functional_type(Type *type) {
+#define FUNCTIONAL(T) if (dynamic_cast<T*>(type)) return true
+        FUNCTIONAL(FunctionPointerType);
+        FUNCTIONAL(ComposedFunctionType);
+#undef FUNCTIONAL
+        return false;
+    }
+
+    memory::garbage_collection::gcref<Type>
+    get_functional_return_type(Type *type, cheese::project::GlobalContext *gctx) {
+#define WHEN_FUNCTIONAL_IS(T, name) if (auto name = dynamic_cast<T*>(type); name)
+        WHEN_FUNCTIONAL_IS(FunctionPointerType, pFunctionPointerType) {
+            return {gctx->gc, pFunctionPointerType->return_type};
+        }
+        WHEN_FUNCTIONAL_IS(ComposedFunctionType, pComposedFunctionType) {
+            return pComposedFunctionType->get_return_type(gctx);
+        }
+        NOT_IMPL_FOR(typeid(*type).name());
+    }
+
+    std::vector<memory::garbage_collection::gcref<Type>>
+    get_functional_argument_types(Type *type, cheese::project::GlobalContext *gctx) {
+        WHEN_FUNCTIONAL_IS(FunctionPointerType, pFunctionPointerType) {
+            std::vector<gcref<Type>> result = {};
+            for (const auto &ty: pFunctionPointerType->argument_types) {
+                result.emplace_back(gctx->gc, ty);
+            }
+            return result;
+        }
+        WHEN_FUNCTIONAL_IS(ComposedFunctionType, pComposedFunctionType) {
+            return pComposedFunctionType->get_argument_types(gctx);
+        }
+#undef WHEN_FUNCTIONAL_IS
+        NOT_IMPL_FOR(typeid(*type).name());
+    }
+
 }

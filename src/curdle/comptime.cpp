@@ -28,6 +28,8 @@
 #include "curdle/types/Complex64Type.h"
 #include "curdle/values/ComptimeComplex.h"
 #include "curdle/types/ComptimeComplexType.h"
+#include "curdle/values/ComptimeEnumLiteral.h"
+#include "curdle/types/ComptimeEnumType.h"
 
 
 namespace cheese::curdle {
@@ -289,6 +291,9 @@ namespace cheese::curdle {
 
             WHEN_NODE_IS(parser::nodes::ImaginaryLiteral, pImaginaryLiteral) {
                 return gc.gcnew<ComptimeComplex>(0, pImaginaryLiteral->value, ComptimeComplexType::get(globalContext));
+            }
+            WHEN_NODE_IS(parser::nodes::EnumLiteral, pEnumLiteral) {
+                return gc.gcnew<ComptimeEnumLiteral>(pEnumLiteral->name, ComptimeEnumType::get(globalContext));
             }
 
 #define BIN_OP(name) return lhs->op_##name(globalContext,rhs)

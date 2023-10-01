@@ -149,7 +149,18 @@ namespace cheese::curdle {
                     return;
                 }
             } else {
-
+                auto lctx = gc.gcnew<LocalContext>(rctx);
+                lctx->expected_type = result_type;
+                auto varName = definition->flags.exter ? lazy->name : mangle(
+                        name.empty() ? lazy->name : name + "." + lazy->name);
+                gctx->global_receiver->receive(
+                        std::make_unique<bacteria::nodes::VariableInitializationNode>(lazy->node->location, varName,
+                                                                                      result_type->get_cached_type(
+                                                                                              gctx->global_receiver.get()),
+                                                                                      curdle::translate_expression(lctx,
+                                                                                                                   pVariableDeclaration->value)));
+                lazy = nullptr;
+                return;
             }
 
         }

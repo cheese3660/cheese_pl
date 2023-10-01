@@ -37,7 +37,8 @@ namespace cheese::bacteria::nodes {
                          BacteriaType *subtype = {},
                          const std::vector<std::size_t> &arrayDimensions = {},
                          const std::vector<BacteriaType *> &childTypes = {},
-                         const std::string &structName = {});
+                         const std::string &structName = {},
+                         const bool externFn = {});
 
 
         ~BacteriaProgram() override {

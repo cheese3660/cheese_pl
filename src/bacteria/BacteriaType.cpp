@@ -65,6 +65,18 @@ namespace cheese::bacteria {
                 return "usize";
             case Type::SignedSize:
                 return "isize";
+            case Type::FunctionPointer: {
+                std::stringstream ss{};
+                ss << "fn(";
+                for (int i = 0; i < child_types.size(); i++) {
+                    ss << child_types[i]->to_string();
+                    if (i < child_types.size() - 1) {
+                        ss << ",";
+                    }
+                }
+                ss << ")=>" << subtype->to_string();
+                return ss.str();
+            }
             default:
                 return "unknown";
         }
@@ -74,9 +86,10 @@ namespace cheese::bacteria {
                                BacteriaType *subtype,
                                const std::vector<std::size_t> &arrayDimensions,
                                const std::vector<BacteriaType *> &childTypes,
-                               const std::string &structName) : type(type), integer_size(
+                               const std::string &structName,
+                               const bool externFn) : type(type), integer_size(
             integerSize), subtype(subtype), array_dimensions(arrayDimensions), child_types(childTypes),
-                                                                struct_name(structName) {}
+                                                      struct_name(structName), extern_fn(externFn) {}
 
     llvm::Type *BacteriaType::get_llvm_type(cheese::project::GlobalContext *ctx) {
         if (cached_llvm_type) return cached_llvm_type;
@@ -134,8 +147,6 @@ namespace cheese::bacteria {
                                                                         }));
                 break;
             case Type::Reference:
-                cached_llvm_type = llvm::PointerType::get(subtype->get_llvm_type(ctx), ctx->machine.data_pointer_addr);
-                break;
             case Type::Pointer:
                 cached_llvm_type = llvm::PointerType::get(subtype->get_llvm_type(ctx), ctx->machine.data_pointer_addr);
                 break;
@@ -151,6 +162,30 @@ namespace cheese::bacteria {
                 struct_type->setBody(arr);
                 break;
             }
+            case Type::FunctionPointer: {
+                auto vec = std::vector<llvm::Type *>{};
+                bool voidReturnType = false;
+                if (subtype->should_implicit_reference()) {
+                    voidReturnType = true;
+                    auto retParam = llvm::PointerType::get(subtype->get_llvm_type(ctx), ctx->machine.data_pointer_addr);
+                    vec.push_back(retParam);
+                }
+                for (const auto &ty: child_types) {
+                    std::vector<llvm::Attribute::AttrKind> param_attributes;
+                    auto child = ty->get_llvm_type(ctx);
+                    if (ty->should_implicit_reference()) {
+                        vec.push_back(llvm::PointerType::get(child, ctx->machine.data_pointer_addr));
+                    } else {
+                        vec.push_back(child);
+                    }
+                }
+                auto arr = llvm::ArrayRef<llvm::Type *>{vec};
+                auto fn_type = llvm::FunctionType::get(
+                        voidReturnType ? llvm::Type::getVoidTy(ctx->llvm_context) : subtype->get_llvm_type(ctx), arr,
+                        false);
+                cached_llvm_type = llvm::PointerType::get(fn_type, ctx->machine.function_pointer_addr);
+                break;
+            }
         }
         return cached_llvm_type;
     }
@@ -161,7 +196,8 @@ namespace cheese::bacteria {
 
     bool BacteriaType::matches(BacteriaType::Type otherType, uint16_t integerSize, BacteriaType *otherSubtype,
                                const std::vector<std::size_t> &arrayDimensions,
-                               const std::vector<BacteriaType *> &childTypes, const std::string &structName) {
+                               const std::vector<BacteriaType *> &childTypes, const std::string &structName,
+                               const bool externFn) {
         if (otherType != this->type) return false;
         switch (type) {
             case Type::Opaque:
@@ -186,14 +222,41 @@ namespace cheese::bacteria {
             case Type::Object:
                 if (structName != struct_name) return false;
                 if (struct_name.empty()) {
-                    if (childTypes.size() != child_types.size()) return false;
-                    for (auto i = 0; i < childTypes.size(); i++) {
-                        if (childTypes[i] != child_types[i]) return false;
-                    }
                     return true;
                 } else {
                     return true; // As these kinda have to be the same, struct names are globally unique
                 }
+            case Type::FunctionPointer: {
+                if (childTypes.size() != child_types.size()) return false;
+                for (auto i = 0; i < childTypes.size(); i++) {
+                    if (childTypes[i] != child_types[i]) return false;
+                }
+                return subtype == otherSubtype && extern_fn == externFn;
+            }
+        }
+    }
+
+    bool BacteriaType::should_implicit_reference() {
+        switch (type) {
+            case Type::Opaque:
+            case Type::Void:
+            case Type::Noreturn:
+            case Type::UnsignedInteger:
+            case Type::UnsignedSize:
+            case Type::SignedInteger:
+            case Type::SignedSize:
+            case Type::Float32:
+            case Type::Float64:
+            case Type::Complex32:
+            case Type::Complex64:
+            case Type::Slice:
+            case Type::Reference:
+            case Type::Pointer:
+            case Type::FunctionPointer:
+                return false;
+            case Type::Array:
+            case Type::Object:
+                return true;
         }
     }
 }

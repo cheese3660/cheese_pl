@@ -10,6 +10,7 @@
 #include "memory/garbage_collection.h"
 #include "project/GlobalContext.h"
 #include "bacteria/nodes/reciever_nodes.h"
+#include "curdle/enums/SimpleOperation.h"
 
 namespace cheese::curdle {
 #define PEER_TYPE_CATCH_ANY() if (dynamic_cast<AnyType*>(other)) return gcref{gctx->gc,this}
@@ -59,7 +60,21 @@ namespace cheese::curdle {
 
     memory::garbage_collection::gcref<Type> peer_type(std::vector<Type *> types, cheese::project::GlobalContext *gctx);
 
+    memory::garbage_collection::gcref<Type>
+    binary_result_type(enums::SimpleOperation op, Type *a, Type *b, cheese::project::GlobalContext *gctx);
+
+    memory::garbage_collection::gcref<Type>
+    unary_result_type(enums::SimpleOperation op, Type *t, cheese::project::GlobalContext *gctx);
+
     bool trivial_arithmetic_type(Type *type);
+
+    bool is_functional_type(Type *type);
+
+    memory::garbage_collection::gcref<Type>
+    get_functional_return_type(Type *type, cheese::project::GlobalContext *gctx);
+
+    std::vector<memory::garbage_collection::gcref<Type>>
+    get_functional_argument_types(Type *type, cheese::project::GlobalContext *gctx);
 }
 #define INVALID_CHILD throw CurdleError("key not a comptime child of type " + to_string() + ": " + key, error::ErrorCode::InvalidSubscript)
 #define CATCH_DUNDER_NAME do { if (key == "__name__") { return gctx->gc.gcnew<ComptimeString>(to_string(), ComptimeStringType::get(gctx)); } } while(0)

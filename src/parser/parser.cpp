@@ -2272,7 +2272,7 @@ namespace cheese::parser {
 //                if (err.has_value()) {
 //                    return err.value();
 //                }
-//                return (new nodes::EnumLiteral(location, id))->get();
+//                return (new nodes::ComptimeEnumLiteral(location, id))->get();
 //            }},
 //            {Any,single_value<nodes::AnyType>},
 //            {Object, PARSE_TO_VALUE {

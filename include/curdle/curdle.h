@@ -23,6 +23,8 @@ using namespace cheese::project;
 namespace cheese::curdle {
     std::unique_ptr<bacteria::BacteriaNode> curdle(cheese::project::GlobalContext *gctx);
 
+    bacteria::BacteriaPtr translate_expression(LocalContext *lctx, parser::NodePtr expr);
+
     gcref<Structure>
     translate_structure(ComptimeContext *ctx, parser::nodes::Structure *structure_node);
 

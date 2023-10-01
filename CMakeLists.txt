@@ -159,7 +159,30 @@ add_executable(
         src/curdle/types/BuiltinReferenceType.cpp
         include/curdle/types/ErrorType.h
         src/curdle/types/ErrorType.cpp
-        include/curdle/types/Complex64Type.h src/curdle/types/Complex64Type.cpp include/curdle/types/ComptimeComplexType.h src/curdle/types/ComptimeComplexType.cpp include/project/Machine.h include/util/llvm_utils.h src/util/llvm_utils.cpp include/util/Endianness.h include/curdle/values/ComptimeBool.h src/curdle/values/ComptimeBool.cpp src/bacteria/BacteriaReceiver.cpp include/curdle/types/ComptimeStringType.h src/curdle/types/ComptimeStringType.cpp)
+        include/curdle/types/Complex64Type.h
+        src/curdle/types/Complex64Type.cpp
+        include/curdle/types/ComptimeComplexType.h
+        src/curdle/types/ComptimeComplexType.cpp
+        include/project/Machine.h
+        include/util/llvm_utils.h
+        src/util/llvm_utils.cpp
+        include/util/Endianness.h
+        include/curdle/values/ComptimeBool.h
+        src/curdle/values/ComptimeBool.cpp
+        src/bacteria/BacteriaReceiver.cpp
+        include/curdle/types/ComptimeStringType.h
+        src/curdle/types/ComptimeStringType.cpp
+        include/curdle/types/FunctionPointerType.h
+        src/curdle/types/FunctionPointerType.cpp
+        include/curdle/types/ComptimeEnumType.h
+        src/curdle/types/ComptimeEnumType.cpp
+        include/curdle/values/ComptimeEnumLiteral.h
+        src/curdle/values/ComptimeEnumLiteral.cpp
+        include/curdle/types/ComposedFunctionType.h
+        include/curdle/types/ComptimeComposedFunctionType.h
+        include/curdle/enums/SimpleOperation.h
+        src/curdle/types/ComposedFunctionType.cpp
+        src/curdle/enums/SimpleOperation.cpp)
 if (UNIX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++ -Wall")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++ -lc++abi")

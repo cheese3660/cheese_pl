@@ -13,6 +13,7 @@
 #include "curdle/comptime.h"
 #include "bacteria/nodes/expression_nodes.h"
 #include "project/GlobalContext.h"
+#include "curdle/types/VoidType.h"
 
 using namespace cheese::project;
 
@@ -51,17 +52,22 @@ namespace cheese::curdle {
         }
 
         Builtin(bacteria::BacteriaPtr
-                (*runtime_function)(Coordinate location, LocalContext *ctx, std::vector<parser::Node *> arguments))
+                (*runtime_function)(Coordinate location, LocalContext *ctx, std::vector<parser::Node *> arguments),
+                gcref<Type> (*type_of_function)(Coordinate location, LocalContext *ctx,
+                                                std::vector<parser::Node *> arguments))
                 : comptime(false), runtime(true), runtime_function(runtime_function), comptime_function(nullptr),
-                  get_function(nullptr) {}
+                  get_function(nullptr), type_of_function(type_of_function) {}
 
         Builtin(gcref<ComptimeValue>
                 (*comptime_function)(Coordinate location, std::vector<parser::Node *> arguments, ComptimeContext *cctx,
                                      RuntimeContext *rctx),
                 bacteria::BacteriaPtr
-                (*runtime_function)(Coordinate location, LocalContext *ctx, std::vector<parser::Node *> arguments))
+                (*runtime_function)(Coordinate location, LocalContext *ctx, std::vector<parser::Node *> arguments),
+                gcref<Type> (*type_of_function)(Coordinate location, LocalContext *ctx,
+                                                std::vector<parser::Node *> arguments))
                 : comptime(true), runtime(true), comptime_function(comptime_function),
-                  runtime_function(runtime_function) {}
+                  runtime_function(runtime_function),
+                  type_of_function(type_of_function) {}
         // Now we must define the entire builtin structure that will be used
 
         bool comptime;
@@ -98,6 +104,17 @@ namespace cheese::curdle {
             return runtime_function(location, ctx, std::move(arguments));
         }
 
+        gcref<Type> type_of(Coordinate location, LocalContext *ctx, std::vector<parser::Node *> arguments) {
+            if (!runtime) {
+                ctx->runtime->comptime->globalContext->raise(
+                        "Bad Builtin Call: Attempting to get the type of a non-runtime builtin at runtime", location,
+                        error::ErrorCode::BadBuiltinCall);
+                return {ctx->runtime->comptime->globalContext->gc,
+                        VoidType::get(ctx->runtime->comptime->globalContext)};
+            }
+            return type_of_function(location, ctx, std::move(arguments));
+        }
+
         gcref<ComptimeValue>
         get(Coordinate location, ComptimeContext *cctx, RuntimeContext *rctx) {
             if (comptime || runtime) {
@@ -118,6 +135,8 @@ namespace cheese::curdle {
         gcref<ComptimeValue>
         (*get_function)(Coordinate location, ComptimeContext *cctx, RuntimeContext *rctx);
 
+        gcref<Type> (*type_of_function)(Coordinate location, LocalContext *ctx, std::vector<parser::Node *> arguments);
+
         // We might add a third value for "getting a cached value" when its a single value builtin
     };
 
@@ -135,5 +154,6 @@ namespace cheese::curdle {
 #define BUILTIN_NAME(a) BUILTIN_NAME_MERGE(builtin_,a)
 #define BUILTIN(name, value) static BuiltinWrapper BUILTIN_NAME(__LINE__){name, Builtin{value}};
 #define BUILTIN2(name, funct, funct2) static BuiltinWrapper BUILTIN_NAME(__LINE__){name, Builtin{funct,funct2}};
+#define BUILTIN3(name, funct, funct2, funct3) static BuiltinWrapper BUILTIN_NAME(__LINE__){name, Builtin{funct,funct2,funct3}};
 
 #endif //CHEESE_BUILTIN_H

@@ -34,6 +34,7 @@
 #include "curdle/values/ComptimeObject.h"
 #include "curdle/types/Float64Type.h"
 #include "curdle/values/ComptimeComplex.h"
+#include "curdle/values/BuiltinFunctionReference.h"
 
 using namespace cheese::memory::garbage_collection;
 
@@ -248,6 +249,8 @@ namespace cheese::curdle {
                                                                  std::move(actual_arguments));
     }
 
+    bacteria::BacteriaPtr translate_comptime(LocalContext *lctx, Coordinate location, ComptimeValue *value);
+
     bacteria::BacteriaPtr translate_tuple_call(LocalContext *lctx, parser::nodes::TupleCall *call) {
         // Now we try to do the fun thing and get the called object either as a comptime value, or runtime value
         // If it's a compile time value then that's *cool* it makes our jobs easier
@@ -264,6 +267,21 @@ namespace cheese::curdle {
                 auto location = call->location;
                 return generate_call(lctx, function, arguments, location);
             }
+            if (auto builtin = dynamic_cast<BuiltinFunctionReference *>(ctime); builtin) {
+                if (builtin->builtin->runtime) {
+                    std::vector<parser::Node *> args;
+                    for (const auto &ptr: call->args) {
+                        args.push_back(ptr.get());
+                    }
+                    return builtin->builtin->translate(call->location, lctx, args);
+                } else {
+                    throw LocalizedCurdleError{
+                            "Attempting to use a comptime builtin at runtime",
+                            call->location,
+                            error::ErrorCode::BadBuiltinCall
+                    };
+                }
+            }
             NOT_IMPL_FOR(typeid(*ctime).name());
         } else if (auto subscript = dynamic_cast<parser::nodes::Subscription *>(call->object.get()); subscript) {
             auto subscript_type = rctx->get_type(subscript->lhs.get());
@@ -279,7 +297,9 @@ namespace cheese::curdle {
                 }
             }
             // We are going to have to check interfaces and mixins at some point which will be fun, also function pointers
-            if (!structure->function_sets.contains(function->name));
+//            if (!structure->function_sets.contains(function->name)) {
+//
+//            }
             parser::NodeList arg_nodes{};
             arg_nodes.push_back(subscript->lhs);
             for (auto &arg: call->args) {
@@ -290,7 +310,11 @@ namespace cheese::curdle {
             return generate_call(lctx, function2, arg_nodes, call->location);
         } else {
             // Here is where we need to grab a function pointer and call the function pointer
-            NOT_IMPL_FOR("non compile time deductible functions");
+            auto fn_ty = rctx->get_type(call->object.get());
+//#define WHEN_FN_IS(ty, name) if (auto name == dynamic_cast<ty*>(fn_ty.get()); name)
+//#undef WHEN_FN_IS
+
+            NOT_IMPL_FOR("non compile time deductible functions of type " + typeid(*fn_ty.get()).name());
         }
     }
 
@@ -690,17 +714,90 @@ namespace cheese::curdle {
         auto subscript_ptr = subscript_type.get();
         bool reference = false;
 #define WHEN_SUBSCRIPT_IS(type, name) if (auto name = dynamic_cast<type*>(subscript_ptr); name != nullptr)
-#define WHEN_KEY_IS(type, name) if (auto type = dynamic_cast<type*>(subscription->rhs.get); name != nullptr)
+#define WHEN_KEY_IS(type, name) if (auto name = dynamic_cast<type*>(subscription->rhs.get()); name != nullptr)
         WHEN_SUBSCRIPT_IS(ReferenceType, pReferenceType) {
             reference = true;
             subscript_ptr = pReferenceType->child;
         }
         WHEN_SUBSCRIPT_IS(TypeType, pTypeType) {
-            NOT_IMPL_FOR("types");
+            auto value = cctx->exec(subscription->lhs.get(), rctx);
+            auto type = dynamic_cast<ComptimeType *>(value.get());
+            if (auto struct_type = dynamic_cast<Structure *>(type->typeValue); struct_type) {
+                WHEN_KEY_IS(parser::nodes::ValueReference, pValueReference) {
+                    auto &name = pValueReference->name;
+                    struct_type->resolve_by_name(name);
+                    try {
+                        auto child = struct_type->get_child_comptime(name, gctx);
+                        return translate_comptime(lctx, subscription->location, value);
+                    } catch (const CurdleError &comptime_error) {
+                        if (struct_type->top_level_variables.contains(name)) {
+                            auto var = struct_type->top_level_variables[name];
+                            // I *really* need to add access control with like a `can_access_private_variables_from(struct* other)` to a structure, but that's not necessary just yet
+                            return std::make_unique<bacteria::nodes::ValueReference>(subscription->location,
+                                                                                     var.mangled_name);
+                        }
+                    }
+                } else {
+                    throw LocalizedCurdleError{
+                            "invalid key type " + std::string(typeid(*subscription->rhs.get()).name()) +
+                            " for structure child reference", subscription->rhs->location,
+                            error::ErrorCode::InvalidSubscript};
+                }
+            } else {
+                NOT_IMPL_FOR(typeid(*type->typeValue).name());
+            }
         }
         WHEN_SUBSCRIPT_IS(Structure, pStructure) {
             // This is the hellish part, innit?
-            
+            WHEN_KEY_IS(parser::nodes::ValueReference, pValueReference) {
+                if (pStructure->is_tuple) {
+                    throw LocalizedCurdleError{
+                            "Attempting to use non integer index into a tuple structure: " + pStructure->to_string(),
+                            subscription->rhs->location, error::ErrorCode::InvalidSubscript};
+                } else {
+                    for (int i = 0; i < pStructure->fields.size(); i++) {
+                        auto &field = pStructure->fields[i];
+                        if (field.name == pValueReference->name) {
+                            // This is where we just return the operator to get a field
+                            if (reference) {
+                                return std::make_unique<bacteria::nodes::ReferenceSubscriptNode>(subscription->location,
+                                                                                                 translate_expression(
+                                                                                                         lctx,
+                                                                                                         subscription->lhs),
+                                                                                                 i);
+                            } else {
+                                return std::make_unique<bacteria::nodes::ObjectSubscriptNode>(subscription->location,
+                                                                                              translate_expression(
+                                                                                                      lctx,
+                                                                                                      subscription->lhs),
+                                                                                              i);
+                            }
+                        }
+                    }
+                }
+            }
+            WHEN_KEY_IS(parser::nodes::IntegerLiteral, pIntegerLiteral) {
+                if (pStructure->is_tuple) {
+                    if (reference) {
+                        return std::make_unique<bacteria::nodes::ReferenceSubscriptNode>(subscription->location,
+                                                                                         translate_expression(
+                                                                                                 lctx,
+                                                                                                 subscription->lhs),
+                                                                                         pIntegerLiteral->value);
+                    } else {
+                        return std::make_unique<bacteria::nodes::ObjectSubscriptNode>(subscription->location,
+                                                                                      translate_expression(
+                                                                                              lctx,
+                                                                                              subscription->lhs),
+                                                                                      pIntegerLiteral->value);
+                    }
+                } else {
+                    throw LocalizedCurdleError{
+                            "Attempting to use an integer index into a non tuple structure: " + pStructure->to_string(),
+                            subscription->rhs->location, error::ErrorCode::InvalidSubscript};
+                }
+
+            }
         }
         NOT_IMPL_FOR(typeid(*subscript_ptr).name());
 #undef WHEN_SUBSCRIPT_IS
@@ -882,23 +979,6 @@ namespace cheese::curdle {
                 // It's time to redo this
 
                 /*
-                auto subscript_type = rctx->get_type(pSubscription->lhs.get());
-                auto subscript_ctx = gc.gcnew<LocalContext>(rctx, subscript_type);
-                auto identifier = dynamic_cast<parser::nodes::ValueReference *>(pSubscription->rhs.get());
-                std::string name;
-                auto structure = dynamic_cast<Structure *>(subscript_type.get());
-                bool reference = false;
-                if (!structure) {
-                    auto ref = dynamic_cast<ReferenceType *>(subscript_type.get());
-                    reference = ref;
-                    if (!ref) {
-                        NOT_IMPL_FOR("Non structure subscriptions");
-                    }
-                    if (!(structure = dynamic_cast<Structure *>(ref->child))) {
-                        NOT_IMPL_FOR("Non structure subscriptions");
-                    }
-                }
-                // This could be much more simplified TODO
                 if (!identifier) {
                     auto integer = dynamic_cast<parser::nodes::IntegerLiteral *>(pSubscription->rhs.get());
                     if (integer) {
