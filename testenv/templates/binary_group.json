@@ -69,12 +69,12 @@
     [
       "expressions: %NAME% (function pointer-integer)",
       "import function_pointers @ l\nfn main => void entry\n{let x: i64 = 1\nlet y: i64 = 1\nlet z = l.fn_pointer_integer%OPERATION%y\n_ = z(x)}",
-      {}
+      "@POINTER_INTEGER@"
     ],
     [
       "expressions: %NAME% (function pointer-float)",
       "import function_pointers @ l\nfn main => void entry\n{let x: f64 = 1.0\nlet y: f64 = 1.0\nlet z = l.fn_pointer_float%OPERATION%y\n_ = z(x)}",
-      {}
+      "@POINTER_FLOAT@"
     ],
     {
       ":match": "%OPERATION%",
@@ -82,13 +82,13 @@
       ":default": [
         "expressions: %NAME% (function pointer-complex)",
         "import function_pointers @ l\nfn main => void entry\n{let x: c64 = 1.0\nlet y: c64 = 1.0\nlet z = l.fn_pointer_complex%OPERATION%y\n_ = z(x)}",
-        {}
+        "@POINTER_COMPLEX@"
       ]
     },
     [
       "expressions: %NAME% (function pointer-function_pointer)",
-      "import function_pointers @ l\nfn main => void entry\n{let x: i64 = 1\nlet y: i64 = 1\nlet z = l.fn_pointer_integer%OPERATION%l.fn_pointer_integer\n_ = z(x,y)}",
-      {}
+      "import function_pointers @ l\nfn main => void entry\n{let x: i64 = 1\nlet y: i64 = 1\nlet z = l.fn_pointer_integer%OPERATION%l.fn_pointer_integer\n_ = z(x)\n_ = z(y)}",
+      "@POINTER_POINTER@"
     ]
   ]
 }

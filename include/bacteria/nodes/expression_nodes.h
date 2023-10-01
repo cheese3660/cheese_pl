@@ -89,7 +89,7 @@ namespace cheese::bacteria::nodes {
 
         JSON_FUNCS("nop", std::vector<std::string>{})
     };
-    
+
 
     struct IntegerLiteral : BacteriaNode {
         IntegerLiteral(const Coordinate &location, const math::BigInteger &value, TypePtr type) : BacteriaNode(
@@ -207,6 +207,32 @@ namespace cheese::bacteria::nodes {
         }
 
         JSON_FUNCS("call", { "function", "arguments" }, function, arguments)
+    };
+
+    struct PointerCallNode : BacteriaNode {
+        PointerCallNode(const Coordinate &location, BacteriaPtr function,
+                        std::vector<BacteriaPtr> arguments) : BacteriaNode(location), function(std::move(function)),
+                                                              arguments(std::move(arguments)) {}
+
+        BacteriaPtr function;
+        std::vector<BacteriaPtr> arguments;
+
+        ~PointerCallNode() override = default;
+
+        std::string get_textual_representation(int depth) override {
+            std::stringstream ss{};
+            ss << "(*" + function->get_textual_representation(depth) + ")" << '(';
+            for (int i = 0; i < arguments.size(); i++) {
+                ss << arguments[i]->get_textual_representation(depth);
+                if (i < arguments.size() - 1) {
+                    ss << ", ";
+                }
+            }
+            ss << ')';
+            return ss.str();
+        }
+
+        JSON_FUNCS("pointer_call", { "function", "arguments" }, function, arguments)
     };
 
     struct VariableInitializationNode : BacteriaNode {

@@ -249,7 +249,8 @@ namespace cheese::curdle {
                 full_operation = (new parser::nodes::TupleCall({0, 0, 0}, first, {second}))->get();
         }
         std::vector<bacteria::FunctionArgument> arguments = {};
-        arguments.emplace_back(get_cached_type(gctx->global_receiver.get()), "state");
+        arguments.emplace_back(gctx->global_receiver->get_type(bacteria::BacteriaType::Type::Reference, 0,
+                                                               get_cached_type(gctx->global_receiver.get())), "state");
         for (int i = 0; i < arg_types.size(); i++) {
             arguments.emplace_back(arg_types[i]->get_cached_type(gctx->global_receiver.get()), "_" + std::to_string(i));
         }

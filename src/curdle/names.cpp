@@ -29,7 +29,6 @@ namespace cheese::curdle {
         translations['$'] = 'd';
         translations['%'] = 'p';
         translations['\''] = 'q';
-        translations['+'] = 'a';
         translations['-'] = 'm';
         translations['/'] = 's';
         translations[':'] = '0';
@@ -44,6 +43,7 @@ namespace cheese::curdle {
         translations['|'] = '6';
         translations['}'] = '7';
         translations['?'] = '8';
+        translations['+'] = '9';
         for (auto translation: translations) {
             untranslations[translation.second] = translation.first;
         }

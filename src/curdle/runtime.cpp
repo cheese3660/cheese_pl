@@ -19,6 +19,8 @@
 #include "curdle/types/ErrorType.h"
 #include "curdle/values/BuiltinFunctionReference.h"
 #include "curdle/builtin.h"
+#include "curdle/types/ComposedFunctionType.h"
+#include "curdle/types/FunctionPointerType.h"
 
 
 namespace cheese::curdle {
@@ -98,32 +100,39 @@ namespace cheese::curdle {
             }
             NOT_IMPL_FOR(typeid(*ctime).name());
         } else if (auto subscript = dynamic_cast<parser::nodes::Subscription *>(call->object.get()); subscript) {
-            auto subscript_type = rctx->get_type(subscript->lhs.get()).get();
+            auto subscript_type = rctx->get_type(subscript->lhs.get());
             auto function = dynamic_cast<parser::nodes::ValueReference *>(subscript->rhs.get());
-            if (!function) {
-                NOT_IMPL_FOR("Possible function pointers");
-            }
-            auto structure = dynamic_cast<Structure *>(subscript_type);
-            if (!structure) {
-                auto ref = dynamic_cast<ReferenceType *>(subscript_type);
-                if (!(structure = dynamic_cast<Structure *>(ref->child))) {
-                    NOT_IMPL_FOR("Non structure subscriptions");
+            if (function) {
+                auto structure = dynamic_cast<Structure *>(subscript_type.get());
+
+                if (!structure) {
+                    auto ref = dynamic_cast<ReferenceType *>(subscript_type.get());
+                    structure = dynamic_cast<Structure *>(ref->child);
+                }
+                if (structure && structure->function_sets.contains(function->name)) {
+                    parser::NodeList arg_nodes{};
+                    arg_nodes.push_back(subscript->lhs);
+                    for (auto &arg: call->args) {
+                        arg_nodes.push_back(arg);
+                    }
+                    ConcreteFunction *function2 = get_function(rctx, cctx, empty_ctx,
+                                                               structure->function_sets[function->name],
+                                                               arg_nodes);
+                    return {gc, function2->returnType};
                 }
             }
-            // We are going to have to check interfaces and mixins at some point which will be fun, also function pointers
-            if (!structure->function_sets.contains(function->name));
-            parser::NodeList arg_nodes{};
-            arg_nodes.push_back(subscript->lhs);
-            for (auto &arg: call->args) {
-                arg_nodes.push_back(arg);
-            }
-            ConcreteFunction *function2 = get_function(rctx, cctx, empty_ctx, structure->function_sets[function->name],
-                                                       arg_nodes);
-            return {gc, function2->returnType};
-        } else {
-            auto obj = call->object.get();
-            NOT_IMPL_FOR("non compile time deductible functions of type " + typeid(*obj).name());
         }
+        auto fn_ty = lctx->get_type(call->object.get());
+#define WHEN_FN_IS(ty, name) if (auto name = dynamic_cast<ty*>(fn_ty.get()); name)
+        WHEN_FN_IS(ComposedFunctionType, pComposedFunctionType) {
+            return pComposedFunctionType->get_return_type(gctx);
+        }
+        WHEN_FN_IS(FunctionPointerType, pFunctionPointerType) {
+            return {gc, pFunctionPointerType->return_type};
+        }
+#undef WHEN_FN_IS
+
+        NOT_IMPL_FOR("non compile time deductible functions of type " + typeid(*fn_ty.get()).name());
     }
 
     Type *get_object_call_type(LocalContext *lctx, parser::nodes::ObjectCall *call) {
@@ -165,19 +174,19 @@ namespace cheese::curdle {
         }
     }
 
-    gcref<Type> getBinaryType(LocalContext *lctx, parser::NodePtr lhs, parser::NodePtr rhs) {
-        auto gctx = lctx->runtime->comptime->globalContext;
-        auto &gc = gctx->gc;
-        auto pair = lctx->get_binary_type(lhs.get(), rhs.get());
-        auto lhs_ty = pair.first.get();
-        auto rhs_ty = pair.second.get();
-        // Now we have to check if a type is a trivial arithmetic type
-        if (trivial_arithmetic_type(lhs_ty) && trivial_arithmetic_type(rhs_ty)) {
-            return gcref<Type>(gc, peer_type({lhs_ty, rhs_ty}, gctx));
-        } else {
-            NOT_IMPL_FOR(lhs_ty->to_string() + " & " + rhs_ty->to_string());
-        }
-    }
+//    gcref<Type> getBinaryType(LocalContext *lctx, parser::NodePtr lhs, parser::NodePtr rhs) {
+//        auto gctx = lctx->runtime->comptime->globalContext;
+//        auto &gc = gctx->gc;
+//        auto pair = lctx->get_binary_type(lhs.get(), rhs.get());
+//        auto lhs_ty = pair.first.get();
+//        auto rhs_ty = pair.second.get();
+//        // Now we have to check if a type is a trivial arithmetic type
+//        if (trivial_arithmetic_type(lhs_ty) && trivial_arithmetic_type(rhs_ty)) {
+//            return gcref<Type>(gc, peer_type({lhs_ty, rhs_ty}, gctx));
+//        } else {
+//            NOT_IMPL_FOR(lhs_ty->to_string() + " & " + rhs_ty->to_string());
+//        }
+//    }
 
     std::pair<gcref<Type>, std::string> get_capture_type(garbage_collector &gc, Type *t, parser::Node *capture) {
 #define WHEN_CAPTURE_IS(type, name) if (auto name = dynamic_cast<type*>(capture); name)
@@ -248,12 +257,20 @@ namespace cheese::curdle {
                     try {
                         auto child = struct_type->get_child_comptime(name, gctx);
                         return {gc, child->type};
-                    } catch (const CurdleError &comptime_error) {
+                    } catch (NotImplementedException &notImplementedException) {
+                        throw;
+                    }
+                    catch (std::exception &comptime_error) {
                         if (struct_type->top_level_variables.contains(name)) {
                             auto var = struct_type->top_level_variables[name];
                             // I *really* need to add access control with like a `can_access_private_variables_from(struct* other)` to a structure, but that's not necessary just yet
                             return {gc, var.type};
                         }
+                        throw LocalizedCurdleError{
+                                pValueReference->name + " is not a field of " + struct_type->to_string(),
+                                pValueReference->location,
+                                error::ErrorCode::InvalidSubscript
+                        };
                     }
                 } else {
                     throw LocalizedCurdleError{
@@ -273,25 +290,61 @@ namespace cheese::curdle {
                             "Attempting to use non integer index into a tuple structure: " + pStructure->to_string(),
                             subscription->rhs->location, error::ErrorCode::InvalidSubscript};
                 } else {
-                    for (int i = 0; i < pStructure->fields.size(); i++) {
-                        auto &field = pStructure->fields[i];
+                    for (auto &field: pStructure->fields) {
                         if (field.name == pValueReference->name) {
                             // This is where we just return the operator to get a field
                             return {gc, field.type};
                         }
                     }
+                    throw LocalizedCurdleError{
+                            pValueReference->name + " is not a field in " + pStructure->name,
+                            pValueReference->location,
+                            error::ErrorCode::InvalidSubscript
+                    };
                 }
             }
             WHEN_KEY_IS(parser::nodes::IntegerLiteral, pIntegerLiteral) {
                 if (pStructure->is_tuple) {
+                    if (pIntegerLiteral->value < 0) {
+                        throw LocalizedCurdleError{"Attempting to negatively index a tuple",
+                                                   subscription->rhs->location, error::ErrorCode::InvalidSubscript};
+                    }
+                    if (pIntegerLiteral->value >= pStructure->fields.size()) {
+                        throw LocalizedCurdleError{
+                                static_cast<std::string>(pIntegerLiteral->value) + " is out of range for tuple " +
+                                pStructure->name, subscription->rhs->location, error::ErrorCode::InvalidSubscript};
+                    }
                     return {gc, pStructure->fields[pIntegerLiteral->value].type};
                 } else {
                     throw LocalizedCurdleError{
                             "Attempting to use an integer index into a non tuple structure: " + pStructure->to_string(),
                             subscription->rhs->location, error::ErrorCode::InvalidSubscript};
                 }
-
             }
+            throw LocalizedCurdleError{
+                    "Attempting to use a subscript of type " + std::string(typeid(*subscription->rhs.get()).name()) +
+                    " for a structure", subscription->rhs->location, error::ErrorCode::InvalidSubscript
+            };
+        }
+        WHEN_SUBSCRIPT_IS(ComposedFunctionType, pComposedFunctionType) {
+            WHEN_KEY_IS(parser::nodes::IntegerLiteral, pIntegerLiteral) {
+                if (pIntegerLiteral->value < 0) {
+                    throw LocalizedCurdleError{"Attempting to negatively index a composed function",
+                                               subscription->rhs->location, error::ErrorCode::InvalidSubscript};
+                }
+                if (pIntegerLiteral->value >= pComposedFunctionType->operand_types.size()) {
+                    throw LocalizedCurdleError{
+                            static_cast<std::string>(pIntegerLiteral->value) +
+                            " is out of range for composed function " +
+                            pComposedFunctionType->to_string(), subscription->rhs->location,
+                            error::ErrorCode::InvalidSubscript};
+                }
+                return {gc, pComposedFunctionType->operand_types[pIntegerLiteral->value]};
+            }
+            throw LocalizedCurdleError{
+                    "Attempting to use a subscript of type " + std::string(typeid(*subscription->rhs.get()).name()) +
+                    " for a composed function", subscription->rhs->location, error::ErrorCode::InvalidSubscript
+            };
         }
         NOT_IMPL_FOR(typeid(*subscript_ptr).name());
 #undef WHEN_SUBSCRIPT_IS
@@ -361,37 +414,46 @@ namespace cheese::curdle {
                 }
             }
             WHEN_NODE_IS(parser::nodes::Multiplication, pMultiplication) {
-                return getBinaryType(this, pMultiplication->lhs, pMultiplication->rhs);
+                return binary_result_type(enums::SimpleOperation::Multiplication, get_type(pMultiplication->lhs.get()),
+                                          get_type(pMultiplication->rhs.get()), gctx);
             }
             WHEN_NODE_IS(parser::nodes::Subtraction, pSubtraction) {
-                return getBinaryType(this, pSubtraction->lhs, pSubtraction->rhs);
+                return binary_result_type(enums::SimpleOperation::Subtraction, get_type(pSubtraction->lhs.get()),
+                                          get_type(pSubtraction->rhs.get()), gctx);
             }
             WHEN_NODE_IS(parser::nodes::Modulus, pModulus) {
-                return getBinaryType(this, pModulus->lhs, pModulus->rhs);
+                return binary_result_type(enums::SimpleOperation::Remainder, get_type(pModulus->lhs.get()),
+                                          get_type(pModulus->rhs.get()), gctx);
             }
             WHEN_NODE_IS(parser::nodes::Division, pDivision) {
-                return getBinaryType(this, pDivision->lhs, pDivision->rhs);
+                return binary_result_type(enums::SimpleOperation::Division, get_type(pDivision->lhs.get()),
+                                          get_type(pDivision->rhs.get()), gctx);
             }
             WHEN_NODE_IS(parser::nodes::Addition, pAddition) {
-                return getBinaryType(this, pAddition->lhs, pAddition->rhs);
+                return binary_result_type(enums::SimpleOperation::Addition, get_type(pAddition->lhs.get()),
+                                          get_type(pAddition->rhs.get()), gctx);
             }
             WHEN_NODE_IS(parser::nodes::And, pAnd) {
-                return getBinaryType(this, pAnd->lhs, pAnd->rhs);
+                return binary_result_type(enums::SimpleOperation::And, get_type(pAnd->lhs.get()),
+                                          get_type(pAnd->rhs.get()), gctx);
             }
             WHEN_NODE_IS(parser::nodes::Xor, pXor) {
-                return getBinaryType(this, pXor->lhs, pXor->rhs);
+                return binary_result_type(enums::SimpleOperation::Xor, get_type(pXor->lhs.get()),
+                                          get_type(pXor->rhs.get()), gctx);
             }
             WHEN_NODE_IS(parser::nodes::Or, pOr) {
-                return getBinaryType(this, pOr->lhs, pOr->rhs);
+                return binary_result_type(enums::SimpleOperation::Or, get_type(pOr->lhs.get()),
+                                          get_type(pOr->rhs.get()), gctx);
             }
             WHEN_NODE_IS(parser::nodes::Not, pNot) {
-                return get_type(pNot->child.get());
+                return unary_result_type(enums::SimpleOperation::UnaryMinus, get_type(pNot->child.get()), gctx);
             }
             WHEN_NODE_IS(parser::nodes::UnaryMinus, pUnaryMinus) {
-                return get_type(pUnaryMinus->child.get());
+//                return get_type(pUnaryMinus->child.get());
+                return unary_result_type(enums::SimpleOperation::UnaryMinus, get_type(pUnaryMinus->child.get()), gctx);
             }
             WHEN_NODE_IS(parser::nodes::UnaryPlus, pUnaryPlus) {
-                return get_type(pUnaryPlus->child.get());
+                return unary_result_type(enums::SimpleOperation::UnaryPlus, get_type(pUnaryPlus->child.get()), gctx);
             }
             WHEN_NODE_IS(parser::nodes::TupleCall, pTupleCall) {
                 // Now time to do a bunch of work to get the type of *one* function call

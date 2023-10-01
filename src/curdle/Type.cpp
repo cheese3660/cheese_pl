@@ -58,18 +58,24 @@ namespace cheese::curdle {
             throw CurdleError{"No Peer Type: cannot find a peer type w/o any types to find a peer between",
                               error::ErrorCode::NoPeerType};
         }
-        auto base_type = gcref{gctx->gc, types[0]};
+        std::vector<gcref<Type>> _keepInScope;
+//        auto base_type = gcref{gctx->gc, types[0]};
+        auto base_type = types[0];
+        _keepInScope.emplace_back(gctx->gc, base_type);
         for (int i = 1; i < types.size(); i++) {
-            if (types[i] != base_type)
-                base_type = base_type->peer(types[i], gctx);
-            if (base_type.value == nullptr) {
+            if (types[i] != base_type) {
+                auto ref = base_type->peer(types[i], gctx);
+                base_type = ref.value;
+                _keepInScope.push_back(std::move(ref));
+            }
+            if (base_type == nullptr) {
                 throw CurdleError{
                         "No Peer Type: cannot find a peer type between " + get_peer_type_list(types),
                         error::ErrorCode::NoPeerType,
                 };
             }
         }
-        return base_type;
+        return {gctx->gc, base_type};
     }
 
     bool trivial_arithmetic_type(Type *type) {

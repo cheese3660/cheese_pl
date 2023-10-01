@@ -140,6 +140,7 @@ namespace cheese::curdle {
                             result_type,
                             value
                     }});
+                    lazy = nullptr;
                     return;
                 } catch (const NotComptimeError &e) {
                     gctx->raise(e.what(), pVariableDeclaration->location, error::ErrorCode::NotComptime);
@@ -159,6 +160,12 @@ namespace cheese::curdle {
                                                                                               gctx->global_receiver.get()),
                                                                                       curdle::translate_expression(lctx,
                                                                                                                    pVariableDeclaration->value)));
+                top_level_variables[lazy->name] = TopLevelVariableInfo{
+                        !definition->flags.mut,
+                        definition->flags.pub != 0,
+                        varName,
+                        result_type
+                };
                 lazy = nullptr;
                 return;
             }

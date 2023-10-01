@@ -35,6 +35,8 @@
 #include "curdle/types/Float64Type.h"
 #include "curdle/values/ComptimeComplex.h"
 #include "curdle/values/BuiltinFunctionReference.h"
+#include "curdle/types/ComposedFunctionType.h"
+#include "curdle/types/FunctionPointerType.h"
 
 using namespace cheese::memory::garbage_collection;
 
@@ -286,36 +288,76 @@ namespace cheese::curdle {
         } else if (auto subscript = dynamic_cast<parser::nodes::Subscription *>(call->object.get()); subscript) {
             auto subscript_type = rctx->get_type(subscript->lhs.get());
             auto function = dynamic_cast<parser::nodes::ValueReference *>(subscript->rhs.get());
-            if (!function) {
-                NOT_IMPL_FOR("Possible function pointers");
-            }
-            auto structure = dynamic_cast<Structure *>(subscript_type.get());
-            if (!structure) {
-                auto ref = dynamic_cast<ReferenceType *>(subscript_type.get());
-                if (!(structure = dynamic_cast<Structure *>(ref->child))) {
-                    NOT_IMPL_FOR("Non structure subscriptions");
+            if (function) {
+                auto structure = dynamic_cast<Structure *>(subscript_type.get());
+
+                if (!structure) {
+                    auto ref = dynamic_cast<ReferenceType *>(subscript_type.get());
+                    structure = dynamic_cast<Structure *>(ref->child);
+                }
+                if (structure && structure->function_sets.contains(function->name)) {
+                    parser::NodeList arg_nodes{};
+                    arg_nodes.push_back(subscript->lhs);
+                    for (auto &arg: call->args) {
+                        arg_nodes.push_back(arg);
+                    }
+                    ConcreteFunction *function2 = get_function(rctx, cctx, empty_ctx,
+                                                               structure->function_sets[function->name],
+                                                               arg_nodes);
+                    return generate_call(lctx, function2, arg_nodes, call->location);
                 }
             }
-            // We are going to have to check interfaces and mixins at some point which will be fun, also function pointers
-//            if (!structure->function_sets.contains(function->name)) {
-//
-//            }
-            parser::NodeList arg_nodes{};
-            arg_nodes.push_back(subscript->lhs);
-            for (auto &arg: call->args) {
-                arg_nodes.push_back(arg);
-            }
-            ConcreteFunction *function2 = get_function(rctx, cctx, empty_ctx, structure->function_sets[function->name],
-                                                       arg_nodes);
-            return generate_call(lctx, function2, arg_nodes, call->location);
-        } else {
-            // Here is where we need to grab a function pointer and call the function pointer
-            auto fn_ty = rctx->get_type(call->object.get());
-//#define WHEN_FN_IS(ty, name) if (auto name == dynamic_cast<ty*>(fn_ty.get()); name)
-//#undef WHEN_FN_IS
-
-            NOT_IMPL_FOR("non compile time deductible functions of type " + typeid(*fn_ty.get()).name());
         }
+        auto fn_ty = rctx->get_type(call->object.get());
+#define WHEN_FN_IS(ty, name) if (auto name = dynamic_cast<ty*>(fn_ty.get()); name)
+        WHEN_FN_IS(ComposedFunctionType, pComposedFunctionType) {
+            auto result = pComposedFunctionType->get_return_type(gctx);
+            auto arg_types = pComposedFunctionType->get_argument_types(gctx);
+            auto name = pComposedFunctionType->get_function_name(cctx);
+            auto result_ctx = gc.gcnew<LocalContext>(rctx);
+            result_ctx->expected_type = result;
+            std::vector<bacteria::BacteriaPtr> actual_arguments;
+            actual_arguments.push_back((new bacteria::nodes::ImplicitReferenceNode(call->object->location,
+                                                                                   translate_expression(result_ctx,
+                                                                                                        call->object)))->get());
+            if (call->args.size() != arg_types.size()) {
+                throw LocalizedCurdleError{
+                        "Invalid number of parameters to composed function",
+                        call->args[std::min(call->args.size() - 1, arg_types.size())]->location,
+                        error::ErrorCode::MismatchedFunctionCall
+                };
+            }
+            for (int i = 0; i < arg_types.size(); i++) {
+                auto arg_ctx = gc.gcnew<LocalContext>(rctx);
+                arg_ctx->expected_type = arg_types[i];
+                actual_arguments.push_back(make_cast(arg_ctx, call->args[i]));
+            }
+            return (new bacteria::nodes::NormalCallNode(call->location, name, std::move(actual_arguments)))->get();
+        }
+        WHEN_FN_IS(FunctionPointerType, pFunctionPointerType) {
+            auto result = pFunctionPointerType->return_type;
+            auto result_ctx = gc.gcnew<LocalContext>(rctx);
+            result_ctx->expected_type = result;
+            auto arg_types = pFunctionPointerType->argument_types;
+            std::vector<bacteria::BacteriaPtr> actual_arguments;
+            if (call->args.size() != arg_types.size()) {
+                throw LocalizedCurdleError{
+                        "Invalid number of parameters to composed function",
+                        call->args[std::min(call->args.size() - 1, arg_types.size())]->location,
+                        error::ErrorCode::MismatchedFunctionCall
+                };
+            }
+            for (int i = 0; i < arg_types.size(); i++) {
+                auto arg_ctx = gc.gcnew<LocalContext>(rctx);
+                arg_ctx->expected_type = arg_types[i];
+                actual_arguments.push_back(make_cast(arg_ctx, call->args[i]));
+            }
+            return (new bacteria::nodes::PointerCallNode(call->location, translate_expression(result_ctx, call->object),
+                                                         std::move(actual_arguments)))->get();
+        }
+#undef WHEN_FN_IS
+
+        NOT_IMPL_FOR("non compile time deductible functions of type " + typeid(*fn_ty.get()).name());
     }
 
     bacteria::BacteriaPtr translate_object_call(LocalContext *lctx, parser::nodes::ObjectCall *call) {
@@ -629,20 +671,46 @@ namespace cheese::curdle {
 
     template<typename T>
     bacteria::BacteriaPtr
-    translate_binary(LocalContext *lctx, Coordinate location, parser::NodePtr lhs, parser::NodePtr rhs) {
+    translate_binary(LocalContext *lctx, Coordinate location, parser::NodePtr lhs, parser::NodePtr rhs,
+                     enums::SimpleOperation operation) {
         auto rctx = lctx->runtime;
         auto cctx = rctx->comptime;
         auto gctx = cctx->globalContext;
         auto &gc = gctx->gc;
         static_assert(std::is_base_of_v<bacteria::nodes::BinaryNode, T>, "Class must be of type binary node");
-        auto bin_type = lctx->get_binary_type(lhs.get(), rhs.get());
-        auto peer = peer_type({bin_type.first, bin_type.second}, gctx);
-        auto peer_ctx = gc.gcnew<LocalContext>(lctx, peer);
-        // At some point we are going to need to respect operators which will be fun
-        auto lhs_expr = make_cast(peer_ctx, lhs);
-        auto rhs_expr = make_cast(peer_ctx, rhs);
-        return std::make_unique<T>(location, std::move(lhs_expr),
-                                   std::move(rhs_expr));
+//        auto bin_type = lctx->get_binary_type(lhs.get(), rhs.get());
+
+//        auto bin_type = binary_result_type()
+//        auto peer = peer_type({bin_type.first, bin_type.second}, gctx);
+//        auto result_type = binary_result_type(operation, rctx->get_type(lhs.get()), rctx->get_type(rhs.get()), gctx);
+        auto a_type = rctx->get_type(lhs.get());
+        auto b_type = rctx->get_type(rhs.get());
+        if (trivial_arithmetic_type(a_type) && trivial_arithmetic_type(b_type)) {
+            auto bin_type = lctx->get_binary_type(lhs.get(), rhs.get());
+            auto peer = peer_type({bin_type.first, bin_type.second}, gctx);
+            auto peer_ctx = gc.gcnew<LocalContext>(lctx, peer);
+            // At some point we are going to need to respect operators which will be fun
+            auto lhs_expr = make_cast(peer_ctx, lhs);
+            auto rhs_expr = make_cast(peer_ctx, rhs);
+            return std::make_unique<T>(location, std::move(lhs_expr),
+                                       std::move(rhs_expr));
+        } else if (is_functional_type(a_type) || is_functional_type(b_type)) {
+            auto result_type = binary_result_type(operation, a_type, b_type, gctx);
+            auto a_ctx = gc.gcnew<LocalContext>(lctx, a_type);
+            auto b_ctx = gc.gcnew<LocalContext>(lctx, b_type);
+            std::vector<std::unique_ptr<bacteria::BacteriaNode>> args;
+            args.push_back(translate_expression(a_ctx, lhs));
+            args.push_back(translate_expression(b_ctx, rhs));
+            return std::make_unique<bacteria::nodes::AggregrateObject>(location, result_type->get_cached_type(
+                    gctx->global_receiver.get()), std::move(args));
+        } else {
+            throw LocalizedCurdleError{
+                    "Cannot do operation " + enums::get_op_string(operation) + " between a value of type " +
+                    a_type->to_string() + " and a value of type " + b_type->to_string(),
+                    location,
+                    error::ErrorCode::InvalidRuntimeOperation
+            };
+        }
     }
 
 
@@ -705,6 +773,19 @@ namespace cheese::curdle {
         NOT_IMPL_FOR(typeid(*vv).name());
     }
 
+    bacteria::BacteriaPtr
+    make_possible_reference_subscript(bool reference, Coordinate location, bacteria::BacteriaPtr object, int index) {
+        if (reference) {
+            return std::make_unique<bacteria::nodes::ReferenceSubscriptNode>(location,
+                                                                             std::move(object),
+                                                                             index);
+        } else {
+            return std::make_unique<bacteria::nodes::ObjectSubscriptNode>(location,
+                                                                          std::move(object),
+                                                                          index);
+        }
+    }
+
     bacteria::BacteriaPtr translate_subscription(LocalContext *lctx, parser::nodes::Subscription *subscription) {
         auto rctx = lctx->runtime;
         auto cctx = rctx->comptime;
@@ -736,6 +817,11 @@ namespace cheese::curdle {
                             return std::make_unique<bacteria::nodes::ValueReference>(subscription->location,
                                                                                      var.mangled_name);
                         }
+                        throw LocalizedCurdleError{
+                                pValueReference->name + " is not a field of " + struct_type->to_string(),
+                                pValueReference->location,
+                                error::ErrorCode::InvalidSubscript
+                        };
                     }
                 } else {
                     throw LocalizedCurdleError{
@@ -759,38 +845,19 @@ namespace cheese::curdle {
                         auto &field = pStructure->fields[i];
                         if (field.name == pValueReference->name) {
                             // This is where we just return the operator to get a field
-                            if (reference) {
-                                return std::make_unique<bacteria::nodes::ReferenceSubscriptNode>(subscription->location,
-                                                                                                 translate_expression(
-                                                                                                         lctx,
-                                                                                                         subscription->lhs),
-                                                                                                 i);
-                            } else {
-                                return std::make_unique<bacteria::nodes::ObjectSubscriptNode>(subscription->location,
-                                                                                              translate_expression(
-                                                                                                      lctx,
-                                                                                                      subscription->lhs),
-                                                                                              i);
-                            }
+                            return make_possible_reference_subscript(reference, subscription->location,
+                                                                     translate_expression(
+                                                                             lctx,
+                                                                             subscription->lhs), i);
                         }
                     }
                 }
             }
             WHEN_KEY_IS(parser::nodes::IntegerLiteral, pIntegerLiteral) {
                 if (pStructure->is_tuple) {
-                    if (reference) {
-                        return std::make_unique<bacteria::nodes::ReferenceSubscriptNode>(subscription->location,
-                                                                                         translate_expression(
-                                                                                                 lctx,
-                                                                                                 subscription->lhs),
-                                                                                         pIntegerLiteral->value);
-                    } else {
-                        return std::make_unique<bacteria::nodes::ObjectSubscriptNode>(subscription->location,
-                                                                                      translate_expression(
-                                                                                              lctx,
-                                                                                              subscription->lhs),
-                                                                                      pIntegerLiteral->value);
-                    }
+                    return make_possible_reference_subscript(reference, subscription->location, translate_expression(
+                            lctx,
+                            subscription->lhs), pIntegerLiteral->value);
                 } else {
                     throw LocalizedCurdleError{
                             "Attempting to use an integer index into a non tuple structure: " + pStructure->to_string(),
@@ -799,9 +866,58 @@ namespace cheese::curdle {
 
             }
         }
+        WHEN_SUBSCRIPT_IS(ComposedFunctionType, pComposedFunctionType) {
+            WHEN_KEY_IS(parser::nodes::IntegerLiteral, pIntegerLiteral) {
+                if (pIntegerLiteral->value < 0) {
+                    throw LocalizedCurdleError{"Attempting to negatively index a composed function",
+                                               subscription->rhs->location, error::ErrorCode::InvalidSubscript};
+                }
+                if (pIntegerLiteral->value >= pComposedFunctionType->operand_types.size()) {
+                    throw LocalizedCurdleError{
+                            static_cast<std::string>(pIntegerLiteral->value) +
+                            " is out of range for composed function " +
+                            pComposedFunctionType->to_string(), subscription->rhs->location,
+                            error::ErrorCode::InvalidSubscript};
+                }
+                return make_possible_reference_subscript(reference, subscription->location, translate_expression(
+                        lctx,
+                        subscription->lhs), pIntegerLiteral->value);
+            }
+            throw LocalizedCurdleError{
+                    "Attempting to use a subscript of type " + std::string(typeid(*subscription->rhs.get()).name()) +
+                    " for a composed function", subscription->rhs->location, error::ErrorCode::InvalidSubscript
+            };
+        }
         NOT_IMPL_FOR(typeid(*subscript_ptr).name());
 #undef WHEN_SUBSCRIPT_IS
 #undef WHEN_KEY_IS
+    }
+
+    bacteria::BacteriaPtr
+    translate_unary(LocalContext *lctx, Coordinate location, enums::SimpleOperation operation, parser::NodePtr child) {
+        auto child_type = lctx->get_type(child.get());
+        auto child_ctx = lctx->runtime->comptime->globalContext->gc.gcnew<LocalContext>(lctx->runtime);
+        child_ctx->expected_type = child_type;
+        if (trivial_arithmetic_type(child_type)) {
+            switch (operation) {
+                case enums::SimpleOperation::Not:
+                    NOT_IMPL_FOR("Unary not");
+                case enums::SimpleOperation::UnaryPlus:
+                    return (new bacteria::nodes::UnaryPlusNode(location,
+                                                               translate_expression(child_ctx, child)))->get();
+                case enums::SimpleOperation::UnaryMinus:
+                    return (new bacteria::nodes::UnaryMinusNode(location,
+                                                                translate_expression(child_ctx, child)))->get();
+            }
+        }
+        if (is_functional_type(child_type)) {
+            auto composed = unary_result_type(operation, child_type, lctx->runtime->comptime->globalContext);
+            std::vector<std::unique_ptr<bacteria::BacteriaNode>> args{};
+            args.push_back(translate_expression(child_ctx, child));
+            return (new bacteria::nodes::AggregrateObject(location, composed->get_cached_type(
+                    lctx->runtime->comptime->globalContext->global_receiver.get()), std::move(args)))->get();
+        }
+        NOT_IMPL_FOR("unary " + enums::get_op_string(operation) + " on " + typeid(*child_type).name());
     }
 
     bacteria::BacteriaPtr translate_expression(LocalContext *lctx, parser::NodePtr expr) {
@@ -863,31 +979,36 @@ namespace cheese::curdle {
             }
             WHEN_EXPR_IS(parser::nodes::EqualTo, pEqualTo) {
                 return translate_binary<bacteria::nodes::EqualToNode>(lctx, expr->location, pEqualTo->lhs,
-                                                                      pEqualTo->rhs);
+                                                                      pEqualTo->rhs, enums::SimpleOperation::EqualTo);
             }
             WHEN_EXPR_IS(parser::nodes::LesserThan, pLesserThan) {
                 return translate_binary<bacteria::nodes::LesserThanNode>(lctx, expr->location, pLesserThan->lhs,
-                                                                         pLesserThan->rhs);
+                                                                         pLesserThan->rhs,
+                                                                         enums::SimpleOperation::LesserThan);
             }
             WHEN_EXPR_IS(parser::nodes::Multiplication, pMultiplication) {
                 return translate_binary<bacteria::nodes::MultiplyNode>(lctx, expr->location, pMultiplication->lhs,
-                                                                       pMultiplication->rhs);
+                                                                       pMultiplication->rhs,
+                                                                       enums::SimpleOperation::Multiplication);
             }
             WHEN_EXPR_IS(parser::nodes::Subtraction, pSubtraction) {
                 return translate_binary<bacteria::nodes::SubtractNode>(lctx, expr->location, pSubtraction->lhs,
-                                                                       pSubtraction->rhs);
+                                                                       pSubtraction->rhs,
+                                                                       enums::SimpleOperation::Subtraction);
             }
             WHEN_EXPR_IS(parser::nodes::Modulus, pModulus) {
                 return translate_binary<bacteria::nodes::ModulusNode>(lctx, expr->location, pModulus->lhs,
-                                                                      pModulus->rhs);
+                                                                      pModulus->rhs, enums::SimpleOperation::Remainder);
             }
             WHEN_EXPR_IS(parser::nodes::Division, pDivision) {
                 return translate_binary<bacteria::nodes::DivisionNode>(lctx, expr->location, pDivision->lhs,
-                                                                       pDivision->rhs);
+                                                                       pDivision->rhs,
+                                                                       enums::SimpleOperation::Division);
             }
             WHEN_EXPR_IS(parser::nodes::Addition, pAddition) {
                 return translate_binary<bacteria::nodes::AdditionNode>(lctx, expr->location, pAddition->lhs,
-                                                                       pAddition->rhs);
+                                                                       pAddition->rhs,
+                                                                       enums::SimpleOperation::Addition);
             }
             WHEN_EXPR_IS(parser::nodes::Cast, pCast) {
                 try {
@@ -954,14 +1075,12 @@ namespace cheese::curdle {
                 }
             }
             WHEN_EXPR_IS(parser::nodes::UnaryMinus, pUnaryMinus) {
-                return std::make_unique<bacteria::nodes::UnaryMinusNode>(pUnaryMinus->location,
-                                                                         translate_expression(lctx,
-                                                                                              pUnaryMinus->child));
+                return translate_unary(lctx, pUnaryMinus->location, enums::SimpleOperation::UnaryMinus,
+                                       pUnaryMinus->child);
             }
             WHEN_EXPR_IS(parser::nodes::UnaryPlus, pUnaryPlus) {
-                return std::make_unique<bacteria::nodes::UnaryPlusNode>(pUnaryPlus->location,
-                                                                        translate_expression(lctx,
-                                                                                             pUnaryPlus->child));
+                return translate_unary(lctx, pUnaryPlus->location, enums::SimpleOperation::UnaryPlus,
+                                       pUnaryPlus->child);
             }
             WHEN_EXPR_IS(parser::nodes::ObjectCall, pObjectCall) {
                 return translate_object_call(lctx, pObjectCall);
@@ -976,46 +1095,6 @@ namespace cheese::curdle {
             }
             WHEN_EXPR_IS(parser::nodes::Subscription, pSubscription) {
                 return translate_subscription(lctx, pSubscription);
-                // It's time to redo this
-
-                /*
-                if (!identifier) {
-                    auto integer = dynamic_cast<parser::nodes::IntegerLiteral *>(pSubscription->rhs.get());
-                    if (integer) {
-                        if (structure->is_tuple) {
-                            name = "_" + static_cast<std::string>(integer->value);
-                        } else {
-                            throw LocalizedCurdleError(
-                                    "Invalid Subscript: Attempting to tuple index a non-tuple structure",
-                                    pSubscription->location, error::ErrorCode::InvalidSubscript);
-                        }
-                    } else {
-                        NOT_IMPL_FOR("Non identifier subscriptions");
-                    }
-                } else {
-                    name = identifier->name;
-                }
-                for (int i = 0; i < structure->fields.size(); i++) {
-                    auto &field = structure->fields[i];
-                    if (field.name == name) {
-                        // This is where we just return the operator to get a field
-                        if (reference) {
-                            return std::make_unique<bacteria::nodes::ReferenceSubscriptNode>(expr->location,
-                                                                                             translate_expression(
-                                                                                                     subscript_ctx,
-                                                                                                     pSubscription->lhs),
-                                                                                             i);
-                        } else {
-                            return std::make_unique<bacteria::nodes::ObjectSubscriptNode>(expr->location,
-                                                                                          translate_expression(
-                                                                                                  subscript_ctx,
-                                                                                                  pSubscription->lhs),
-                                                                                          i);
-                        }
-                    }
-                }
-                NOT_IMPL_FOR("Possible traits");
-                */
             }
             WHEN_EXPR_IS(parser::nodes::TupleLiteral, pTupleLiteral) {
                 gcref<Type> expected_type =
