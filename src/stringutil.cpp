@@ -9,7 +9,7 @@ namespace cheese::stringutil {
     std::string escape(std::string const &str) {
         std::ostringstream result;
         for (std::string::const_iterator it = str.begin(); it != str.end(); it++) {
-            if (' ' <= *it && *it <= '~') {
+            if (' ' <= *it && *it <= '~' && *it != '\\') {
                 result << *it;
             } else {
                 switch (*it) {
@@ -36,11 +36,13 @@ namespace cheese::stringutil {
                         break;
                     case '\\':
                         result << "\\\\";
+                        break;
                     default:
                         result << "\\x" << std::setw(2) << std::hex << std::setfill('0') << *it;
+                        break;
                 }
             }
-            return result.str();
         }
+        return result.str();
     }
 }

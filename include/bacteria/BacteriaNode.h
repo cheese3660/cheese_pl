@@ -15,6 +15,7 @@
 namespace cheese::bacteria {
 
     // We are going to completely redefine all the parser helper functions again to make stuff easier on us
+    struct BacteriaContext;
 
     class BacteriaNode {
     public:
@@ -36,6 +37,9 @@ namespace cheese::bacteria {
         [[nodiscard]] virtual nlohmann::json as_json() const = 0;
 
         [[nodiscard]] virtual bool compare_json(const nlohmann::json &json) const = 0;
+
+        virtual void lower_top_level(BacteriaContext *ctx);
+
     };
 
     void add_indentation(std::stringstream &ss, int indentation);
@@ -217,6 +221,18 @@ namespace cheese::bacteria {
                    const std::vector<FunctionArgument> &value);
 
     bool implicit_compare_value(const std::vector<FunctionArgument> &value);
+
+    template<>
+    void cheese::bacteria::build_json<TypeList>(nlohmann::json &object, std::string name,
+                                                const TypeList &value);
+
+    bool
+    compare_helper(const nlohmann::json &object, const std::string &name,
+                   const TypeList &value);
+
+    bool implicit_compare_value(const TypeList &value);
+
+
 }
 
 

@@ -48,6 +48,7 @@ namespace cheese::project {
         size_t anonymous_struct_offset{0};
         size_t anonymous_variable_offset{0};
         std::set<std::string> all_struct_names;
+        std::set<std::string> imported_functions;
 
         std::string verify_name(std::string struct_name);
 

@@ -267,17 +267,19 @@ namespace cheese::curdle {
         parser::NodePtr body_ptr;
         bool force_comptime;
         bool external;
+        bool entry;
         bool generator{false};
         std::string name;
         auto true_ptr = ptr.get();
         if (auto as_fn = dynamic_cast<parser::nodes::Function *>(true_ptr); as_fn) {
             force_comptime = as_fn->flags.comptime;
             external = as_fn->flags.exter || as_fn->flags.entry;
+            entry = as_fn->flags.entry;
             name = as_fn->name;
             body_ptr = as_fn->body;
         } else if (auto as_gen = dynamic_cast<parser::nodes::Generator *>(true_ptr); as_gen) {
             force_comptime = as_gen->flags.comptime;
-            external = as_gen->flags.exter || as_gen->flags.entry;
+            external = as_gen->flags.exter;
             name = as_gen->name;
             body_ptr = as_gen->body;
             generator = true;
@@ -302,12 +304,106 @@ namespace cheese::curdle {
             }
         }
 
-        auto new_function = gc.gcnew<ConcreteFunction>(name, true_arguments, ret_type, comptime_only, external);
+        auto new_function = gc.gcnew<ConcreteFunction>(name, true_arguments, ret_type, comptime_only, external, entry);
         concrete_functions.push_back(new_function);
         new_function->generate_code(fctx, rctx,
                                     external, std::move(body_ptr), generator, rtime_names);
 
         return new_function;
+    }
+
+    ConcreteFunction *FunctionTemplate::get() {
+        // Essentially it will do some magic
+        auto &gctx = ctx->globalContext;
+        auto &gc = gctx->gc;
+        if (concrete_functions.empty()) {
+            // We have to generate a new function
+            std::vector<gcref<managed_object>> _keepInScope;
+            auto fctx = gc.gcnew<ComptimeContext>(ctx);
+            auto rctx = gc.gcnew<RuntimeContext>(fctx, fctx->currentStructure);
+            std::vector<PassedFunctionArgument> true_arguments{};
+            parser::NodeList args_list;
+            parser::NodePtr ret_val;
+            parser::NodePtr body_ptr;
+            bool force_comptime;
+            bool external;
+            bool entry;
+            bool generator{false};
+            std::string name;
+            auto true_ptr = ptr.get();
+            if (auto as_fn = dynamic_cast<parser::nodes::Function *>(true_ptr); as_fn) {
+                force_comptime = as_fn->flags.comptime;
+                external = as_fn->flags.exter || as_fn->flags.entry;
+                entry = as_fn->flags.entry;
+                name = as_fn->name;
+                body_ptr = as_fn->body;
+                args_list = as_fn->arguments;
+                ret_val = as_fn->return_type;
+            } else if (auto as_gen = dynamic_cast<parser::nodes::Generator *>(true_ptr); as_gen) {
+                force_comptime = as_gen->flags.comptime;
+                external = as_gen->flags.exter;
+                name = as_gen->name;
+                body_ptr = as_gen->body;
+                generator = true;
+                args_list = as_gen->arguments;
+                ret_val = as_gen->return_type;
+                NOT_IMPL_FOR("generators");
+            } else if (auto as_op = dynamic_cast<parser::nodes::Operator *>(true_ptr); as_op) {
+                force_comptime = as_op->flags.comptime;
+                external = false;
+                name = "operator" + as_op->op;
+                body_ptr = as_op->body;
+                args_list = as_fn->arguments;
+                ret_val = as_fn->return_type;
+            }
+            int next_arg = 0;
+            std::vector<std::string> rtime_names;
+            for (auto &arg: args_list) {
+                auto as_arg = dynamic_cast<parser::nodes::Argument *>(arg.get());
+                auto ty = fctx->exec(as_arg->type, rctx);
+                auto arg_name = as_arg->name.has_value() ? as_arg->name.value() : "_" + std::to_string(next_arg++);
+                if (auto as_ty = dynamic_cast<ComptimeType *>(ty.get()); as_ty) {
+                    rctx->variables[arg_name] = RuntimeVariableInfo{
+                            true,
+                            arg_name,
+                            as_ty->typeValue
+                    };
+                    true_arguments.emplace_back(true, nullptr, as_ty->typeValue);
+                    rtime_names.push_back(arg_name);
+                } else {
+                    throw LocalizedCurdleError{
+                            "Expected type",
+                            arg->location,
+                            error::ErrorCode::ExpectedType
+                    };
+                }
+                _keepInScope.emplace_back(std::move(ty));
+            }
+            auto ret_ty_val = fctx->exec(ret_val, rctx);
+            Type *ret_ty;
+            if (auto as_ty = dynamic_cast<ComptimeType *>(ret_ty_val.get()); as_ty) {
+                ret_ty = as_ty->typeValue;
+            } else {
+                throw LocalizedCurdleError{
+                        "Expected type",
+                        ret_val->location,
+                        error::ErrorCode::ExpectedType
+                };
+            }
+            auto new_function = gc.gcnew<ConcreteFunction>(name, true_arguments, ret_ty, false, external,
+                                                           entry);
+            concrete_functions.push_back(new_function);
+            new_function->generate_code(fctx, rctx,
+                                        external, std::move(body_ptr), generator, rtime_names);
+            return new_function;
+        } else if (concrete_functions.size() == 1) {
+            return concrete_functions[0];
+        } else if (concrete_functions.size() > 1) {
+            throw CurdleError{
+                    "Ambiguous function matching",
+                    error::ErrorCode::AmbiguousFunctionCall
+            };
+        }
     }
 
     void FunctionSet::mark_references() {
@@ -349,7 +445,18 @@ namespace cheese::curdle {
                     error::ErrorCode::NoOverloadFound
             };
         }
-        return closest_function->get(std::move(arguments));
+        return closest_function->get(arguments);
+    }
+
+    ConcreteFunction *FunctionSet::get() {
+        if (templates.size() != 1) {
+            throw CurdleError{
+                    "Ambiguous function matching",
+                    error::ErrorCode::AmbiguousFunctionCall
+            };
+        } else {
+            return templates[0]->get();
+        }
     }
 
     IncorrectCallException::IncorrectCallException() = default;
@@ -426,7 +533,7 @@ namespace cheese::curdle {
     }
 
     ConcreteFunction::ConcreteFunction(std::string path, const std::vector<PassedFunctionArgument> &arguments,
-                                       Type *returnType, bool comptimeOnly, bool external) {
+                                       Type *returnType, bool comptimeOnly, bool external, bool entry) {
         // Comptime argument typenames to the name mangler get passed like such
         // TYPENAME$VALUE
         is_comptime_only = comptimeOnly;
@@ -435,6 +542,8 @@ namespace cheese::curdle {
         if (comptimeOnly) {
             mangled_name = "";
             NOT_IMPL_FOR("compile time");
+        } else if (entry) {
+            mangled_name = "main"; // Name it main, as global constructors do exist
         } else {
             // Time to do a lot of stuff just to mangle the name
             std::vector<std::string> args;

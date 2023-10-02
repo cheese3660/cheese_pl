@@ -17,6 +17,8 @@
 #include "curdle/types/IntegerType.h"
 #include "curdle/values/ComptimeString.h"
 #include "curdle/values/ComptimeInteger.h"
+#include "curdle/types/ImportedFunctionType.h"
+#include "curdle/values/ImportedFunction.h"
 
 namespace cheese::curdle {
 
@@ -103,6 +105,55 @@ namespace cheese::curdle {
             comptime_variables[n] = info;
             return;
         }
+        WHEN_LAZY_IS(parser::nodes::FunctionImport, pFunctionImport) {
+            std::vector<gcref<managed_object>> _keepInScope;
+            std::vector<Type *> arg_types;
+            for (const auto &argument: pFunctionImport->arguments) {
+                auto as_arg = dynamic_cast<parser::nodes::Argument *>(argument.get());
+                auto ty = containedContext->exec(as_arg->type);
+                if (auto as_ty = dynamic_cast<ComptimeType *>(ty.get()); as_ty) {
+                    arg_types.push_back(as_ty->typeValue);
+                } else {
+                    throw LocalizedCurdleError{
+                            "Expected a value convertible into a type",
+                            as_arg->type->location,
+                            error::ErrorCode::ExpectedType
+                    };
+                }
+                _keepInScope.emplace_back(std::move(ty));
+            }
+            auto rty = containedContext->exec(pFunctionImport->return_type);
+            Type *return_type;
+            if (auto as_ty = dynamic_cast<ComptimeType *>(rty.get()); as_ty) {
+                return_type = as_ty->typeValue;
+            } else {
+                throw LocalizedCurdleError{
+                        "Expected a value convertible into a type",
+                        pFunctionImport->return_type->location,
+                        error::ErrorCode::ExpectedType
+                };
+            }
+            auto fn_ty = gc.gcnew<ImportedFunctionType>(return_type, arg_types);
+            bool pub = pFunctionImport->flags.pub;
+            auto fn_value = gc.gcnew<ImportedFunction>(pFunctionImport->name, fn_ty);
+            lazy = nullptr;
+            ComptimeVariableInfo info{pub, true, fn_ty, fn_value};
+            comptime_variables[pFunctionImport->name] = info;
+            if (!gctx->imported_functions.contains(pFunctionImport->name)) {
+                bacteria::TypeList arguments;
+                gctx->imported_functions.insert(pFunctionImport->name);
+                for (const auto &ty: arg_types) {
+                    arguments.push_back(ty->get_cached_type(gctx->global_receiver.get()));
+                }
+                gctx->global_receiver->receive(
+                        std::make_unique<bacteria::nodes::FunctionImport>(pFunctionImport->location,
+                                                                          pFunctionImport->name, arguments,
+                                                                          return_type->get_cached_type(
+                                                                                  gctx->global_receiver.get())));
+            }
+
+            return;
+        }
         WHEN_LAZY_IS(parser::nodes::VariableDeclaration, pVariableDeclaration) {
             gcref<Type> result_type{gc, nullptr};
             Type *value_type = nullptr; // This is the cached type
@@ -159,7 +210,8 @@ namespace cheese::curdle {
                                                                                       result_type->get_cached_type(
                                                                                               gctx->global_receiver.get()),
                                                                                       curdle::translate_expression(lctx,
-                                                                                                                   pVariableDeclaration->value)));
+                                                                                                                   pVariableDeclaration->value),
+                                                                                      !definition->flags.mut));
                 top_level_variables[lazy->name] = TopLevelVariableInfo{
                         !definition->flags.mut,
                         definition->flags.pub != 0,

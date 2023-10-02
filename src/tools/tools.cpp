@@ -4,6 +4,7 @@
 #include "tools/tools.h"
 #include "tools/test.h"
 #include "tools/parse.h"
+#include "tools/lower.h"
 #include "configuration.h"
 #include <iostream>
 #include "lexer/lexer.h"
@@ -20,7 +21,8 @@ namespace cheese::tools {
     std::unordered_map<std::string, CheeseTool> tools{
             {"test",      test},
             {"parse",     parse},
-            {"translate", translate}
+            {"translate", translate},
+            {"lower",     lower}
     };
 
     argparse::ArgumentParser get_parser(std::string name) {

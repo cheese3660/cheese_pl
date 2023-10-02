@@ -88,6 +88,7 @@ namespace cheese::error {
         BadComptimeCast,
         InvalidComptimeOperation,
         InvalidRuntimeOperation,
+        InvalidDimension,
         //General error (thrown for example when multiple previous errors were printed)
         GeneralCompilerError = 9999,
     };

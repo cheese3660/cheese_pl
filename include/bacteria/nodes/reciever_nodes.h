@@ -9,6 +9,8 @@
 #include "bacteria/BacteriaType.h"
 #include "parser/Node.h"
 #include <sstream>
+#include <utility>
+#include <llvm/IR/Module.h>
 
 namespace cheese::bacteria::nodes {
 
@@ -38,7 +40,7 @@ namespace cheese::bacteria::nodes {
                          const std::vector<std::size_t> &arrayDimensions = {},
                          const std::vector<BacteriaType *> &childTypes = {},
                          const std::string &structName = {},
-                         const bool externFn = {});
+                         const bool constant_ref = {});
 
 
         ~BacteriaProgram() override {
@@ -79,6 +81,8 @@ namespace cheese::bacteria::nodes {
                                                                               json[kv.first].get<std::string>();
                                        });
         }
+
+        std::unique_ptr<llvm::Module> lower_into_module(project::GlobalContext *ctx);
     };
 
     struct UnnamedBlock : BacteriaReceiver {
@@ -97,13 +101,15 @@ namespace cheese::bacteria::nodes {
             return ss.str();
         }
 
-        JSON_FUNCS("block", { "body" }, children);
+        JSON_FUNCS("block", { "body" }, children)
+
+        ~UnnamedBlock() override = default;;
     };
 
 
     struct Function : BacteriaReceiver {
         Function(Coordinate location, std::string n, std::vector<FunctionArgument> args, bacteria::TypePtr rt)
-                : BacteriaReceiver(location), name(n), arguments(args), return_type(rt) {
+                : BacteriaReceiver(location), name(std::move(n)), arguments(args), return_type(rt) {
 
         }
 
@@ -137,7 +143,9 @@ namespace cheese::bacteria::nodes {
         ~Function() override = default;
 
         JSON_FUNCS("function", { "name", "arguments", "return_type", "body" }, name, arguments,
-                   return_type->to_string(), children);
+                   return_type->to_string(), children)
+
+        void lower_top_level(BacteriaContext *ctx) override;;
     };
 }
 

@@ -7,6 +7,8 @@
 #include "NotImplementedException.h"
 #include <typeinfo>
 #include <utility>
+#include "project/GlobalContext.h"
+#include "bacteria/BacteriaContext.h"
 
 namespace cheese::bacteria::nodes {
     std::map<std::string, int> BacteriaProgram::get_child_map() const {
@@ -17,6 +19,8 @@ namespace cheese::bacteria::nodes {
                 map[as_function->name] = i;
             } else if (auto as_init = dynamic_cast<VariableInitializationNode *>(child.get()); as_init) {
                 map[as_init->name] = i;
+            } else if (auto as_proto = dynamic_cast<FunctionImport *>(child.get()); as_proto) {
+                map[as_proto->name] = i;
             } else {
                 auto c = child.get();
                 NOT_IMPL_FOR(typeid(*c).name());
@@ -33,20 +37,76 @@ namespace cheese::bacteria::nodes {
     TypePtr BacteriaProgram::get_type(BacteriaType::Type type, uint16_t integerSize, BacteriaType *subtype,
                                       const std::vector<std::size_t> &arrayDimensions,
                                       const std::vector<BacteriaType *> &childTypes, const std::string &structName,
-                                      const bool externFn) {
+                                      const bool constant_ref) {
         // Lets deduplicate all types
         for (auto &already_made_type: all_types) {
             if (already_made_type->matches(type, integerSize, subtype, arrayDimensions, childTypes, structName,
-                                           externFn)) {
+                                           constant_ref)) {
                 return already_made_type;
             }
         }
 
-        auto ty = new BacteriaType(type, integerSize, subtype, arrayDimensions, childTypes, structName, externFn);
+        auto ty = new BacteriaType(type, integerSize, subtype, arrayDimensions, childTypes, structName, constant_ref);
         all_types.push_back(ty);
         if (!structName.empty()) {
             named_types[structName] = ty;
         }
         return ty;
+    }
+
+    std::unique_ptr<llvm::Module> BacteriaProgram::lower_into_module(project::GlobalContext *ctx) {
+        auto bacteriaModule = ctx->gc.gcnew<BacteriaContext>(ctx);
+        ctx->gc.add_root_object(bacteriaModule);
+        ctx->gc.remove_root_object(ctx);
+        // Set up top level declaration info
+        for (const auto &child: children) {
+            if (auto as_function = dynamic_cast<Function *>(child.get()); as_function) {
+                TypePtr retTy = as_function->return_type;
+                TypeList args;
+                for (const auto &arg: as_function->arguments) {
+                    args.push_back(arg.type);
+                }
+                bacteriaModule->functions[as_function->name] = FunctionInfo{
+                        args,
+                        retTy,
+                        as_function->name
+                };
+            } else if (auto as_import = dynamic_cast<FunctionImport *>(child.get()); as_import) {
+                bacteriaModule->functions[as_import->name] = FunctionInfo{
+                        as_import->arguments,
+                        as_import->return_type,
+                        as_import->name
+                };
+            } else if (auto as_init = dynamic_cast<VariableInitializationNode *>(child.get()); as_init) {
+                bacteriaModule->global_variables[as_init->name] = VariableInfo{
+                        as_init->constant,
+                        as_init->name,
+                        as_init->type
+                };
+            } else {
+                NOT_IMPL_FOR(typeid(*child.get()).name());
+            }
+        }
+        // Lower stuff
+        for (const auto &child: children) {
+            child->lower_top_level(bacteriaModule);
+        }
+
+        return std::unique_ptr<llvm::Module>{bacteriaModule->program_module};
+    }
+
+    void Function::lower_top_level(BacteriaContext *ctx) {
+        auto returnType = return_type->get_llvm_type(ctx->global_context);
+        std::vector<llvm::Type *> argTypes;
+        for (auto &arg: arguments) {
+            argTypes.push_back(arg.type->get_llvm_type(ctx->global_context));
+        }
+        auto functionType = llvm::FunctionType::get(returnType, argTypes, false);
+        auto prototype = llvm::Function::Create(functionType, llvm::Function::ExternalLinkage, name,
+                                                ctx->program_module);
+        size_t idx = 0;
+        for (auto &arg: prototype->args()) {
+            arg.setName(arguments[idx++].name);
+        }
     }
 }

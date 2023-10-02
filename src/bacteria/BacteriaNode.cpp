@@ -3,12 +3,18 @@
 //
 
 #include "bacteria/BacteriaNode.h"
+#include "bacteria/BacteriaContext.h"
+#include "NotImplementedException.h"
 #include <sstream>
 
 namespace cheese::bacteria {
 
     std::unique_ptr<BacteriaNode> BacteriaNode::get() {
         return std::unique_ptr<BacteriaNode>(this);
+    }
+
+    void BacteriaNode::lower_top_level(BacteriaContext *ctx) {
+        NOT_IMPL_FOR(typeid(*this).name());
     }
 
     void add_indentation(std::stringstream &ss, int indentation) {
@@ -197,7 +203,35 @@ namespace cheese::bacteria {
             build_json(obj, "type", v.type->to_string());
             arr.push_back(obj);
         }
-        object[name] = arr;
+        object[std::move(name)] = arr;
+    }
+
+    template<>
+    void cheese::bacteria::build_json<TypeList>(nlohmann::json &object, std::string name,
+                                                const TypeList &value) {
+        auto arr = nlohmann::json::array();
+        for (auto &v: value) {
+            arr.push_back(v->to_string());
+        }
+        object[std::move(name)] = arr;
+    }
+
+    bool
+    compare_helper(const nlohmann::json &object, const std::string &name,
+                   const TypeList &value) {
+        if (!object.contains(name)) return implicit_compare_value(value);
+        if (!object[name].is_array()) return false;
+        if (object[name].size() != value.size()) return false;
+        auto &arr = object[name];
+        for (int i = 0; i < value.size(); i++) {
+            if (!arr[i].is_string()) return false;
+            if (arr[i].get<std::string>() != value[i]->to_string()) return false;
+        }
+        return true;
+    }
+
+    bool implicit_compare_value(const TypeList &value) {
+        return value.empty();
     }
 
 #undef CATCH_IMPLICIT

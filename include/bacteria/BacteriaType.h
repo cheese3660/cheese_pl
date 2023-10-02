@@ -40,7 +40,7 @@ namespace cheese::bacteria {
         } type = Type::Void;
         std::uint16_t integer_size = 0;
         BacteriaType *subtype = {};
-        std::vector<std::size_t> array_dimensions = {};
+        std::vector<std::uint64_t> array_dimensions = {};
         std::vector<BacteriaType *> child_types = {}; //Used for structures, all pointers to objects are replaced with opaque pointers
         std::string struct_name{};
         // If this is empty, there is no name, otherwise there is
@@ -51,7 +51,7 @@ namespace cheese::bacteria {
                               const std::vector<std::size_t> &arrayDimensions = {},
                               const std::vector<BacteriaType *> &childTypes = {},
                               const std::string &structName = {},
-                              const bool externFn = {});
+                              const bool constant_ref = {});
 
         BacteriaType &operator=(const BacteriaType &other) = default;
 
@@ -63,7 +63,7 @@ namespace cheese::bacteria {
 
         size_t get_llvm_size(cheese::project::GlobalContext *ctx);
 
-        bool extern_fn; // If the function pointer is extern or not
+        bool constant_ref; // If the function pointer is extern or not
 
         bool
         matches(Type otherType, uint16_t integerSize, BacteriaType *subtype,
@@ -73,7 +73,7 @@ namespace cheese::bacteria {
         bool should_implicit_reference();
 
     private:
-        llvm::Type *cached_llvm_type;
+        llvm::Type *cached_llvm_type{nullptr};
     };
 
     typedef BacteriaType *TypePtr;

@@ -37,6 +37,9 @@
 #include "curdle/values/BuiltinFunctionReference.h"
 #include "curdle/types/ComposedFunctionType.h"
 #include "curdle/types/FunctionPointerType.h"
+#include "curdle/values/ImportedFunction.h"
+#include "curdle/types/ImportedFunctionType.h"
+#include "curdle/values/ComptimeString.h"
 
 using namespace cheese::memory::garbage_collection;
 
@@ -143,6 +146,8 @@ namespace cheese::curdle {
                         structure_ref->function_sets[as_gen->name] = gc.gcnew<FunctionSet>();
                     }
                     structure_ref->function_sets[as_gen->name]->templates.push_back(temp.get());
+                } else if (auto as_fn_import = dynamic_cast<parser::nodes::FunctionImport *>(ptr); as_fn_import) {
+                    structure_ref->lazies.push_back(new LazyValue{as_fn_import->name, child});
                 }
             }
 
@@ -196,7 +201,7 @@ namespace cheese::curdle {
                 error::raise_exiting_error("curdle", "no entrypoint found", gctx->project.root_file->location,
                                            error::ErrorCode::NoEntryPoint);
             }
-            gctx->entry_function->get({});
+            gctx->entry_function->get();
         }
         return gctx->global_receiver.release()->get();
     }
@@ -284,6 +289,23 @@ namespace cheese::curdle {
                     };
                 }
             }
+            if (auto imported = dynamic_cast<ImportedFunction *>(ctime); imported) {
+                auto ty = dynamic_cast<ImportedFunctionType *>(imported->type);
+                std::vector<bacteria::BacteriaPtr> actual_arguments;
+                if (call->args.size() != ty->argument_types.size()) {
+                    throw LocalizedCurdleError{
+                            "Invalid number of parameters to composed function",
+                            call->args[std::min(call->args.size() - 1, ty->argument_types.size())]->location,
+                            error::ErrorCode::MismatchedFunctionCall
+                    };
+                }
+                for (int i = 0; i < call->args.size(); i++) {
+                    auto argCtx = gc.gcnew<LocalContext>(lctx, ty->argument_types[i]);
+                    actual_arguments.push_back(make_cast(argCtx, call->args[i]));
+                }
+                return (new bacteria::nodes::NormalCallNode(call->location, imported->function,
+                                                            std::move(actual_arguments)))->get();
+            }
             NOT_IMPL_FOR(typeid(*ctime).name());
         } else if (auto subscript = dynamic_cast<parser::nodes::Subscription *>(call->object.get()); subscript) {
             auto subscript_type = rctx->get_type(subscript->lhs.get());
@@ -318,8 +340,9 @@ namespace cheese::curdle {
             result_ctx->expected_type = result;
             std::vector<bacteria::BacteriaPtr> actual_arguments;
             actual_arguments.push_back((new bacteria::nodes::ImplicitReferenceNode(call->object->location,
-                                                                                   translate_expression(result_ctx,
-                                                                                                        call->object)))->get());
+                                                                                   translate_expression(
+                                                                                           gc.gcnew<LocalContext>(rctx),
+                                                                                           call->object)))->get());
             if (call->args.size() != arg_types.size()) {
                 throw LocalizedCurdleError{
                         "Invalid number of parameters to composed function",
@@ -768,7 +791,11 @@ namespace cheese::curdle {
                                                                      result_type->get_cached_type(
                                                                              lctx->runtime->comptime->globalContext->global_receiver.get()));
         }
-
+        WHEN_COMPTIME_IS(ComptimeString, pComptimeString) {
+            return std::make_unique<bacteria::nodes::StringLiteral>(location, pComptimeString->value,
+                                                                    result_type->get_cached_type(
+                                                                            lctx->runtime->comptime->globalContext->global_receiver.get()));
+        }
 #undef WHEN_COMPTIME_IS
         NOT_IMPL_FOR(typeid(*vv).name());
     }
@@ -896,8 +923,7 @@ namespace cheese::curdle {
     bacteria::BacteriaPtr
     translate_unary(LocalContext *lctx, Coordinate location, enums::SimpleOperation operation, parser::NodePtr child) {
         auto child_type = lctx->get_type(child.get());
-        auto child_ctx = lctx->runtime->comptime->globalContext->gc.gcnew<LocalContext>(lctx->runtime);
-        child_ctx->expected_type = child_type;
+        auto child_ctx = lctx->runtime->comptime->globalContext->gc.gcnew<LocalContext>(lctx, child_type);
         if (trivial_arithmetic_type(child_type)) {
             switch (operation) {
                 case enums::SimpleOperation::Not:
@@ -912,8 +938,11 @@ namespace cheese::curdle {
         }
         if (is_functional_type(child_type)) {
             auto composed = unary_result_type(operation, child_type, lctx->runtime->comptime->globalContext);
+            auto composed_ptr = dynamic_cast<ComposedFunctionType *>(composed.get());
             std::vector<std::unique_ptr<bacteria::BacteriaNode>> args{};
-            args.push_back(translate_expression(child_ctx, child));
+            auto composed_ctx = lctx->runtime->comptime->globalContext->gc.gcnew<LocalContext>(lctx,
+                                                                                               composed_ptr->operand_types[0]);
+            args.push_back(make_cast(composed_ctx, child));
             return (new bacteria::nodes::AggregrateObject(location, composed->get_cached_type(
                     lctx->runtime->comptime->globalContext->global_receiver.get()), std::move(args)))->get();
         }
@@ -1254,7 +1283,8 @@ namespace cheese::curdle {
                                                                                       make_cast(
                                                                                               rctx->comptime->globalContext->gc.gcnew<LocalContext>(
                                                                                                       rctx, type),
-                                                                                              new_node)));
+                                                                                              new_node),
+                                                                                      !as_def->flags.mut));
                 rctx->variables[name] = RuntimeVariableInfo{as_def->flags.mut == 0, name, type};
             } else if (dynamic_cast<parser::nodes::Underscore *>(match.get())) {
                 continue;
@@ -1365,7 +1395,7 @@ namespace cheese::curdle {
                                     pVariableDeclaration->location,
                                     definition->name,
                                     result_type->get_cached_type(rctx->comptime->globalContext->global_receiver.get()),
-                                    std::move(inner_ptr)));
+                                    std::move(inner_ptr), !definition->flags.mut));
                     rctx->variables[definition->name] = RuntimeVariableInfo{!definition->flags.mut, definition->name,
                                                                             result_type};
                     return;
@@ -1390,7 +1420,8 @@ namespace cheese::curdle {
                                                                                                   gc.gcnew<LocalContext>(
                                                                                                           rctx,
                                                                                                           destructure_type),
-                                                                                                  pDestructure->value))
+                                                                                                  pDestructure->value),
+                                                                                          true)
                     );
                     reference = (new parser::nodes::ValueReference(pDestructure->value->location,
                                                                    var_name))->get();

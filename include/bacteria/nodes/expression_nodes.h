@@ -9,11 +9,47 @@
 #include <utility>
 #include "bacteria/BacteriaNode.h"
 #include "bacteria/nodes/reciever_nodes.h"
+#include "stringutil.h"
 #include <sstream>
 
 namespace cheese::bacteria::nodes {
 
     //TODO: remove needless parentheses around expressions
+
+    struct FunctionImport : BacteriaNode {
+        FunctionImport(Coordinate location, std::string n, TypeList args, bacteria::TypePtr rt)
+                : BacteriaNode(location), name(std::move(n)), arguments(std::move(args)), return_type(rt) {
+
+        }
+
+        std::string name;
+        TypeList arguments;
+        bacteria::TypePtr return_type;
+
+        std::string get_textual_representation(int depth) override {
+            std::stringstream ss{};
+            ss << "fn " << name << " ";
+            for (int i = 0; i < arguments.size(); i++) {
+                auto &argument = arguments[i];
+                ss << argument->to_string();
+                if (i < arguments.size() - 1) {
+                    ss << ", ";
+                } else {
+                    ss << " ";
+                }
+            }
+            ss << "=> " << return_type->to_string() << " import";
+            return ss.str();
+        }
+
+        ~FunctionImport() override = default;
+
+        JSON_FUNCS("function", { "name", "arguments", "return_type" }, name, arguments,
+                   return_type->to_string())
+
+        void lower_top_level(BacteriaContext *ctx) override;;
+    };
+
     struct Return : BacteriaNode {
         std::optional<BacteriaPtr> retVal;
 
@@ -104,6 +140,25 @@ namespace cheese::bacteria::nodes {
         std::string get_textual_representation(int depth) override {
             std::stringstream ss{};
             ss << '(' << static_cast<std::string>(value) << " @ " << type->to_string() << ')';
+            return ss.str();
+        }
+
+        JSON_FUNCS("integer", { "value", "ty" }, value, (type->to_string()));
+    };
+
+    struct StringLiteral : BacteriaNode {
+        StringLiteral(const Coordinate &location, std::string value, TypePtr type) : BacteriaNode(
+                location), value(std::move(value)), type(type) {
+        }
+
+        std::string value;
+        TypePtr type;
+
+        ~StringLiteral() override = default;
+
+        std::string get_textual_representation(int depth) override {
+            std::stringstream ss{};
+            ss << '(' << '"' << stringutil::escape(value) << '"' << " @ " << type->to_string() << ')';
             return ss.str();
         }
 
@@ -240,10 +295,11 @@ namespace cheese::bacteria::nodes {
         std::string name;
         TypePtr type;
         BacteriaPtr value;
+        bool constant;
 
         VariableInitializationNode(const Coordinate &location, const std::string &name, const TypePtr &type,
-                                   BacteriaPtr value) : BacteriaNode(location), name(name), type(type),
-                                                        value(std::move(value)) {}
+                                   BacteriaPtr value, bool constant) : BacteriaNode(location), name(name), type(type),
+                                                                       value(std::move(value)), constant(constant) {}
 
         ~VariableInitializationNode() = default;
 
@@ -251,7 +307,8 @@ namespace cheese::bacteria::nodes {
             return name + ": " + type->to_string() + " = " + value->get_textual_representation(depth);
         }
 
-        JSON_FUNCS("init", { "name", "ty", "value" }, name, type->to_string(), value);
+        JSON_FUNCS("init", { "name", "ty", "value", "constant" }, name, type->to_string(), value,
+                   std::to_string(constant));
     };
 
     struct AggregrateObject : BacteriaNode {

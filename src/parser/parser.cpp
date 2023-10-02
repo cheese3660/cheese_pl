@@ -1984,6 +1984,9 @@ namespace cheese::parser {
                     case 'v':
                         result += '\v';
                         break;
+                    case 'n':
+                        result += '\n';
+                        break;
                     case '0':
                     case '1':
                     case '2':

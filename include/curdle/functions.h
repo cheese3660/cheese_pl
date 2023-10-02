@@ -55,7 +55,7 @@ namespace cheese::curdle {
         bool is_comptime_only;
         ComptimeValue *returned_value; // If this is void then fun
         ConcreteFunction(std::string path, const std::vector<PassedFunctionArgument> &arguments, Type *returnType,
-                         bool comptimeOnly, bool external);
+                         bool comptimeOnly, bool external, bool entry = false);
 
         void generate_code(ComptimeContext *cctx, RuntimeContext *rctx, bool external,
                            parser::NodePtr body_ptr, bool is_generator, const std::vector<std::string> &rtime_names);
@@ -83,6 +83,9 @@ namespace cheese::curdle {
 
         // The concrete func
         ConcreteFunction *get(const std::vector<PassedFunctionArgument> &arguments);
+
+        // Gets a function w/o any actual arguments passed to it
+        ConcreteFunction *get();
     };
 
     class IncorrectCallException : std::exception {
@@ -103,6 +106,8 @@ namespace cheese::curdle {
         std::vector<FunctionTemplate *> templates;
 
         ConcreteFunction *get(const std::vector<PassedFunctionArgument> &arguments);
+
+        ConcreteFunction *get();
     };
 
 

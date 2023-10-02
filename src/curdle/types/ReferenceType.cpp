@@ -15,7 +15,7 @@
 namespace cheese::curdle {
     bacteria::TypePtr ReferenceType::get_bacteria_type(bacteria::nodes::BacteriaProgram *program) {
         auto child_type = child->get_cached_type(program);
-        return program->get_type(bacteria::BacteriaType::Type::Reference, {}, child_type);
+        return program->get_type(bacteria::BacteriaType::Type::Reference, {}, child_type, {}, {}, {}, constant);
     }
 
     void ReferenceType::mark_type_references() {

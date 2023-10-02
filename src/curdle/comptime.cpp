@@ -30,6 +30,8 @@
 #include "curdle/types/ComptimeComplexType.h"
 #include "curdle/values/ComptimeEnumLiteral.h"
 #include "curdle/types/ComptimeEnumType.h"
+#include "curdle/types/ArrayType.h"
+#include "curdle/types/PointerType.h"
 
 
 namespace cheese::curdle {
@@ -256,6 +258,53 @@ namespace cheese::curdle {
             WHEN_NODE_IS(parser::nodes::Structure, pStructure) {
                 return create_from_type(globalContext, translate_structure(this, pStructure).get());
             }
+            WHEN_NODE_IS(parser::nodes::ArrayType, pArrayType) {
+                bool constant = pArrayType->constant;
+                auto subtype_value = exec(pArrayType->child.get(), rtime);
+                if (auto child_type = dynamic_cast<ComptimeType *>(subtype_value.get()); child_type) {
+                    gcref<Type> subtype = {gc, child_type->typeValue};
+                    std::vector<std::size_t> current_dimensions;
+                    for (std::ptrdiff_t i = pArrayType->dimensions.size() - 1; i >= 0; i--) {
+                        if (auto as_unknown = dynamic_cast<parser::nodes::UnknownSize *>(pArrayType->dimensions[i].get()); as_unknown) {
+                            if (!current_dimensions.empty()) {
+                                subtype = gc.gcnew<ArrayType>(subtype.get(), current_dimensions, constant);
+                                current_dimensions = {};
+                            }
+                            subtype = gc.gcnew<PointerType>(subtype.get(), constant);
+                        } else {
+                            auto result = exec(pArrayType->dimensions[i], rtime);
+                            if (auto as_integer = dynamic_cast<ComptimeInteger *>(result.get()); as_integer) {
+                                if (as_integer->value > 0) {
+                                    current_dimensions.insert(current_dimensions.begin(), as_integer->value);
+                                } else {
+                                    throw LocalizedCurdleError{
+                                            "Invalid dimension: expected a dimension size that resolved to a positive integer greater than zero",
+                                            pArrayType->dimensions[i]->location,
+                                            error::ErrorCode::InvalidDimension
+                                    };
+                                }
+                            } else {
+                                throw LocalizedCurdleError{
+                                        "Invalid dimension: expected a dimension size that resolved to an integer",
+                                        pArrayType->dimensions[i]->location,
+                                        error::ErrorCode::InvalidDimension
+                                };
+                            }
+                        }
+                    }
+                    if (!current_dimensions.empty()) {
+                        subtype = gc.gcnew<ArrayType>(subtype.get(), current_dimensions, constant);
+                    }
+
+                    return create_from_type(globalContext, subtype.get());
+                } else {
+                    throw LocalizedCurdleError{
+                            "Expected Type: Expected a value convertible to a type",
+                            pArrayType->child->location,
+                            error::ErrorCode::ExpectedType
+                    };
+                }
+            }
             WHEN_NODE_IS(parser::nodes::ValueReference, pValueReference) {
                 // Do the same as below but throw errors on an invalid value reference
                 auto gotten = get(pValueReference->name);
@@ -283,6 +332,9 @@ namespace cheese::curdle {
             }
             WHEN_NODE_IS(parser::nodes::IntegerLiteral, pIntegerLiteral) {
                 return gc.gcnew<ComptimeInteger>(pIntegerLiteral->value, ComptimeIntegerType::get(globalContext));
+            }
+            WHEN_NODE_IS(parser::nodes::StringLiteral, pStringLiteral) {
+                return gc.gcnew<ComptimeString>(pStringLiteral->str, ComptimeIntegerType::get(globalContext));
             }
 
             WHEN_NODE_IS(parser::nodes::FloatLiteral, pFloatLiteral) {
