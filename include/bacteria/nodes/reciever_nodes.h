@@ -143,9 +143,11 @@ namespace cheese::bacteria::nodes {
         ~Function() override = default;
 
         JSON_FUNCS("function", { "name", "arguments", "return_type", "body" }, name, arguments,
-                   return_type->to_string(), children)
+                   return_type->to_string(), children);
 
-        void lower_top_level(BacteriaContext *ctx) override;;
+        void gen_protos(BacteriaContext *ctx) override;
+
+        void lower_top_level(BacteriaContext *ctx) override;
     };
 }
 

@@ -17,6 +17,30 @@ namespace cheese::bacteria {
         NOT_IMPL_FOR(typeid(*this).name());
     }
 
+    void BacteriaNode::lower_scope_level(ScopeContext &ctx) {
+        NOT_IMPL_FOR(typeid(*this).name());
+    }
+
+    llvm::Value *BacteriaNode::lower_expression_level(ScopeContext &ctx, ExpressionContext &expr) {
+        NOT_IMPL_FOR(typeid(*this).name());
+    }
+
+    llvm::Value *BacteriaNode::lower_address(ScopeContext &ctx) {
+        NOT_IMPL_FOR(typeid(*this).name());
+    }
+
+    llvm::Value *BacteriaNode::lower_write(ScopeContext &ctx, WriteContext &writeContext) {
+        NOT_IMPL_FOR(typeid(*this).name());
+    }
+
+    void BacteriaNode::gen_protos(BacteriaContext *ctx) {
+        NOT_IMPL_FOR(typeid(*this).name());
+    }
+
+    TypePtr BacteriaNode::get_expr_type() {
+        NOT_IMPL_FOR(typeid(*this).name());
+    }
+
     void add_indentation(std::stringstream &ss, int indentation) {
         for (int i = 0; i < indentation; i++) {
             ss << "    ";

@@ -12,6 +12,7 @@ namespace cheese::bacteria {
         TypeList argumentTypes;
         TypePtr returnType;
         std::string name;
+        llvm::Function *prototype;
     };
 }
 #endif //CHEESE_FUNCTIONINFO_H

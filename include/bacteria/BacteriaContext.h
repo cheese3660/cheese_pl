@@ -16,9 +16,9 @@ namespace cheese::bacteria {
     struct BacteriaContext : managed_object {
         project::GlobalContext *global_context;
         llvm::Module *program_module;
-        llvm::IRBuilder<> *ir_builder;
+//        llvm::IRBuilder<> *ir_builder;
         llvm::LLVMContext &context;
-        std::unordered_map<std::string, std::string> string_constants;
+        std::unordered_map<std::string, llvm::Value *> string_constants;
         std::unordered_map<std::string, FunctionInfo> functions;
         std::unordered_map<std::string, VariableInfo> global_variables;
         std::size_t next_string_constant_name{0};
@@ -29,7 +29,7 @@ namespace cheese::bacteria {
 
         explicit BacteriaContext(project::GlobalContext *globalContext);
 
-        std::string get_string_constant(std::string constant); // This returns a ptr u8
+        llvm::Value *get_string_constant(std::string constant); // This returns a ptr u8
 
     };
 }

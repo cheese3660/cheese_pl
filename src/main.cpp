@@ -16,6 +16,7 @@ std::string usage =
         "   parse       -   parse a source file into an AST representation\n"
         "   translate   -   translate a program to bacteria\n"
         "   lower       -   lower a program into llvm IR\n"
+        "   build       -   compile a program into assembly\n"
         "options:\n"
         "   --version   -   print the version and exit\n"
         "   --help      -   print a help string dependant on the tool and exit\n";

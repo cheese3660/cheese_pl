@@ -70,6 +70,8 @@ namespace cheese::bacteria {
                 const std::vector<std::size_t> &arrayDimensions,
                 const std::vector<BacteriaType *> &childTypes, const std::string &structName, const bool externFn);
 
+        bool is_same_as(BacteriaType *other);
+
         bool should_implicit_reference();
 
     private:

@@ -11,11 +11,15 @@
 #include "BacteriaType.h"
 #include <memory>
 #include <utility>
+#include <llvm/IR/Value.h>
 
 namespace cheese::bacteria {
 
     // We are going to completely redefine all the parser helper functions again to make stuff easier on us
     struct BacteriaContext;
+    struct ScopeContext;
+    struct WriteContext;
+    struct ExpressionContext;
 
     class BacteriaNode {
     public:
@@ -40,6 +44,17 @@ namespace cheese::bacteria {
 
         virtual void lower_top_level(BacteriaContext *ctx);
 
+        virtual void gen_protos(BacteriaContext *ctx);
+
+        virtual void lower_scope_level(ScopeContext &ctx);
+
+        virtual llvm::Value *lower_expression_level(ScopeContext &ctx, ExpressionContext &expr);
+
+        virtual llvm::Value *lower_address(ScopeContext &ctx);
+
+        virtual llvm::Value *lower_write(ScopeContext &ctx, WriteContext &writeContext);
+
+        virtual TypePtr get_expr_type();
     };
 
     void add_indentation(std::stringstream &ss, int indentation);

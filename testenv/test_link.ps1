@@ -1,0 +1,1 @@
+lld-link translated.o /libpath:"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.35.32215\lib\x64" /libpath:"C:\Program Files (x86)\Windows Kits\10\Lib\10.0.22000.0\ucrt\x64" /libpath:"C:\Program Files (x86)\Windows Kits\10\Lib\10.0.22000.0\um\x64" msvcrtd.lib /out:translated.exe

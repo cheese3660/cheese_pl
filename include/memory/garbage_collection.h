@@ -75,6 +75,8 @@ namespace cheese::memory::garbage_collection {
 
         void remove_root_object(managed_object *object);
 
+        void clear();
+
         ~garbage_collector();
     };
 

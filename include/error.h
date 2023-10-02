@@ -89,6 +89,8 @@ namespace cheese::error {
         InvalidComptimeOperation,
         InvalidRuntimeOperation,
         InvalidDimension,
+
+        InvalidReturn = generator_error_start,
         //General error (thrown for example when multiple previous errors were printed)
         GeneralCompilerError = 9999,
     };

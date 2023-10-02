@@ -9,6 +9,8 @@
 #include <utility>
 #include "project/GlobalContext.h"
 #include "bacteria/BacteriaContext.h"
+#include "bacteria/FunctionContext.h"
+#include "bacteria/ScopeContext.h"
 
 namespace cheese::bacteria::nodes {
     std::map<std::string, int> BacteriaProgram::get_child_map() const {
@@ -60,46 +62,44 @@ namespace cheese::bacteria::nodes {
         ctx->gc.remove_root_object(ctx);
         // Set up top level declaration info
         for (const auto &child: children) {
-            if (auto as_function = dynamic_cast<Function *>(child.get()); as_function) {
-                TypePtr retTy = as_function->return_type;
-                TypeList args;
-                for (const auto &arg: as_function->arguments) {
-                    args.push_back(arg.type);
-                }
-                bacteriaModule->functions[as_function->name] = FunctionInfo{
-                        args,
-                        retTy,
-                        as_function->name
-                };
-            } else if (auto as_import = dynamic_cast<FunctionImport *>(child.get()); as_import) {
-                bacteriaModule->functions[as_import->name] = FunctionInfo{
-                        as_import->arguments,
-                        as_import->return_type,
-                        as_import->name
-                };
-            } else if (auto as_init = dynamic_cast<VariableInitializationNode *>(child.get()); as_init) {
-                bacteriaModule->global_variables[as_init->name] = VariableInfo{
-                        as_init->constant,
-                        as_init->name,
-                        as_init->type
-                };
-            } else {
-                NOT_IMPL_FOR(typeid(*child.get()).name());
-            }
+            child->gen_protos(bacteriaModule);
         }
         // Lower stuff
         for (const auto &child: children) {
             child->lower_top_level(bacteriaModule);
         }
 
-        return std::unique_ptr<llvm::Module>{bacteriaModule->program_module};
+        return std::unique_ptr<llvm::Module>(bacteriaModule->program_module);
     }
 
     void Function::lower_top_level(BacteriaContext *ctx) {
+        auto prototype = ctx->functions[name].prototype;
+        FunctionContext fctx{ctx, prototype};
+        fctx.return_type = return_type;
+        ScopeContext sctx{fctx, fctx.entry_block};
+        size_t idx = 0;
+        for (auto &arg: prototype->args()) {
+            fctx.all_variables[arguments[idx].name] = VariableInfo{
+                    true,
+                    arguments[idx].name,
+                    arguments[idx].type,
+                    &arg
+            };
+            sctx.variable_renames[arguments[idx].name] = arguments[idx].name;
+        }
+
+        for (const auto &child: children) {
+            child->lower_scope_level(sctx);
+        }
+    }
+
+    void Function::gen_protos(BacteriaContext *ctx) {
         auto returnType = return_type->get_llvm_type(ctx->global_context);
         std::vector<llvm::Type *> argTypes;
+        std::vector<TypePtr> bacteriaArgTypes;
         for (auto &arg: arguments) {
             argTypes.push_back(arg.type->get_llvm_type(ctx->global_context));
+            bacteriaArgTypes.push_back(arg.type);
         }
         auto functionType = llvm::FunctionType::get(returnType, argTypes, false);
         auto prototype = llvm::Function::Create(functionType, llvm::Function::ExternalLinkage, name,
@@ -108,5 +108,11 @@ namespace cheese::bacteria::nodes {
         for (auto &arg: prototype->args()) {
             arg.setName(arguments[idx++].name);
         }
+        ctx->functions[name] = FunctionInfo{
+                bacteriaArgTypes,
+                return_type,
+                name,
+                prototype
+        };
     }
 }

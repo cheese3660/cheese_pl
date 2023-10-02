@@ -5,6 +5,7 @@
 #include "tools/test.h"
 #include "tools/parse.h"
 #include "tools/lower.h"
+#include "tools/build.h"
 #include "configuration.h"
 #include <iostream>
 #include "lexer/lexer.h"
@@ -22,7 +23,8 @@ namespace cheese::tools {
             {"test",      test},
             {"parse",     parse},
             {"translate", translate},
-            {"lower",     lower}
+            {"lower",     lower},
+            {"build",     build}
     };
 
     argparse::ArgumentParser get_parser(std::string name) {

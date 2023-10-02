@@ -10,11 +10,11 @@ void cheese::bacteria::BacteriaContext::mark_references() {
 cheese::bacteria::BacteriaContext::BacteriaContext(cheese::project::GlobalContext *globalContext) : global_context(
         globalContext), context(globalContext->llvm_context) {
     program_module = new llvm::Module("main", globalContext->llvm_context);
-    ir_builder = new llvm::IRBuilder<>(globalContext->llvm_context);
+    program_module->setDataLayout(globalContext->machine.layout);
     program_module->setSourceFileName(globalContext->project.root_path.filename().string());
 }
 
-std::string cheese::bacteria::BacteriaContext::get_string_constant(std::string constant) {
+llvm::Value *cheese::bacteria::BacteriaContext::get_string_constant(std::string constant) {
     if (string_constants.contains(constant)) return string_constants[constant];
     auto next_name = ".str__" + std::to_string(next_string_constant_name++);
     auto llvmConstant = program_module->getOrInsertGlobal(next_name,
@@ -24,10 +24,9 @@ std::string cheese::bacteria::BacteriaContext::get_string_constant(std::string c
     globalVariable->setConstant(true);
     globalVariable->setLinkage(llvm::GlobalValue::PrivateLinkage);
     globalVariable->setInitializer(llvm::ConstantDataArray::getString(context, constant, true));
-    string_constants[constant] = next_name;
-    return next_name;
+    string_constants[constant] = globalVariable;
+    return globalVariable;
 }
 
 cheese::bacteria::BacteriaContext::~BacteriaContext() {
-    delete ir_builder;
 }

@@ -91,6 +91,22 @@ namespace cheese::memory::garbage_collection {
         }
     }
 
+    void garbage_collector::clear() {
+        int i = 0;
+//        std::cout << "Clearing garbage collector, dumping all remaining objects\n";
+        for (auto ptr: managed_objects) {
+
+            if (ptr != nullptr) {
+//                std::cout << i << ": " << typeid(*ptr).name() << '\n';
+                delete ptr;
+            } else {
+//                std::cout << i << ": empty\n";
+            }
+            i++;
+        }
+        managed_objects.clear();
+    }
+
 
 
 

@@ -9,3 +9,6 @@
 /reference.pdf
 /default.latex
 /testenv/example.json
+/testbuild
+translated.asm
+/testenv/translated.*

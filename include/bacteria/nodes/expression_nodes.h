@@ -47,7 +47,9 @@ namespace cheese::bacteria::nodes {
         JSON_FUNCS("function", { "name", "arguments", "return_type" }, name, arguments,
                    return_type->to_string())
 
-        void lower_top_level(BacteriaContext *ctx) override;;
+        void lower_top_level(BacteriaContext *ctx) override;
+
+        void gen_protos(BacteriaContext *ctx) override;
     };
 
     struct Return : BacteriaNode {
@@ -70,6 +72,8 @@ namespace cheese::bacteria::nodes {
         }
 
         JSON_FUNCS("return", { "value" }, retVal)
+
+        void lower_scope_level(ScopeContext &ctx) override;
     };
 
     struct If : BacteriaNode {
@@ -162,7 +166,11 @@ namespace cheese::bacteria::nodes {
             return ss.str();
         }
 
-        JSON_FUNCS("integer", { "value", "ty" }, value, (type->to_string()));
+        JSON_FUNCS("integer", { "value", "ty" }, value, (type->to_string()))
+
+        llvm::Value *lower_expression_level(ScopeContext &ctx, ExpressionContext &expr) override;
+
+        TypePtr get_expr_type() override;;
     };
 
     struct FloatLiteral : BacteriaNode {
@@ -230,12 +238,13 @@ namespace cheese::bacteria::nodes {
 
         std::string get_textual_representation(int depth) override {
             std::stringstream ss{};
-            bool parens = false;
             ss << lhs->get_textual_representation(depth) << " @ " << rhs->to_string();
             return ss.str();
         }
 
         JSON_FUNCS("cast", { "value", "ty" }, lhs, (rhs->to_string()))
+
+        llvm::Value *lower_expression_level(ScopeContext &ctx, ExpressionContext &expr) override;
     };
 
     struct NormalCallNode : BacteriaNode {
@@ -262,6 +271,8 @@ namespace cheese::bacteria::nodes {
         }
 
         JSON_FUNCS("call", { "function", "arguments" }, function, arguments)
+
+        llvm::Value *lower_expression_level(ScopeContext &ctx, ExpressionContext &expr) override;
     };
 
     struct PointerCallNode : BacteriaNode {

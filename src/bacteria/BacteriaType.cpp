@@ -237,4 +237,9 @@ namespace cheese::bacteria {
                 return true;
         }
     }
+
+    bool BacteriaType::is_same_as(BacteriaType *other) {
+        return matches(other->type, other->integer_size, other->subtype, other->array_dimensions, other->child_types,
+                       other->struct_name, other->constant_ref);
+    }
 }

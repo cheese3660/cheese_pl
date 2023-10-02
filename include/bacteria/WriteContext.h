@@ -7,10 +7,11 @@
 
 #include "BacteriaType.h"
 #include <string>
+#include <llvm/IR/Value.h>
 
 namespace cheese::bacteria {
     struct WriteContext {
-        std::string result_variable;
+        llvm::Value *result_valuee;
         TypePtr result_type;
     };
 }
