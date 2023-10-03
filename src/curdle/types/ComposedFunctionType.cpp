@@ -13,7 +13,7 @@
 #include "curdle/curdle.h"
 #include "curdle/types/FunctionPointerType.h"
 #include "curdle/types/ReferenceType.h"
-#include "bacteria/nodes/reciever_nodes.h"
+#include "bacteria/nodes/receiver_nodes.h"
 #include "bacteria/nodes/expression_nodes.h"
 
 namespace cheese::curdle {

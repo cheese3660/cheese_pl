@@ -2,13 +2,15 @@
 // Created by Lexi Allen on 10/1/2023.
 //
 #include "bacteria/BacteriaContext.h"
+#include "bacteria/nodes/receiver_nodes.h"
 
 void cheese::bacteria::BacteriaContext::mark_references() {
     global_context->mark();
 }
 
-cheese::bacteria::BacteriaContext::BacteriaContext(cheese::project::GlobalContext *globalContext) : global_context(
-        globalContext), context(globalContext->llvm_context) {
+cheese::bacteria::BacteriaContext::BacteriaContext(cheese::project::GlobalContext *globalContext,
+                                                   nodes::BacteriaProgram *program) : global_context(
+        globalContext), context(globalContext->llvm_context), program(program) {
     program_module = new llvm::Module("main", globalContext->llvm_context);
     program_module->setDataLayout(globalContext->machine.layout);
     program_module->setSourceFileName(globalContext->project.root_path.filename().string());

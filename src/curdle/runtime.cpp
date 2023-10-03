@@ -21,6 +21,10 @@
 #include "curdle/builtin.h"
 #include "curdle/types/ComposedFunctionType.h"
 #include "curdle/types/FunctionPointerType.h"
+#include "curdle/values/ImportedFunction.h"
+#include "curdle/types/ImportedFunctionType.h"
+#include "curdle/types/PointerType.h"
+#include "curdle/types/ArrayType.h"
 
 
 namespace cheese::curdle {
@@ -98,6 +102,10 @@ namespace cheese::curdle {
                     return {gc, builtin->builtin->exec(call->location, args, cctx, rctx)->type};
                 }
             }
+            if (auto imported = dynamic_cast<ImportedFunction *>(ctime); imported) {
+                auto ty = dynamic_cast<ImportedFunctionType *>(imported->type);
+                return {gc, ty->return_type};
+            }
             NOT_IMPL_FOR(typeid(*ctime).name());
         } else if (auto subscript = dynamic_cast<parser::nodes::Subscription *>(call->object.get()); subscript) {
             auto subscript_type = rctx->get_type(subscript->lhs.get());
@@ -133,6 +141,24 @@ namespace cheese::curdle {
 #undef WHEN_FN_IS
 
         NOT_IMPL_FOR("non compile time deductible functions of type " + typeid(*fn_ty.get()).name());
+    }
+
+
+    gcref<Type> get_array_call_type(LocalContext *lctx, parser::nodes::ArrayCall *call) {
+        auto rctx = lctx->runtime;
+        auto cctx = rctx->comptime;
+        auto gctx = cctx->globalContext;
+        auto &gc = gctx->gc;
+        auto arr_ty = lctx->get_type(call->object.get());
+#define WHEN_ARR_IS(ty, name) if (auto name = dynamic_cast<ty*>(arr_ty.get()); name)
+        WHEN_ARR_IS(PointerType, pPointerType) {
+            return get_true_subtype(gc, pPointerType, call->args.size());
+        }
+        WHEN_ARR_IS(ArrayType, pArrayType) {
+            return get_true_subtype(gc, pArrayType, call->args.size());
+        }
+#undef WHEN_ARR_IS
+        NOT_IMPL_FOR("non compile time deductible arrays of type " + typeid(*arr_ty.get()).name());
     }
 
     Type *get_object_call_type(LocalContext *lctx, parser::nodes::ObjectCall *call) {
@@ -445,6 +471,11 @@ namespace cheese::curdle {
                 return binary_result_type(enums::SimpleOperation::Or, get_type(pOr->lhs.get()),
                                           get_type(pOr->rhs.get()), gctx);
             }
+            WHEN_NODE_IS(parser::nodes::GreaterEqual, pGreaterEqual) {
+                return binary_result_type(enums::SimpleOperation::GreaterThanOrEqualTo,
+                                          get_type(pGreaterEqual->lhs.get()),
+                                          get_type(pGreaterEqual->rhs.get()), gctx);
+            }
             WHEN_NODE_IS(parser::nodes::Not, pNot) {
                 return unary_result_type(enums::SimpleOperation::UnaryMinus, get_type(pNot->child.get()), gctx);
             }
@@ -458,6 +489,9 @@ namespace cheese::curdle {
             WHEN_NODE_IS(parser::nodes::TupleCall, pTupleCall) {
                 // Now time to do a bunch of work to get the type of *one* function call
                 return get_function_call_type(this, pTupleCall);
+            }
+            WHEN_NODE_IS(parser::nodes::ArrayCall, pArrayCall) {
+                return get_array_call_type(this, pArrayCall);
             }
             WHEN_NODE_IS(parser::nodes::Cast, pCast) {
                 try {
@@ -519,6 +553,11 @@ namespace cheese::curdle {
                     return structure;
                 }
             }
+            WHEN_NODE_IS(parser::nodes::If, pIf) {
+                auto result_type = get_type(pIf->body.get());
+                auto else_type = pIf->els.has_value() ? get_type(pIf->els.value().get()) : VoidType::get(gctx);
+                return {gc, peer_type({result_type, else_type}, gctx)};
+            }
             WHEN_NODE_IS(parser::nodes::Match, pMatch) {
                 // We peer type all the arms together
                 std::vector<gcref<Type>> all_referenced_types;
@@ -538,6 +577,22 @@ namespace cheese::curdle {
                 auto lvalue_type = runtime->get_lvalue_type(pAddressOf->child.get());
                 // We have to ma
                 return gc.gcnew<ReferenceType>(lvalue_type.first, lvalue_type.second);
+            }
+            WHEN_NODE_IS(parser::nodes::Block, pBlock) {
+                return {gc, VoidType::get(gctx)};
+            }
+            WHEN_NODE_IS(parser::nodes::EmptyReturn, pEmptyReturn) {
+                return {gc, NoReturnType::get(gctx)};
+            }
+            WHEN_NODE_IS(parser::nodes::VariableDefinition, pVariableDefinition) {
+                return {gc, VoidType::get(gctx)};
+            }
+            WHEN_NODE_IS(parser::nodes::Assignment, pAssignment) {
+                return {gc, VoidType::get(gctx)};
+            }
+            WHEN_NODE_IS(parser::nodes::While, pWhile) {
+                //TODO: while loop body analysis
+                return {gc, VoidType::get(gctx)};
             }
             NOT_IMPL_FOR(typeid(*node).name());
 #undef WHEN_NODE_IS

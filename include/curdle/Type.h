@@ -9,7 +9,7 @@
 #include "Mixin.h"
 #include "memory/garbage_collection.h"
 #include "project/GlobalContext.h"
-#include "bacteria/nodes/reciever_nodes.h"
+#include "bacteria/nodes/receiver_nodes.h"
 #include "curdle/enums/SimpleOperation.h"
 
 namespace cheese::curdle {
@@ -75,6 +75,9 @@ namespace cheese::curdle {
 
     std::vector<memory::garbage_collection::gcref<Type>>
     get_functional_argument_types(Type *type, cheese::project::GlobalContext *gctx);
+
+    memory::garbage_collection::gcref<Type>
+    get_true_subtype(memory::garbage_collection::garbage_collector &gc, Type *type, std::size_t num_subindices);
 }
 #define INVALID_CHILD throw CurdleError("key not a comptime child of type " + to_string() + ": " + key, error::ErrorCode::InvalidSubscript)
 #define CATCH_DUNDER_NAME do { if (key == "__name__") { return gctx->gc.gcnew<ComptimeString>(to_string(), ComptimeStringType::get(gctx)); } } while(0)

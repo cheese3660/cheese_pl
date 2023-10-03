@@ -32,6 +32,7 @@
 #include "curdle/types/ComptimeEnumType.h"
 #include "curdle/types/ArrayType.h"
 #include "curdle/types/PointerType.h"
+#include "curdle/types/ComptimeStringType.h"
 
 
 namespace cheese::curdle {
@@ -334,7 +335,7 @@ namespace cheese::curdle {
                 return gc.gcnew<ComptimeInteger>(pIntegerLiteral->value, ComptimeIntegerType::get(globalContext));
             }
             WHEN_NODE_IS(parser::nodes::StringLiteral, pStringLiteral) {
-                return gc.gcnew<ComptimeString>(pStringLiteral->str, ComptimeIntegerType::get(globalContext));
+                return gc.gcnew<ComptimeString>(pStringLiteral->str, ComptimeStringType::get(globalContext));
             }
 
             WHEN_NODE_IS(parser::nodes::FloatLiteral, pFloatLiteral) {
@@ -581,6 +582,33 @@ namespace cheese::curdle {
             }
             WHEN_NODE_IS(parser::nodes::Return, pReturn) {
                 throw CurdleError("Not Compile Time: Can't return at compile time",
+                                  error::ErrorCode::NotComptime);
+            }
+            WHEN_NODE_IS(parser::nodes::EmptyReturn, pEmptyReturn) {
+                throw CurdleError("Not Compile Time: Can't return at compile time",
+                                  error::ErrorCode::NotComptime);
+            }
+            WHEN_NODE_IS(parser::nodes::Block, pBlock) {
+                //TODO: Maybe we should do some comptime stuff on this, but not yet
+                throw CurdleError("Not Compile Time: Can't execute a block at compile time",
+                                  error::ErrorCode::NotComptime);
+            }
+            WHEN_NODE_IS(parser::nodes::ArrayCall, pArrayCall) {
+                //TODO: Do comptime stuff on this, but not yet
+                throw CurdleError("Not Compile Time: can't do an array call at compile time",
+                                  error::ErrorCode::NotComptime);
+            }
+            WHEN_NODE_IS(parser::nodes::While, pWhile) {
+                //TODO: Do comptime stuff on this, but not yet
+                throw CurdleError("Not Compile Time: can't do a while loop at compile time",
+                                  error::ErrorCode::NotComptime);
+            }
+            WHEN_NODE_IS(parser::nodes::VariableDefinition, pVariableDefinition) {
+                throw CurdleError("Not Compile Time: can't do a variable definition at compile time",
+                                  error::ErrorCode::NotComptime);
+            }
+            WHEN_NODE_IS(parser::nodes::Assignment, pAssignment) {
+                throw CurdleError("Not Compile Time: can't do assignment at compile time",
                                   error::ErrorCode::NotComptime);
             }
             NOT_IMPL_FOR(typeid(*node).name());

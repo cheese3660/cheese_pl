@@ -14,7 +14,7 @@
 //#include "curdle/functions.h"
 #include "bacteria/BacteriaNode.h"
 #include "bacteria/BacteriaReceiver.h"
-#include "bacteria/nodes/reciever_nodes.h"
+#include "bacteria/nodes/receiver_nodes.h"
 #include "Machine.h"
 #include <set>
 

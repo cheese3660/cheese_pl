@@ -18,6 +18,8 @@
 #include "curdle/types/VoidType.h"
 #include "curdle/types/ComposedFunctionType.h"
 #include "curdle/types/FunctionPointerType.h"
+#include "curdle/types/PointerType.h"
+#include "curdle/types/ArrayType.h"
 
 namespace cheese::curdle {
 
@@ -166,6 +168,32 @@ namespace cheese::curdle {
         }
 #undef WHEN_FUNCTIONAL_IS
         NOT_IMPL_FOR(typeid(*type).name());
+    }
+
+    gcref<Type> get_true_subtype(garbage_collector &gc, Type *type, std::size_t num_subindices) {
+        if (num_subindices == 0) return {gc, type};
+#define WHEN_TY_IS(ty, name) if (auto name = dynamic_cast<ty*>(type); name)
+        WHEN_TY_IS(PointerType, pPointerType) {
+            return get_true_subtype(gc, type, num_subindices - 1);
+        }
+        WHEN_TY_IS(ArrayType, pArrayType) {
+            if (num_subindices >= pArrayType->dimensions.size()) {
+                return get_true_subtype(gc, pArrayType->subtype, num_subindices - pArrayType->dimensions.size());
+            }
+            if (num_subindices < pArrayType->dimensions.size()) {
+                auto num_ptrs = num_subindices - pArrayType->dimensions.size();
+                auto base_ptr = gc.gcnew<PointerType>(pArrayType->subtype, pArrayType->constant);
+                for (int i = 1; i < num_ptrs; i++) {
+                    base_ptr = gc.gcnew<PointerType>(base_ptr, pArrayType->constant);
+                }
+                return base_ptr;
+            }
+        }
+#undef WHEN_TY_IS
+        throw CurdleError{
+                "Cannot get subtype of: " + std::string(typeid(*type).name()),
+                error::ErrorCode::InvalidSubscript
+        };
     }
 
 }

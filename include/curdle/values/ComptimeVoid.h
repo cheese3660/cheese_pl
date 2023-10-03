@@ -18,6 +18,8 @@ namespace cheese::curdle {
         std::string to_string() override;
 
         gcref<ComptimeValue> cast(Type *target_type, garbage_collector &garbageCollector) override;
+
+        ComptimeVoid(Type *ty);
     };
 }
 

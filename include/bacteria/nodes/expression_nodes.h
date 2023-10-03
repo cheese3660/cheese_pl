@@ -8,7 +8,7 @@
 #include <optional>
 #include <utility>
 #include "bacteria/BacteriaNode.h"
-#include "bacteria/nodes/reciever_nodes.h"
+#include "bacteria/nodes/receiver_nodes.h"
 #include "stringutil.h"
 #include <sstream>
 
@@ -114,6 +114,48 @@ namespace cheese::bacteria::nodes {
         }
 
         JSON_FUNCS("if", { "condition", "body", "else" }, condition, body, els)
+
+        void lower_scope_level(ScopeContext &ctx) override;
+    };
+
+    struct While : BacteriaNode {
+        While(const Coordinate &location, BacteriaPtr condition, BacteriaPtr body,
+              BacteriaPtr &&els) : BacteriaNode(location), condition(std::move(condition)), body(std::move(body)),
+                                   els(std::move(els)) {}
+
+        While(const Coordinate &location, BacteriaPtr condition, BacteriaPtr body) : BacteriaNode(location),
+                                                                                     condition(std::move(condition)),
+                                                                                     body(std::move(body)), els() {}
+
+        BacteriaPtr condition;
+        BacteriaPtr body;
+        std::optional<BacteriaPtr> els;
+
+        ~While() override = default;
+
+        std::string get_textual_representation(int depth) override {
+            std::stringstream ss{};
+            ss << "while " << condition->get_textual_representation(depth) << '\n';
+            auto d = dynamic_cast<UnnamedBlock *>(body.get()) ? 0 : 1;
+            add_indentation(ss, depth + d);
+            ss << body->get_textual_representation(depth + d);
+            if (els.has_value()) {
+                ss << '\n';
+                add_indentation(ss, depth);
+                if (dynamic_cast<If *>(els.value().get())) {
+                    ss << "else ";
+                    ss << els.value()->get_textual_representation(depth);
+                } else {
+                    ss << "else\n";
+                    auto d2 = dynamic_cast<UnnamedBlock *>(els.value().get()) ? 0 : 1;
+                    add_indentation(ss, depth + d2);
+                    ss << els.value()->get_textual_representation(depth + d2);
+                }
+            }
+            return ss.str();
+        }
+
+        JSON_FUNCS("while", { "condition", "body", "else" }, condition, body, els)
     };
 
     struct Nop : BacteriaNode {
@@ -147,7 +189,11 @@ namespace cheese::bacteria::nodes {
             return ss.str();
         }
 
-        JSON_FUNCS("integer", { "value", "ty" }, value, (type->to_string()));
+        JSON_FUNCS("integer", { "value", "ty" }, value, (type->to_string()))
+
+        llvm::Value *lower_expression_level(ScopeContext &ctx, ExpressionContext &expr) override;
+
+        TypePtr get_expr_type(ScopeContext &ctx, nodes::BacteriaProgram *program) override;;
     };
 
     struct StringLiteral : BacteriaNode {
@@ -170,7 +216,7 @@ namespace cheese::bacteria::nodes {
 
         llvm::Value *lower_expression_level(ScopeContext &ctx, ExpressionContext &expr) override;
 
-        TypePtr get_expr_type() override;;
+        TypePtr get_expr_type(ScopeContext &ctx, BacteriaProgram *program) override;
     };
 
     struct FloatLiteral : BacteriaNode {
@@ -225,6 +271,10 @@ namespace cheese::bacteria::nodes {
         }
 
         JSON_FUNCS("value", { "name" }, name)
+
+        llvm::Value *lower_expression_level(ScopeContext &ctx, ExpressionContext &expr) override;
+
+        TypePtr get_expr_type(ScopeContext &ctx, nodes::BacteriaProgram *program) override;
     };
 
     struct CastNode : BacteriaNode {
@@ -273,6 +323,8 @@ namespace cheese::bacteria::nodes {
         JSON_FUNCS("call", { "function", "arguments" }, function, arguments)
 
         llvm::Value *lower_expression_level(ScopeContext &ctx, ExpressionContext &expr) override;
+
+        void lower_scope_level(ScopeContext &ctx) override;
     };
 
     struct PointerCallNode : BacteriaNode {
@@ -301,6 +353,36 @@ namespace cheese::bacteria::nodes {
         JSON_FUNCS("pointer_call", { "function", "arguments" }, function, arguments)
     };
 
+    struct ArrayIndexNode : BacteriaNode {
+        ArrayIndexNode(const Coordinate &location, BacteriaPtr array,
+                       std::vector<BacteriaPtr> arguments) : BacteriaNode(location), array(std::move(array)),
+                                                             arguments(std::move(arguments)) {}
+
+        BacteriaPtr array;
+        std::vector<BacteriaPtr> arguments;
+
+        ~ArrayIndexNode() override = default;
+
+        std::string get_textual_representation(int depth) override {
+            std::stringstream ss{};
+            ss << array->get_textual_representation(depth) << '[';
+            for (int i = 0; i < arguments.size(); i++) {
+                ss << arguments[i]->get_textual_representation(depth);
+                if (i < arguments.size() - 1) {
+                    ss << ", ";
+                }
+            }
+            ss << ']';
+            return ss.str();
+        }
+
+        JSON_FUNCS("pointer_call", { "array", "arguments" }, array, arguments)
+
+        TypePtr get_expr_type(ScopeContext &ctx, nodes::BacteriaProgram *program) override;
+
+        llvm::Value *lower_expression_level(ScopeContext &ctx, ExpressionContext &expr) override;
+    };
+
     struct VariableInitializationNode : BacteriaNode {
 
         std::string name;
@@ -320,6 +402,22 @@ namespace cheese::bacteria::nodes {
 
         JSON_FUNCS("init", { "name", "ty", "value", "constant" }, name, type->to_string(), value,
                    std::to_string(constant));
+    };
+
+    struct VariableDefinitionNode : BacteriaNode {
+        std::string name;
+        TypePtr type;
+
+        VariableDefinitionNode(const Coordinate &location, const std::string &name, const TypePtr &type) : BacteriaNode(
+                location), name(name), type(type) {}
+
+        ~VariableDefinitionNode() = default;
+
+        std::string get_textual_representation(int depth) override {
+            return name + ": " + type->to_string();
+        }
+
+        JSON_FUNCS("def", { "name", "ty" }, name, type->to_string());
     };
 
     struct AggregrateObject : BacteriaNode {
@@ -498,8 +596,13 @@ namespace cheese::bacteria::nodes {
         ~LesserThanNode() override = default;
 
         const char *get_operator() const override {
-            return "<=";
+            return "<";
         }
+
+        llvm::Value *lower_expression_level(ScopeContext &ctx, ExpressionContext &expr) override;
+
+        TypePtr get_expr_type(ScopeContext &ctx, nodes::BacteriaProgram *program) override;
+
     };
 
     struct MultiplyNode : BinaryNode {
@@ -571,6 +674,30 @@ namespace cheese::bacteria::nodes {
 
         const char *get_operator() const override {
             return "+";
+        }
+    };
+
+    struct GreaterEqualNode : BinaryNode {
+        GreaterEqualNode(const Coordinate &location, BacteriaPtr lhs, BacteriaPtr rhs) : BinaryNode(location,
+                                                                                                    std::move(lhs),
+                                                                                                    std::move(rhs)) {}
+
+        ~GreaterEqualNode() override = default;
+
+        const char *get_operator() const override {
+            return ">=";
+        }
+    };
+
+    struct MutationNode : BinaryNode {
+        MutationNode(const Coordinate &location, BacteriaPtr lhs, BacteriaPtr rhs) : BinaryNode(location,
+                                                                                                std::move(lhs),
+                                                                                                std::move(rhs)) {}
+
+        ~MutationNode() override = default;
+
+        const char *get_operator() const override {
+            return "=";
         }
     };
 }

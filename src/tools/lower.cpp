@@ -15,7 +15,7 @@
 #include "curdle/curdle.h"
 #include "project/Project.h"
 #include "project/Machine.h"
-#include "bacteria/nodes/reciever_nodes.h"
+#include "bacteria/nodes/receiver_nodes.h"
 #include <filesystem>
 
 namespace cheese::tools {

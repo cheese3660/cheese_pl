@@ -20,7 +20,9 @@ namespace cheese::bacteria {
     struct ScopeContext;
     struct WriteContext;
     struct ExpressionContext;
-
+    namespace nodes {
+        struct BacteriaProgram;
+    }
     class BacteriaNode {
     public:
         cheese::Coordinate location;
@@ -54,7 +56,7 @@ namespace cheese::bacteria {
 
         virtual llvm::Value *lower_write(ScopeContext &ctx, WriteContext &writeContext);
 
-        virtual TypePtr get_expr_type();
+        virtual TypePtr get_expr_type(ScopeContext &ctx, nodes::BacteriaProgram *program);
     };
 
     void add_indentation(std::stringstream &ss, int indentation);

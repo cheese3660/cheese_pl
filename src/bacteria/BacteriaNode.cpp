@@ -37,7 +37,7 @@ namespace cheese::bacteria {
         NOT_IMPL_FOR(typeid(*this).name());
     }
 
-    TypePtr BacteriaNode::get_expr_type() {
+    TypePtr BacteriaNode::get_expr_type(ScopeContext &ctx, nodes::BacteriaProgram *program) {
         NOT_IMPL_FOR(typeid(*this).name());
     }
 

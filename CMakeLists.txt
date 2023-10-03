@@ -95,7 +95,7 @@ add_executable(
         include/tools/translate.h
         src/project/GlobalContext.cpp
         include/bacteria/BacteriaReceiver.h
-        include/bacteria/nodes/reciever_nodes.h
+        include/bacteria/nodes/receiver_nodes.h
         include/curdle/runtime.h
         src/curdle/runtime.cpp
         src/curdle/runtime.cpp
@@ -108,7 +108,7 @@ add_executable(
         include/curdle/builtin.h
         src/curdle/builtin.cpp
         src/tests/math_tests.cpp
-        src/bacteria/nodes/reciever_nodes.cpp
+        src/bacteria/nodes/receiver_nodes.cpp
         src/tests/curdle_tests.cpp
         src/tests/curdle_tests.cpp
         include/curdle/values/ComptimeInteger.h

@@ -40,6 +40,9 @@
 #include "curdle/values/ImportedFunction.h"
 #include "curdle/types/ImportedFunctionType.h"
 #include "curdle/values/ComptimeString.h"
+#include "curdle/types/PointerType.h"
+#include "curdle/values/ComptimeVoid.h"
+#include "curdle/types/ArrayType.h"
 
 using namespace cheese::memory::garbage_collection;
 
@@ -381,6 +384,72 @@ namespace cheese::curdle {
 #undef WHEN_FN_IS
 
         NOT_IMPL_FOR("non compile time deductible functions of type " + typeid(*fn_ty.get()).name());
+    }
+
+    bacteria::BacteriaPtr
+    translate_array_index(LocalContext *lctx, bacteria::BacteriaPtr indexed_object, Type *indexed_type,
+                          parser::NodeList &all_indices, size_t start_index) {
+        auto rctx = lctx->runtime;
+        auto cctx = rctx->comptime;
+        auto gctx = cctx->globalContext;
+        auto &gc = gctx->gc;
+        auto index_lctx = gc.gcnew<LocalContext>(lctx, IntegerType::get(gctx, false,
+                                                                        gctx->machine.data_pointer_size * 8));
+        if (start_index == all_indices.size()) return indexed_object;
+#define WHEN_TY_IS(ty, name) if (auto name = dynamic_cast<ty*>(indexed_type); name)
+        WHEN_TY_IS(PointerType, pPointerType) {
+            bacteria::BacteriaList args;
+            args.push_back(make_cast(index_lctx, all_indices[start_index]));
+            return translate_array_index(lctx, std::make_unique<bacteria::nodes::ArrayIndexNode>(
+                                                 all_indices[start_index]->location, std::move(indexed_object), std::move(args)),
+                                         get_true_subtype(gc, indexed_type, (all_indices.size() - start_index) - 1),
+                                         all_indices, start_index + 1);
+        }
+        WHEN_TY_IS(ArrayType, pArrayType) {
+            bacteria::BacteriaList args;
+            if ((all_indices.size() - start_index) >= pArrayType->dimensions.size()) {
+                for (int i = 0; i < pArrayType->dimensions.size(); i++) {
+                    args.push_back(make_cast(index_lctx, all_indices[start_index + i]));
+                }
+                return translate_array_index(lctx, std::make_unique<bacteria::nodes::ArrayIndexNode>(
+                                                     all_indices[start_index]->location, std::move(indexed_object), std::move(args)),
+                                             get_true_subtype(gc, indexed_type, (all_indices.size() - start_index) -
+                                                                                pArrayType->dimensions.size()),
+                                             all_indices, start_index + pArrayType->dimensions.size());
+            } else {
+                for (int i = start_index; i < all_indices.size(); i++) {
+                    args.push_back(make_cast(index_lctx, all_indices[i]));
+                }
+                return std::make_unique<bacteria::nodes::ArrayIndexNode>(all_indices[start_index]->location,
+                                                                         std::move(indexed_object), std::move(args));
+            }
+        }
+#undef WHEN_TY_IS
+        throw CurdleError{
+                "Cannot index: " + std::string(typeid(*indexed_type).name()),
+                error::ErrorCode::InvalidSubscript
+        };
+    }
+
+    bacteria::BacteriaPtr translate_array_call(LocalContext *lctx, parser::nodes::ArrayCall *call) {
+        // Now we try to do the fun thing and get the called object either as a comptime value, or runtime value
+        // If it's a compile time value then that's *cool* it makes our jobs easier
+        auto rctx = lctx->runtime;
+        auto cctx = rctx->comptime;
+        auto gctx = cctx->globalContext;
+        auto &gc = gctx->gc;
+        auto empty_ctx = gc.gcnew<LocalContext>(rctx);
+        auto arr_ty = rctx->get_type(call->object.get());
+#define WHEN_ARR_IS(ty, name) if (auto name = dynamic_cast<ty*>(arr_ty.get()); name)
+        WHEN_ARR_IS(PointerType, pPointerType) {
+            return translate_array_index(lctx, translate_expression(lctx, call->object), arr_ty, call->args, 0);
+        }
+        WHEN_ARR_IS(ArrayType, pArrayType) {
+            return translate_array_index(lctx, translate_expression(lctx, call->object), arr_ty, call->args, 0);
+        }
+#undef WHEN_ARR_IS
+
+        NOT_IMPL_FOR("non compile time deductible functions of type " + typeid(*arr_ty.get()).name());
     }
 
     bacteria::BacteriaPtr translate_object_call(LocalContext *lctx, parser::nodes::ObjectCall *call) {
@@ -949,6 +1018,8 @@ namespace cheese::curdle {
         NOT_IMPL_FOR("unary " + enums::get_op_string(operation) + " on " + typeid(*child_type).name());
     }
 
+    void translate_statement(RuntimeContext *rctx, parser::NodePtr stmnt);
+
     bacteria::BacteriaPtr translate_expression(LocalContext *lctx, parser::NodePtr expr) {
         auto rctx = lctx->runtime;
         auto cctx = rctx->comptime;
@@ -965,6 +1036,9 @@ namespace cheese::curdle {
 #define NOP() return std::make_unique<bacteria::nodes::Nop>(expr->location)
             WHEN_EXPR_IS(parser::nodes::TupleCall, pTupleCall) {
                 return translate_tuple_call(lctx, pTupleCall);
+            }
+            WHEN_EXPR_IS(parser::nodes::ArrayCall, pArrayCall) {
+                return translate_array_call(lctx, pArrayCall);
             }
             WHEN_EXPR_IS(parser::nodes::If, pIf) {
                 return translate_if_statement(lctx, pIf);
@@ -1038,6 +1112,16 @@ namespace cheese::curdle {
                 return translate_binary<bacteria::nodes::AdditionNode>(lctx, expr->location, pAddition->lhs,
                                                                        pAddition->rhs,
                                                                        enums::SimpleOperation::Addition);
+            }
+            WHEN_EXPR_IS(parser::nodes::GreaterEqual, pGreaterEqual) {
+                return translate_binary<bacteria::nodes::GreaterEqualNode>(lctx, expr->location, pGreaterEqual->lhs,
+                                                                           pGreaterEqual->rhs,
+                                                                           enums::SimpleOperation::GreaterThanOrEqualTo);
+            }
+            WHEN_EXPR_IS(parser::nodes::NotEqualTo, pNotEqualTo) {
+                return translate_binary<bacteria::nodes::NotEqualNode>(lctx, expr->location, pNotEqualTo->lhs,
+                                                                       pNotEqualTo->rhs,
+                                                                       enums::SimpleOperation::NotEqualTo);
             }
             WHEN_EXPR_IS(parser::nodes::Cast, pCast) {
                 try {
@@ -1214,6 +1298,45 @@ namespace cheese::curdle {
                 return std::make_unique<bacteria::nodes::ReferenceNode>(pAddressOf->location, translate_expression(
                         gc.gcnew<LocalContext>(rctx), pAddressOf->child));
             }
+            WHEN_EXPR_IS(parser::nodes::Block, pBlock) {
+                auto new_rctx = gc.gcnew<RuntimeContext>(rctx, cctx, rctx->structure);
+//                auto new_rctx_b = gc.gcnew<RuntimeContext>(rctx, cctx, rctx->structure);
+                auto block_node = new bacteria::nodes::UnnamedBlock(pBlock->location);
+                new_rctx->local_reciever = block_node;
+                new_rctx->functionReturnType = rctx->functionReturnType;
+                for (const auto &child: pBlock->children) {
+                    translate_statement(new_rctx, child);
+                }
+                return block_node->get();
+            }
+            WHEN_EXPR_IS(parser::nodes::EmptyReturn, pEmptyReturn) {
+                return std::make_unique<bacteria::nodes::Return>(pEmptyReturn->location);
+            }
+            WHEN_EXPR_IS(parser::nodes::While, pWhile) {
+                // TODO: something more complicated than this for while loops that can return values
+                auto condition_ctx = gc.gcnew<LocalContext>(lctx, BooleanType::get(gctx));
+                auto empty_ctx = gc.gcnew<LocalContext>(rctx);
+                if (pWhile->els.has_value()) {
+                    return std::make_unique<bacteria::nodes::While>(pWhile->location,
+                                                                    translate_expression(condition_ctx,
+                                                                                         pWhile->condition),
+                                                                    translate_expression(empty_ctx, pWhile->body),
+                                                                    translate_expression(empty_ctx,
+                                                                                         pWhile->els.value()));
+                } else {
+                    return std::make_unique<bacteria::nodes::While>(pWhile->location,
+                                                                    translate_expression(condition_ctx,
+                                                                                         pWhile->condition),
+                                                                    translate_expression(empty_ctx, pWhile->body));
+                }
+            }
+            WHEN_EXPR_IS(parser::nodes::Assignment, pAssignment) {
+                // TODO: Semantic analysis and the like to make sure we aren't emitting a mutation for a constant value, but thats not necessary just yet
+                auto lhs_ty = rctx->get_type(pAssignment->lhs.get());
+                auto ctx = gc.gcnew<LocalContext>(lctx, lhs_ty);
+                return std::make_unique<bacteria::nodes::MutationNode>(pAssignment->location, translate_expression(
+                        gc.gcnew<LocalContext>(rctx), pAssignment->lhs), make_cast(ctx, pAssignment->rhs));
+            }
 #undef WHEN_EXPR_IS
             NOT_IMPL_FOR(typeid(*true_expr).name());
         } catch (const CurdleError &curdleError) {
@@ -1325,6 +1448,51 @@ namespace cheese::curdle {
                                                  pAssignment->rhs));
                     return;
                 }
+            }
+            WHEN_STATEMENT_IS(parser::nodes::VariableDefinition, pVariableDefinition) {
+                if (pVariableDefinition->flags.comptime) {
+                    try {
+                        auto ty = cctx->exec(pVariableDefinition->type.value(), rctx);
+                        if (auto as_type = dynamic_cast<ComptimeType *>(ty.get()); as_type) {
+                            cctx->comptimeVariables[pVariableDefinition->name] = gc.gcnew<ComptimeVariable>(
+                                    as_type->typeValue,
+                                    gctx->gc.gcnew<ComptimeVoid>(as_type->typeValue));
+                        } else {
+                            gctx->raise("Expected a type: found " + ty->type->to_string(),
+                                        pVariableDefinition->type.value()->location, error::ErrorCode::ExpectedType);
+                        }
+                    } catch (const NotComptimeError &e) {
+                        gctx->raise(e.what(), pVariableDefinition->location, error::ErrorCode::NotComptime);
+                    } catch (const BadBuiltinCall &e) {
+                        gctx->raise(e.what(), pVariableDefinition->location, error::ErrorCode::BadBuiltinCall);
+                    }
+                    return;
+                } else {
+                    gcref<Type> result_type{gc, nullptr};
+                    try {
+                        auto ty = cctx->exec(pVariableDefinition->type.value(), rctx);
+                        if (auto as_type = dynamic_cast<ComptimeType *>(ty.get()); as_type) {
+                            result_type = gc.manage(as_type->typeValue);
+                        }
+                    } catch (const NotComptimeError &e) {
+                        gctx->raise(e.what(), pVariableDefinition->location, error::ErrorCode::NotComptime);
+                        return;
+                    } catch (const BadBuiltinCall &e) {
+                        gctx->raise(e.what(), pVariableDefinition->location, error::ErrorCode::BadBuiltinCall);
+                        return;
+                    }
+                    rctx->local_reciever->receive(
+                            (new bacteria::nodes::VariableDefinitionNode(pVariableDefinition->location,
+                                                                         pVariableDefinition->name,
+                                                                         result_type->get_cached_type(
+                                                                                 gctx->global_receiver.get())))->get());
+                    rctx->variables[pVariableDefinition->name] = RuntimeVariableInfo{true,
+                                                                                     pVariableDefinition->name,
+                                                                                     result_type};
+
+                    return;
+                }
+
             }
             WHEN_STATEMENT_IS(parser::nodes::VariableDeclaration, pVariableDeclaration) {
                 // Now we have to do variable declaration stuff :3

@@ -1,2 +1,2 @@
 ./test_link.ps1
-./translated.exe
+./translated.exe 10

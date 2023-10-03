@@ -11,7 +11,7 @@
 #include <typeinfo>
 #include "curdle/names.h"
 #include "curdle/curdle.h"
-#include "bacteria/nodes/reciever_nodes.h"
+#include "bacteria/nodes/receiver_nodes.h"
 #include "curdle/types/ReferenceType.h"
 #include "curdle/values/ComptimeType.h"
 #include "curdle/types/AnyType.h"
@@ -390,6 +390,7 @@ namespace cheese::curdle {
                         error::ErrorCode::ExpectedType
                 };
             }
+            rctx->functionReturnType = ret_ty;
             auto new_function = gc.gcnew<ConcreteFunction>(name, true_arguments, ret_ty, false, external,
                                                            entry);
             concrete_functions.push_back(new_function);

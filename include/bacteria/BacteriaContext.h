@@ -12,7 +12,9 @@
 
 namespace cheese::bacteria {
     using namespace memory::garbage_collection;
-
+    namespace nodes {
+        struct BacteriaProgram;
+    }
     struct BacteriaContext : managed_object {
         project::GlobalContext *global_context;
         llvm::Module *program_module;
@@ -22,12 +24,13 @@ namespace cheese::bacteria {
         std::unordered_map<std::string, FunctionInfo> functions;
         std::unordered_map<std::string, VariableInfo> global_variables;
         std::size_t next_string_constant_name{0};
+        nodes::BacteriaProgram *program;
 
         void mark_references() override;
 
         ~BacteriaContext() override;
 
-        explicit BacteriaContext(project::GlobalContext *globalContext);
+        explicit BacteriaContext(project::GlobalContext *globalContext, nodes::BacteriaProgram *prog);
 
         llvm::Value *get_string_constant(std::string constant); // This returns a ptr u8
 

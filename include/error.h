@@ -91,6 +91,7 @@ namespace cheese::error {
         InvalidDimension,
 
         InvalidReturn = generator_error_start,
+        InvalidComparison,
         //General error (thrown for example when multiple previous errors were printed)
         GeneralCompilerError = 9999,
     };

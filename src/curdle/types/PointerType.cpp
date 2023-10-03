@@ -50,6 +50,9 @@ namespace cheese::curdle {
                 return (constant == as_ref->constant) ? 0 : 1;
             }
         }
+        if (auto as_str = dynamic_cast<ComptimeStringType *>(other); as_str) {
+            return constant ? 1 : -1;
+        }
         return -1;
     }
 

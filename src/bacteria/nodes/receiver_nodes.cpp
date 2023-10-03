@@ -1,7 +1,7 @@
 //
 // Created by Lexi Allen on 5/27/2023.
 //
-#include "bacteria/nodes/reciever_nodes.h"
+#include "bacteria/nodes/receiver_nodes.h"
 #include "bacteria/BacteriaNode.h"
 #include "bacteria/nodes/expression_nodes.h"
 #include "NotImplementedException.h"
@@ -11,6 +11,7 @@
 #include "bacteria/BacteriaContext.h"
 #include "bacteria/FunctionContext.h"
 #include "bacteria/ScopeContext.h"
+#include "bacteria/ExpressionContext.h"
 
 namespace cheese::bacteria::nodes {
     std::map<std::string, int> BacteriaProgram::get_child_map() const {
@@ -57,7 +58,7 @@ namespace cheese::bacteria::nodes {
     }
 
     std::unique_ptr<llvm::Module> BacteriaProgram::lower_into_module(project::GlobalContext *ctx) {
-        auto bacteriaModule = ctx->gc.gcnew<BacteriaContext>(ctx);
+        auto bacteriaModule = ctx->gc.gcnew<BacteriaContext>(ctx, this);
         ctx->gc.add_root_object(bacteriaModule);
         ctx->gc.remove_root_object(ctx);
         // Set up top level declaration info
@@ -86,6 +87,7 @@ namespace cheese::bacteria::nodes {
                     &arg
             };
             sctx.variable_renames[arguments[idx].name] = arguments[idx].name;
+            idx += 1;
         }
 
         for (const auto &child: children) {
@@ -114,5 +116,19 @@ namespace cheese::bacteria::nodes {
                 name,
                 prototype
         };
+    }
+
+    void UnnamedBlock::lower_scope_level(ScopeContext &ctx) {
+        auto new_ctx = ScopeContext{ctx.function_context, ctx.current_block, &ctx};
+        for (auto &child: children) {
+            child->lower_scope_level(new_ctx);
+        }
+        ctx.set_current_block(new_ctx.current_block);
+    }
+
+    llvm::Value *UnnamedBlock::lower_expression_level(ScopeContext &ctx, ExpressionContext &expr) {
+        lower_scope_level(ctx);
+        return llvm::PoisonValue::get(
+                expr.result_type->get_llvm_type(ctx.function_context.bacteria_context->global_context));
     }
 }

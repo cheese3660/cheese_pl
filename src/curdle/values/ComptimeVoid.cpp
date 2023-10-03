@@ -27,4 +27,8 @@ namespace cheese::curdle {
     gcref<ComptimeValue> ComptimeVoid::cast(Type *target_type, garbage_collector &garbageCollector) {
         throw InvalidCastError("Invalid cast: cannot cast value of type void");
     }
+
+    ComptimeVoid::ComptimeVoid(Type *ty) {
+        type = ty;
+    }
 }

@@ -2,8 +2,8 @@
 // Created by Lexi Allen on 4/2/2023.
 //
 
-#ifndef CHEESE_RECIEVER_NODES_H
-#define CHEESE_RECIEVER_NODES_H
+#ifndef CHEESE_RECEIVER_NODES_H
+#define CHEESE_RECEIVER_NODES_H
 
 #include "bacteria/BacteriaReceiver.h"
 #include "bacteria/BacteriaType.h"
@@ -103,7 +103,11 @@ namespace cheese::bacteria::nodes {
 
         JSON_FUNCS("block", { "body" }, children)
 
-        ~UnnamedBlock() override = default;;
+        ~UnnamedBlock() override = default;
+
+        void lower_scope_level(ScopeContext &ctx) override;
+
+        llvm::Value *lower_expression_level(ScopeContext &ctx, ExpressionContext &expr) override;;
     };
 
 
@@ -151,4 +155,4 @@ namespace cheese::bacteria::nodes {
     };
 }
 
-#endif //CHEESE_RECIEVER_NODES_H
+#endif //CHEESE_RECEIVER_NODES_H

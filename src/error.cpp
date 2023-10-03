@@ -54,7 +54,7 @@ namespace cheese::error {
             //At somepoint highlight this;
             if (l == location.line_number) {
                 configuration::error_output_handler(line);
-                if (line[line.size()-1] != '\n') {
+                if (line.empty() || line[line.size()-1] != '\n') {
                     configuration::error_output_handler("\n");
                 }
             }
