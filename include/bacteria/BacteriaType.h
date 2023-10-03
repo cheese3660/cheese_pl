@@ -17,6 +17,9 @@ namespace cheese::project {
 }
 
 namespace cheese::bacteria {
+    namespace nodes {
+        struct BacteriaProgram;
+    }
     struct BacteriaType {
 
         enum class Type {
@@ -68,11 +71,13 @@ namespace cheese::bacteria {
         bool
         matches(Type otherType, uint16_t integerSize, BacteriaType *subtype,
                 const std::vector<std::size_t> &arrayDimensions,
-                const std::vector<BacteriaType *> &childTypes, const std::string &structName, const bool externFn);
+                const std::vector<BacteriaType *> &childTypes, const std::string &structName, const bool constRef);
 
         bool is_same_as(BacteriaType *other);
 
         bool should_implicit_reference();
+
+        bacteria::BacteriaType *index_type(nodes::BacteriaProgram *program, std::size_t numIndices);
 
     private:
         llvm::Type *cached_llvm_type{nullptr};

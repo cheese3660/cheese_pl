@@ -7,21 +7,21 @@
 
 namespace cheese::bacteria {
 
-    VariableInfo FunctionContext::get_mutable_variable(std::string varName, TypePtr type) {
+    VariableInfo *FunctionContext::get_mutable_variable(std::string varName, TypePtr type) {
         auto name = dedupe_variable_name(std::move(varName));
-        VariableInfo info{
+        auto info = new VariableInfo{
                 false,
                 name,
                 type
         };
         all_variables[name] = info;
-        info.value = allocate(name, type);
+        info->value = allocate(name, type);
         return info;
     }
 
-    VariableInfo FunctionContext::get_immutable_variable(std::string varName, TypePtr type) {
+    VariableInfo *FunctionContext::get_immutable_variable(std::string varName, TypePtr type) {
         auto name = dedupe_variable_name(std::move(varName));
-        VariableInfo info{
+        auto info = new VariableInfo{
                 true,
                 name,
                 type
@@ -30,9 +30,9 @@ namespace cheese::bacteria {
         return info;
     }
 
-    VariableInfo FunctionContext::get_temporary_variable(TypePtr type) {
+    VariableInfo *FunctionContext::get_temporary_variable(TypePtr type) {
         auto name = dedupe_variable_name(std::to_string(next_temporary_variable++));
-        VariableInfo info{
+        auto info = new VariableInfo{
                 true,
                 name,
                 type
@@ -41,15 +41,15 @@ namespace cheese::bacteria {
         return info;
     }
 
-    VariableInfo FunctionContext::get_temporary_in_memory_variable(TypePtr type) {
+    VariableInfo *FunctionContext::get_temporary_in_memory_variable(TypePtr type) {
         auto name = dedupe_variable_name(std::to_string(next_temporary_variable++));
-        VariableInfo info{
+        auto info = new VariableInfo{
                 false,
                 name,
                 type
         };
         all_variables[name] = info;
-        allocate(name, type);
+        info->value = allocate(name, type);
         return info;
     }
 
@@ -92,7 +92,8 @@ namespace cheese::bacteria {
     llvm::Value *FunctionContext::allocate(const std::string &name, TypePtr type) {
         auto irBuilder = llvm::IRBuilder<>(bacteria_context->context);
         irBuilder.SetInsertPoint(goto_entry_instruction);
-        return irBuilder.CreateAlloca(type->get_llvm_type(bacteria_context->global_context), nullptr, name);
+        auto alloc = irBuilder.CreateAlloca(type->get_llvm_type(bacteria_context->global_context), nullptr, name);
+        return alloc;
     }
 
     std::string FunctionContext::get_block_name(std::string wantedName) {
@@ -116,7 +117,7 @@ namespace cheese::bacteria {
     }
 
     llvm::Value *FunctionContext::get_variable_address(VariableInfo &info) {
-        if (!info.constant) return info.value;
+        if (!info.constant || info.type->type == BacteriaType::Type::Array) return info.value;
         if (info.ptr) return info.ptr;
         auto full_name = info.name + ".addr";
         auto irBuilder = llvm::IRBuilder<>(bacteria_context->context);
@@ -126,6 +127,12 @@ namespace cheese::bacteria {
         irBuilder.CreateStore(info.value, inst, false);
         info.ptr = inst;
         return info.ptr;
+    }
+
+    FunctionContext::~FunctionContext() {
+        for (const auto &var: all_variables) {
+            delete var.second;
+        }
     }
 
 }

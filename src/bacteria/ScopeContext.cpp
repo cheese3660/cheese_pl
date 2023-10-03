@@ -16,7 +16,7 @@ namespace cheese::bacteria {
                                         function_context.get_block_name(name), function_context.function);
     }
 
-    VariableInfo ScopeContext::get_info(std::string name) {
+    VariableInfo *ScopeContext::get_info(std::string name) {
 //        return function_context.all_variables[variable_renames[name]];
         if (variable_renames.contains(name)) {
             return function_context.all_variables[variable_renames[name]];
@@ -28,24 +28,24 @@ namespace cheese::bacteria {
         }
     }
 
-    VariableInfo ScopeContext::get_mutable_variable(std::string name, TypePtr type) {
+    VariableInfo *ScopeContext::get_mutable_variable(std::string name, TypePtr type) {
         auto result = function_context.get_mutable_variable(name, type);
-        variable_renames[name] = result.name;
+        variable_renames[name] = result->name;
         return result;
     }
 
-    VariableInfo ScopeContext::get_immutable_variable(std::string name, TypePtr type) {
+    VariableInfo *ScopeContext::get_immutable_variable(std::string name, TypePtr type) {
         auto result = function_context.get_immutable_variable(name, type);
-        variable_renames[name] = result.name;
+        variable_renames[name] = result->name;
         return result;
     }
 
-    VariableInfo ScopeContext::get_temporary_variable(TypePtr type) {
+    VariableInfo *ScopeContext::get_temporary_variable(TypePtr type) {
         auto result = function_context.get_temporary_variable(type);
         return result;
     }
 
-    VariableInfo ScopeContext::get_temporary_in_memory_variable(TypePtr type) {
+    VariableInfo *ScopeContext::get_temporary_in_memory_variable(TypePtr type) {
         auto result = function_context.get_temporary_in_memory_variable(type);
         return result;
     }

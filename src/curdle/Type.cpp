@@ -174,7 +174,7 @@ namespace cheese::curdle {
         if (num_subindices == 0) return {gc, type};
 #define WHEN_TY_IS(ty, name) if (auto name = dynamic_cast<ty*>(type); name)
         WHEN_TY_IS(PointerType, pPointerType) {
-            return get_true_subtype(gc, type, num_subindices - 1);
+            return get_true_subtype(gc, pPointerType->subtype, num_subindices - 1);
         }
         WHEN_TY_IS(ArrayType, pArrayType) {
             if (num_subindices >= pArrayType->dimensions.size()) {

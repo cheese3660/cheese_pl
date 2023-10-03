@@ -289,6 +289,9 @@ namespace cheese::curdle {
             name = "operator" + as_op->op;
             body_ptr = as_op->body;
         }
+        for (const auto &funct: concrete_functions) {
+            if (funct->matches(true_arguments)) return funct;
+        }
         if (!external) {
             name = combine_names(ctx->currentStructure->name, name);
         }
@@ -297,6 +300,7 @@ namespace cheese::curdle {
             comptime_only = true;
         }
         rctx->functionReturnType = ret_type;
+
         std::vector<std::string> rtime_names;
         for (auto &argument: info.arguments) {
             if (argument.comptimeness == Comptimeness::Runtime) {
@@ -378,6 +382,9 @@ namespace cheese::curdle {
                     };
                 }
                 _keepInScope.emplace_back(std::move(ty));
+            }
+            for (const auto &funct: concrete_functions) {
+                if (funct->matches(true_arguments)) return funct;
             }
             auto ret_ty_val = fctx->exec(ret_val, rctx);
             Type *ret_ty;
@@ -558,6 +565,22 @@ namespace cheese::curdle {
             mangled_name = mangle(std::move(path), args, external);
         }
         this->arguments = std::move(arguments);
+    }
+
+    bool ConcreteFunction::matches(const std::vector<PassedFunctionArgument> &otherArgs) {
+        if (arguments.size() != otherArgs.size()) return false;
+        std::size_t index{0};
+        for (const auto &argument: arguments) {
+            if (argument.is_type && otherArgs[index].is_type) {
+                if (argument.type->compare(otherArgs[index].type) != 0) return false;
+            } else if (!argument.is_type && !otherArgs[index].is_type) {
+                if (!argument.value->is_same_as(otherArgs[index].value)) return false;
+            } else {
+                return false;
+            }
+            index += 1;
+        }
+        return true;
     }
 
 

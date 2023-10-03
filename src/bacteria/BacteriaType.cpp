@@ -175,7 +175,7 @@ namespace cheese::bacteria {
     bool BacteriaType::matches(BacteriaType::Type otherType, uint16_t integerSize, BacteriaType *otherSubtype,
                                const std::vector<std::size_t> &arrayDimensions,
                                const std::vector<BacteriaType *> &childTypes, const std::string &structName,
-                               const bool externFn) {
+                               const bool constRef) {
         if (otherType != this->type) return false;
         switch (type) {
             case Type::Opaque:
@@ -209,7 +209,7 @@ namespace cheese::bacteria {
                 for (auto i = 0; i < childTypes.size(); i++) {
                     if (childTypes[i] != child_types[i]) return false;
                 }
-                return subtype == otherSubtype && constant_ref == externFn;
+                return subtype == otherSubtype && constant_ref == constRef;
             }
         }
     }
@@ -241,5 +241,28 @@ namespace cheese::bacteria {
     bool BacteriaType::is_same_as(BacteriaType *other) {
         return matches(other->type, other->integer_size, other->subtype, other->array_dimensions, other->child_types,
                        other->struct_name, other->constant_ref);
+    }
+
+    bacteria::BacteriaType *BacteriaType::index_type(nodes::BacteriaProgram *program, std::size_t numIndices) {
+        if (numIndices == 0) return this;
+        switch (type) {
+            case Type::Slice:
+            case Type::Pointer:
+                return subtype->index_type(program, numIndices - 1);
+            case Type::Array:
+                if (numIndices >= array_dimensions.size()) {
+                    return subtype->index_type(program, numIndices - array_dimensions.size());
+                } else {
+                    std::vector<std::size_t> newDimensions;
+                    for (int i = array_dimensions.size() - 1; i >= numIndices; i--) {
+                        newDimensions.insert(newDimensions.begin(), array_dimensions.size());
+                    }
+                    return program->get_type(Type::Reference, 0,
+                                             program->get_type(Type::Array, 0, subtype, newDimensions, {}, {},
+                                                               constant_ref), {}, {}, {}, constant_ref);
+                }
+            default:
+                return this;
+        }
     }
 }

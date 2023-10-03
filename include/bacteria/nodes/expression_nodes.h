@@ -156,6 +156,8 @@ namespace cheese::bacteria::nodes {
         }
 
         JSON_FUNCS("while", { "condition", "body", "else" }, condition, body, els)
+
+        void lower_scope_level(ScopeContext &ctx) override;
     };
 
     struct Nop : BacteriaNode {
@@ -275,6 +277,8 @@ namespace cheese::bacteria::nodes {
         llvm::Value *lower_expression_level(ScopeContext &ctx, ExpressionContext &expr) override;
 
         TypePtr get_expr_type(ScopeContext &ctx, nodes::BacteriaProgram *program) override;
+
+        llvm::Value *lower_address(ScopeContext &ctx) override;
     };
 
     struct CastNode : BacteriaNode {
@@ -325,6 +329,8 @@ namespace cheese::bacteria::nodes {
         llvm::Value *lower_expression_level(ScopeContext &ctx, ExpressionContext &expr) override;
 
         void lower_scope_level(ScopeContext &ctx) override;
+
+        TypePtr get_expr_type(ScopeContext &ctx, nodes::BacteriaProgram *program) override;
     };
 
     struct PointerCallNode : BacteriaNode {
@@ -381,6 +387,8 @@ namespace cheese::bacteria::nodes {
         TypePtr get_expr_type(ScopeContext &ctx, nodes::BacteriaProgram *program) override;
 
         llvm::Value *lower_expression_level(ScopeContext &ctx, ExpressionContext &expr) override;
+
+        llvm::Value *lower_address(ScopeContext &ctx) override;
     };
 
     struct VariableInitializationNode : BacteriaNode {
@@ -401,7 +409,9 @@ namespace cheese::bacteria::nodes {
         }
 
         JSON_FUNCS("init", { "name", "ty", "value", "constant" }, name, type->to_string(), value,
-                   std::to_string(constant));
+                   std::to_string(constant))
+
+        void lower_scope_level(ScopeContext &ctx) override;;
     };
 
     struct VariableDefinitionNode : BacteriaNode {
@@ -417,7 +427,9 @@ namespace cheese::bacteria::nodes {
             return name + ": " + type->to_string();
         }
 
-        JSON_FUNCS("def", { "name", "ty" }, name, type->to_string());
+        JSON_FUNCS("def", { "name", "ty" }, name, type->to_string())
+
+        void lower_scope_level(ScopeContext &ctx) override;;
     };
 
     struct AggregrateObject : BacteriaNode {
@@ -574,6 +586,10 @@ namespace cheese::bacteria::nodes {
         const char *get_operator() const override {
             return "!=";
         }
+
+        llvm::Value *lower_expression_level(ScopeContext &ctx, ExpressionContext &expr) override;
+
+        TypePtr get_expr_type(ScopeContext &ctx, nodes::BacteriaProgram *program) override;
     };
 
     struct EqualToNode : BinaryNode {
@@ -586,6 +602,10 @@ namespace cheese::bacteria::nodes {
         const char *get_operator() const override {
             return "==";
         }
+
+        llvm::Value *lower_expression_level(ScopeContext &ctx, ExpressionContext &expr) override;
+
+        TypePtr get_expr_type(ScopeContext &ctx, nodes::BacteriaProgram *program) override;
     };
 
     struct LesserThanNode : BinaryNode {
@@ -627,6 +647,8 @@ namespace cheese::bacteria::nodes {
         const char *get_operator() const override {
             return "-";
         }
+
+        llvm::Value *lower_expression_level(ScopeContext &ctx, ExpressionContext &expr) override;
     };
 
     struct ModulusNode : BinaryNode {
@@ -639,6 +661,8 @@ namespace cheese::bacteria::nodes {
         const char *get_operator() const override {
             return "%";
         }
+
+        llvm::Value *lower_expression_level(ScopeContext &ctx, ExpressionContext &expr) override;
     };
 
     struct DivisionNode : BinaryNode {
@@ -651,6 +675,8 @@ namespace cheese::bacteria::nodes {
         const char *get_operator() const override {
             return "/";
         }
+
+        llvm::Value *lower_expression_level(ScopeContext &ctx, ExpressionContext &expr) override;
     };
 
     struct OrNode : BinaryNode {
@@ -675,6 +701,8 @@ namespace cheese::bacteria::nodes {
         const char *get_operator() const override {
             return "+";
         }
+
+        llvm::Value *lower_expression_level(ScopeContext &ctx, ExpressionContext &expr) override;
     };
 
     struct GreaterEqualNode : BinaryNode {
@@ -687,6 +715,10 @@ namespace cheese::bacteria::nodes {
         const char *get_operator() const override {
             return ">=";
         }
+
+        llvm::Value *lower_expression_level(ScopeContext &ctx, ExpressionContext &expr) override;
+
+        TypePtr get_expr_type(ScopeContext &ctx, nodes::BacteriaProgram *program) override;
     };
 
     struct MutationNode : BinaryNode {
@@ -699,6 +731,20 @@ namespace cheese::bacteria::nodes {
         const char *get_operator() const override {
             return "=";
         }
+
+        void lower_scope_level(ScopeContext &ctx) override;
     };
+
+//    struct WriteNode : BinaryNode {
+//        WriteNode(const Coordinate &location, BacteriaPtr lhs, BacteriaPtr rhs) : BinaryNode(location,
+//                                                                                             std::move(lhs),
+//                                                                                             std::move(rhs)) {}
+//
+//        ~WriteNode() override = default;
+//
+//        const char *get_operator() const override {
+//            return "<-";
+//        }
+//    };
 }
 #endif //CHEESE_EXPRESSION_NODES_H

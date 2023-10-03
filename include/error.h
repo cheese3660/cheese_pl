@@ -92,6 +92,7 @@ namespace cheese::error {
 
         InvalidReturn = generator_error_start,
         InvalidComparison,
+        InvalidIndex,
         //General error (thrown for example when multiple previous errors were printed)
         GeneralCompilerError = 9999,
     };

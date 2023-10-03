@@ -57,6 +57,8 @@ namespace cheese::curdle {
         ConcreteFunction(std::string path, const std::vector<PassedFunctionArgument> &arguments, Type *returnType,
                          bool comptimeOnly, bool external, bool entry = false);
 
+        bool matches(const std::vector<PassedFunctionArgument> &otherArgs);
+
         void generate_code(ComptimeContext *cctx, RuntimeContext *rctx, bool external,
                            parser::NodePtr body_ptr, bool is_generator, const std::vector<std::string> &rtime_names);
     };

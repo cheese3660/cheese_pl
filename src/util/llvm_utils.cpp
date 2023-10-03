@@ -18,3 +18,10 @@ void cheese::util::llvm::initialize_llvm() {
     }
 }
 
+bool cheese::util::llvm::has_terminator(::llvm::BasicBlock *basicBlock) {
+    for (const auto &inst: basicBlock->getInstList()) {
+        if (inst.isTerminator()) return true;
+    }
+    return false;
+}
+

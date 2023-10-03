@@ -15,7 +15,7 @@
 namespace cheese::bacteria {
     struct FunctionContext {
         TypePtr return_type;
-        std::unordered_map<std::string, VariableInfo> all_variables;
+        std::unordered_map<std::string, VariableInfo *> all_variables;
         std::set<std::string> all_block_names;
         std::size_t next_temporary_variable{0};
         llvm::Function *function;
@@ -24,13 +24,13 @@ namespace cheese::bacteria {
         llvm::Instruction *goto_entry_instruction;
         BacteriaContext *bacteria_context;
 
-        VariableInfo get_mutable_variable(std::string name, TypePtr type);
+        VariableInfo *get_mutable_variable(std::string name, TypePtr type);
 
-        VariableInfo get_immutable_variable(std::string name, TypePtr type);
+        VariableInfo *get_immutable_variable(std::string name, TypePtr type);
 
-        VariableInfo get_temporary_variable(TypePtr type);
+        VariableInfo *get_temporary_variable(TypePtr type);
 
-        VariableInfo get_temporary_in_memory_variable(TypePtr type);
+        VariableInfo *get_temporary_in_memory_variable(TypePtr type);
 
         std::string dedupe_variable_name(std::string variableName);
 
@@ -41,6 +41,8 @@ namespace cheese::bacteria {
         std::string get_block_name(std::string wantedName);
 
         llvm::Value *get_variable_address(VariableInfo &info);
+
+        virtual ~FunctionContext();
     };
 }
 #endif //CHEESE_FUNCTIONCONTEXT_H

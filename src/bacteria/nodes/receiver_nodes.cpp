@@ -80,7 +80,7 @@ namespace cheese::bacteria::nodes {
         ScopeContext sctx{fctx, fctx.entry_block};
         size_t idx = 0;
         for (auto &arg: prototype->args()) {
-            fctx.all_variables[arguments[idx].name] = VariableInfo{
+            fctx.all_variables[arguments[idx].name] = new VariableInfo{
                     true,
                     arguments[idx].name,
                     arguments[idx].type,
@@ -92,6 +92,11 @@ namespace cheese::bacteria::nodes {
 
         for (const auto &child: children) {
             child->lower_scope_level(sctx);
+        }
+
+        if (fctx.return_type->type == BacteriaType::Type::Void &&
+            !cheese::util::llvm::has_terminator(sctx.current_block)) {
+            sctx.scope_builder.CreateRetVoid();
         }
     }
 

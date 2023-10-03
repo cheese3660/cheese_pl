@@ -15,15 +15,15 @@ namespace cheese::bacteria {
         ScopeContext *parent_scope;
         FunctionContext &function_context;
 
-        VariableInfo get_info(std::string name);
+        VariableInfo *get_info(std::string name);
 
-        VariableInfo get_mutable_variable(std::string name, TypePtr type);
+        VariableInfo *get_mutable_variable(std::string name, TypePtr type);
 
-        VariableInfo get_immutable_variable(std::string name, TypePtr type);
+        VariableInfo *get_immutable_variable(std::string name, TypePtr type);
 
-        VariableInfo get_temporary_variable(TypePtr type);
+        VariableInfo *get_temporary_variable(TypePtr type);
 
-        VariableInfo get_temporary_in_memory_variable(TypePtr type);
+        VariableInfo *get_temporary_in_memory_variable(TypePtr type);
 
         void
         set_current_block(llvm::BasicBlock *block); // This will also set the IRBuilder for the scope to use this block

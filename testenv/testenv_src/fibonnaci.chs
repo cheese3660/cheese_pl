@@ -9,6 +9,16 @@ fn main argc: u32, argv: [?,?]~u8 => i32 entry
         ==> 1
     }
     let num: u64 = atoi(argv[1]) @ u64
+    if num == 0
+    {
+        _ = puts("number must be > 0")
+        ==> 1
+    }
+    if num >= 94
+    {
+        _ = puts("number must be <= 93")
+        ==> 1
+    }
     fibonnaci(num)
 
     ==> 0
@@ -49,29 +59,20 @@ fn fibonnaci n: u64 => void
 
 fn put_int i: u64 => void
 {
-    let i_copy mut = i
-    if i_copy == 0
-    {
-        _ = puts("0")
-        ==> none
-    }
-    let digits: [?]~u8 = "0123456789"
-    def chars: [20]u8 mut
-    let idx: u64 = 0
-    while i_copy != 0
-    {
-        chars[idx] = digits[i_copy % 10]
-        i_copy = i_copy / 10
-        idx = idx + 1
-    }
-    while idx != 0
-    {
-        _ = putchar(chars[idx])
-        idx = idx - 1
-    }
-    _ = putchar(chars[idx])
+    def chars: [21]u8 mut
+    _ = puts(_ui64toa(i, chars,10))
 }
 
-fn puts s: [?]~u8 => i32 public import
+fn puts s: [?]~u8 => i32
+{
+    let i: u64 mut = 0
+    while s[i] != 0
+    {
+        _ = putchar(s[i])
+        i = i+1
+    }
+    ==> 0
+}
 fn putchar c: u8 => i32 public import
 fn atoi s: [?]~u8 => i32 public import
+fn _ui64toa value: u64, buffer: [?]u8, radix: i32 => [?]~u8 public import
